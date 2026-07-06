@@ -4,6 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>برنامه مرور لایتنر</title>
+<link rel="manifest" href='data:application/json,{"name":"برنامه مرور لایتنر","short_name":"لایتنر","start_url":"./leitner.html","display":"standalone","background_color":"#0f1117","theme_color":"#6c5ce7","description":"مرور هوشمند واژگان","icons":[{"src":"data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Crect width=%27100%27 height=%27100%27 rx=%2720%27 fill=%27%236c5ce7%27/%3E%3Ctext x=%2750%27 y=%2768%27 text-anchor=%27middle%27 font-size=%2750%27 fill=%27white%27%3E📖%3C/text%3E%3C/svg%3E","sizes":"192x192","type":"image/svg+xml"}]}'>
+<meta name="theme-color" content="#6c5ce7">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
@@ -89,25 +93,23 @@ tr:hover td{background:var(--card-hover)}
 .pdf-zoom-info{color:var(--text2);font-size:.8rem;min-width:50px;text-align:center}
 .pdf-body{display:flex;gap:12px;min-height:500px}
 .pdf-sidebar{width:120px;flex-shrink:0;display:flex;flex-direction:column;gap:8px;overflow-y:auto;max-height:calc(100vh - 200px);padding:4px}
-.pdf-thumb{border:2px solid var(--border);border-radius:8px;cursor:pointer;overflow:hidden;transition:border-color .2s;flex-shrink:0}
+.pdf-thumb{border:2px solid var(--border);border-radius:8px;cursor:pointer;overflow:hidden;transition:border-color .2s;flex-shrink:0;min-height:60px;background:var(--bg2);display:flex;align-items:center;justify-content:center}
 .pdf-thumb:hover,.pdf-thumb.active{border-color:var(--accent)}
 .pdf-thumb canvas{display:block;width:100%}
 .pdf-thumb-label{text-align:center;font-size:.7rem;color:var(--text2);padding:4px}
 .pdf-main{flex:1;overflow:auto;padding:10px;background:var(--bg2);border-radius:var(--radius);min-height:500px}
 .pdf-page-wrap{position:relative;display:inline-block;background:#fff;border-radius:6px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,.2);line-height:0}
 .pdf-page-wrap canvas{display:block}
-.pdf-page-wrap .textLayer{position:absolute;left:0;top:0;right:0;bottom:0;overflow:hidden;opacity:1;line-height:1;pointer-events:auto;-webkit-text-size-adjust:none;text-size-adjust:none}
-.pdf-page-wrap .textLayer span{color:transparent;position:absolute;white-space:pre;cursor:text}
-.pdf-page-wrap .textLayer span::selection{background:rgba(108,92,231,.4)}
-.pdf-page-wrap .textLayer span::-moz-selection{background:rgba(108,92,231,.4)}
+.pdf-page-wrap .textLayer{position:absolute;left:0;top:0;right:0;bottom:0;overflow:hidden;opacity:.25;line-height:1.0;pointer-events:auto;-webkit-text-size-adjust:none;text-size-adjust:none}
+.pdf-page-wrap .textLayer>span{color:transparent;position:absolute;white-space:pre;cursor:text;transform-origin:0% 0%}
+.pdf-page-wrap .textLayer .highlight{margin:-1px;padding:1px;background-color:rgba(180,0,180,.2);border-radius:2px}
+.pdf-page-wrap .textLayer ::selection{background:rgba(108,92,231,.4)}
+.pdf-page-wrap .textLayer ::-moz-selection{background:rgba(108,92,231,.4)}
 .pdf-popup{position:fixed;z-index:300;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px;box-shadow:var(--shadow);display:none;max-width:300px;width:auto}
 .pdf-popup.visible{display:block}
 .pdf-popup .btn{margin:2px 0}
-@media(max-width:768px){.pdf-sidebar{display:none}.pdf-toolbar{gap:4px}.pdf-toolbar .btn{padding:6px 10px;font-size:.75rem}}
-
-/* ═══════════════════════════════════════════
-   TRANSLATION POPUP (double-click word)
-   ═══════════════════════════════════════════ */
+.pdf-sep{width:1px;height:24px;background:var(--border);flex-shrink:0}
+@media(max-width:768px){.pdf-sidebar{display:none}.pdf-toolbar{gap:3px;padding:8px;flex-wrap:wrap}.pdf-toolbar .btn{padding:6px 10px;font-size:.75rem;min-width:36px;min-height:36px}.pdf-sep{display:none}.pdf-main{padding:4px}.pdf-page-info{font-size:.8rem}.pdf-zoom-info{font-size:.8rem}}
 .pdf-trans-popup{position:fixed;z-index:310;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;box-shadow:0 8px 32px rgba(0,0,0,.4);display:none;max-width:380px;width:auto;max-height:70vh;overflow-y:auto;font-family:var(--font);direction:ltr;text-align:left}
 .pdf-trans-popup.visible{display:block}
 .trans-header{display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap}
@@ -135,10 +137,6 @@ tr:hover td{background:var(--card-hover)}
 .trans-close{position:absolute;top:8px;left:10px;background:none;border:none;color:var(--text2);cursor:pointer;font-size:1rem;padding:4px;line-height:1}
 .trans-close:hover{color:var(--danger)}
 @media(max-width:768px){.pdf-trans-popup{max-width:calc(100vw - 32px);left:16px!important;right:16px!important}}
-
-/* ═══════════════════════════════════════════
-   IMPORT WIZARD
-   ═══════════════════════════════════════════ */
 .import-steps{display:flex;align-items:center;justify-content:center;gap:0;margin-bottom:24px;flex-wrap:wrap}
 .import-step-dot{width:34px;height:34px;border-radius:50%;background:var(--border);color:var(--text2);display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;transition:all .3s;flex-shrink:0}
 .import-step-dot.active{background:var(--accent);color:#fff;box-shadow:0 0 0 3px rgba(108,92,231,.3)}
@@ -167,9 +165,46 @@ tr:hover td{background:var(--card-hover)}
 .import-progress-card{text-align:center;padding:40px 20px}
 .import-progress-bar{width:100%;max-width:400px;margin:16px auto}
 .import-done-card{text-align:center;padding:30px;max-width:500px;margin:0 auto}
+
+/* ═══════════════════════════════════════════
+   HEATMAP & FORECAST (Stats)
+   ═══════════════════════════════════════════ */
+.heatmap{display:grid;grid-template-columns:repeat(53,1fr);gap:2px;margin:12px 0}
+.heatmap-cell{width:100%;aspect-ratio:1;border-radius:2px;background:var(--bg);cursor:default;position:relative}
+.heatmap-cell[data-count]:hover::after{content:attr(data-count);position:absolute;bottom:110%;left:50%;transform:translateX(-50%);background:var(--text);color:var(--bg);padding:2px 6px;border-radius:4px;font-size:.65rem;white-space:nowrap;z-index:10}
+.heatmap-l0{background:var(--bg)!important}.heatmap-l1{background:rgba(0,184,148,.2)!important}.heatmap-l2{background:rgba(0,184,148,.4)!important}.heatmap-l3{background:rgba(0,184,148,.6)!important}.heatmap-l4{background:rgba(0,184,148,.85)!important}
+.heatmap-legend{display:flex;align-items:center;gap:4px;justify-content:flex-end;font-size:.7rem;color:var(--text2);margin-top:8px}
+.heatmap-legend-cell{width:12px;height:12px;border-radius:2px}
+
+/* ═══════════════════════════════════════════
+   FREQUENCY TIER BADGES
+   ═══════════════════════════════════════════ */
+.tier-1{background:rgba(0,184,148,.2);color:var(--success)}
+.tier-2{background:rgba(108,92,231,.15);color:var(--accent)}
+.tier-3{background:rgba(253,203,110,.15);color:var(--warning)}
+.tier-0{background:rgba(225,112,85,.1);color:var(--danger)}
+
+/* ═══════════════════════════════════════════
+   CONTEXT SENTENCE
+   ═══════════════════════════════════════════ */
+.context-sentence{font-size:.8rem;color:var(--text2);font-style:italic;margin-top:12px;padding:8px 12px;background:var(--bg);border-radius:var(--radius);line-height:1.6;text-align:right}
+
+/* ═══════════════════════════════════════════
+   QUIZ TYPES
+   ═══════════════════════════════════════════ */
+.quiz-type-bar{display:flex;gap:8px;justify-content:center;margin-bottom:16px;flex-wrap:wrap}
+.quiz-input{width:100%;padding:14px;border:2px solid var(--border);border-radius:var(--radius);background:var(--bg);color:var(--text);font:inherit;font-size:1.1rem;text-align:center;transition:border-color .2s}
+.quiz-input:focus{outline:none;border-color:var(--accent)}
+
+/* ═══════════════════════════════════════════
+   OFFLINE INDICATOR
+   ═══════════════════════════════════════════ */
+.offline-banner{background:var(--warning);color:#000;text-align:center;padding:6px;font-size:.8rem;font-weight:600;display:none}
+.offline-banner.visible{display:block}
 </style>
 </head>
 <body>
+<div class="offline-banner" id="offlineBanner">⚡ شما آفلاین هستید - داده‌ها محلی ذخیره می‌شوند</div>
 <div class="app">
 <aside class="sidebar" id="sidebar">
 <div class="sidebar-header"><h1>لایتنر</h1><p>مرور هوشمند واژگان</p></div>
@@ -184,42 +219,177 @@ tr:hover td{background:var(--card-hover)}
 <div class="toast-container" id="toasts"></div>
 <script>
 // ═══════════════════════════════════════════
+// CONSTANTS
+// ═══════════════════════════════════════════
+const MS_PER_DAY=86400000;
+const PDF_DEFAULT_SCALE=1.5;
+const PDF_THUMB_SCALE=0.2;
+
+// ═══════════════════════════════════════════
 // STATE & STORAGE
 // ═══════════════════════════════════════════
 const LS_KEY='leitner_v2';
-const SCHEMA_VERSION=2;
-function defaultState(){return{words:[],longTerm:[],stats:{reviewed:0,correct:0,wrong:0,streak:0,xp:0,lastReviewDate:null,history:{}},categories:['پیش‌فرض'],settings:{theme:'dark'},_version:SCHEMA_VERSION}}
+const LS_BACKUP_KEY='leitner_backup';
+const SCHEMA_VERSION=3;
+function defaultState(){return{words:[],longTerm:[],stats:{reviewed:0,correct:0,wrong:0,streak:0,xp:0,lastReviewDate:null,history:{}},categories:['پیش‌فرض'],settings:{theme:'dark',sourceLang:'en',targetLang:'fa',notifications:false,notificationTime:'09:00'},_version:SCHEMA_VERSION}}
 let S=loadState();
+
 function sanitizeCard(c){
-  return{id:String(c.id||uid()),word:String(c.word||'').trim(),translation:String(c.translation||'').trim(),ipa:String(c.ipa||'').trim(),category:String(c.category||'پیش‌فرض').trim(),favorite:!!c.favorite,box:Math.max(0,Math.min(10,Number(c.box)||0)),repetitions:Math.max(0,Number(c.repetitions)||0),interval:Math.max(1,Number(c.interval)||1),easeFactor:Math.max(1.3,Number(c.easeFactor)||2.5),addedDate:c.addedDate||new Date().toISOString(),nextReviewDate:c.nextReviewDate||null,lastReviewedAt:c.lastReviewedAt||null}}
+  return{id:String(c.id||uid()),word:String(c.word||'').trim(),translation:String(c.translation||'').trim(),ipa:String(c.ipa||'').trim(),category:String(c.category||'پیش‌فرض').trim(),favorite:!!c.favorite,context:String(c.context||'').trim(),
+  box:Math.max(0,Math.min(10,Number(c.box)||0)),repetitions:Math.max(0,Number(c.repetitions)||0),interval:Math.max(1,Number(c.interval)||1),easeFactor:Math.max(1.3,Number(c.easeFactor)||2.5),
+  addedDate:c.addedDate||new Date().toISOString(),nextReviewDate:c.nextReviewDate||null,lastReviewedAt:c.lastReviewedAt||null,
+  // FSRS fields
+  stability:Number(c.stability)||0,difficulty:Number(c.difficulty)||0,elapsedDays:Number(c.elapsedDays)||0,scheduledDays:Number(c.scheduledDays)||0,reps:Number(c.reps)||0,lapses:Number(c.lapses)||0,fsrsState:String(c.fsrsState||'new')}
+}
+
 function loadState(){try{const d=localStorage.getItem(LS_KEY);if(!d)return defaultState();const p=JSON.parse(d);const s={...defaultState(),...p};s.words=(p.words||[]).map(sanitizeCard).filter(w=>w.word);s.longTerm=(p.longTerm||[]).map(sanitizeCard).filter(w=>w.word);s.stats={...defaultState().stats,...(p.stats||{})};if(Array.isArray(s.stats.history))s.stats.history={};s.settings={...defaultState().settings,...(p.settings||{})};return s}catch(e){return defaultState()}}
-function save(){try{localStorage.setItem(LS_KEY,JSON.stringify(S))}catch(e){toast('خطا در ذخیره‌سازی','error')}}
+function save(){try{localStorage.setItem(LS_KEY,JSON.stringify(S));autoBackup()}catch(e){toast('خطا در ذخیره‌سازی','error')}}
 function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML}
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,8)}
 function fmtDate(d){if(!d)return'-';return new Date(d).toLocaleDateString('fa-IR')}
 function todayKey(){return new Date().toISOString().slice(0,10)}
 
 // ═══════════════════════════════════════════
-// SM-2 ALGORITHM
+// FSRS ALGORITHM (self-contained)
 // ═══════════════════════════════════════════
+const FSRS_W=[0.4,0.6,2.4,5.8,4.93,0.94,0.86,1.01,1.38,0.21,1.63,0.48,0.66];
+const FSRS_RETENTION=0.9;
+const FSRS_MAX_INTERVAL=365;
+
+function fsrsPow(stability,graduation){return stability*Math.pow(FSRS_W[graduation-4],1)}
+function fsrsDecay(stability){return Math.pow(stability,-FSRS_W[0])+1}
+function fsrsRetrieveProbability(stability,elapsed){if(stability<=0)return 0;return Math.pow(1+elapsed/(FSRS_W[9]*stability),-FSRS_W[8])}
+function fsrsInitialDifficulty(rating){return Math.min(Math.max(FSRS_W[4]-Math.exp(FSRS_W[5]*(rating-1))+1,1),10)}
+function fsrsInitialStability(rating){return FSRS_W[rating-1]}
+
+function fsrsNext(w,rating){
+  // rating: 1=Again,2=Hard,3=Good,4=Easy
+  const state=w.fsrsState||'new';
+  const now=new Date();
+  let newStability,newDifficulty,newInterval,newState,newLapses=w.lapses||0;
+
+  if(state==='new'||state==='learning'){
+    if(rating===1){
+      newStability=FSRS_W[0];
+      newDifficulty=fsrsInitialDifficulty(rating);
+      newInterval=0;
+      newState='learning';
+      newLapses=w.lapses||0;
+    }else if(rating===2){
+      newStability=FSRS_W[1]*1.2;
+      newDifficulty=fsrsInitialDifficulty(rating);
+      newInterval=1;
+      newState='review';
+    }else if(rating===3){
+      newStability=FSRS_W[2];
+      newDifficulty=fsrsInitialDifficulty(rating);
+      newInterval=1;
+      newState='review';
+    }else{
+      newStability=FSRS_W[3];
+      newDifficulty=fsrsInitialDifficulty(rating);
+      newInterval=Math.round(FSRS_W[3]);
+      newState='review';
+    }
+  }else if(state==='review'){
+    const elapsed=w.elapsedDays||1;
+    const retrievability=fsrsRetrieveProbability(w.stability,elapsed);
+    newDifficulty=Math.min(Math.max(w.difficulty-FSRS_W[6]*(rating-3),1),10);
+
+    if(rating===1){
+      newLapses=(w.lapses||0)+1;
+      newStability=FSRS_W[9]*Math.pow(w.difficulty,-FSRS_W[10])*(Math.pow(w.stability+1,FSRS_W[11])-1)*Math.exp(FSRS_W[12]*(1-retrievability));
+      newInterval=1;
+      newState='relearning';
+    }else{
+      const q=rating===2?0.9:rating===3?1:1.1;
+      newStability=w.stability*(1+Math.exp(FSRS_W[7])*(11-newDifficulty)*Math.pow(w.stability,-FSRS_W[8])*(Math.exp(FSRS_W[10]*(1-retrievability))-1)*q);
+      if(rating===2)newInterval=Math.max(1,Math.round(w.interval*1.2));
+      else if(rating===3)newInterval=Math.max(1,Math.round(w.stability*FSRS_DECAY_COEFF));
+      else newInterval=Math.max(1,Math.round(w.stability*FSRS_DECAY_COEFF*FSRS_W[3]/FSRS_W[2]));
+      newState='review';
+    }
+  }else if(state==='relearning'){
+    if(rating===1){
+      newStability=FSRS_W[0];
+      newInterval=0;
+      newState='relearning';
+    }else{
+      newStability=w.stability||FSRS_W[0];
+      newInterval=1;
+      newState='review';
+    }
+  }else{
+    newStability=FSRS_W[0];
+    newDifficulty=fsrsInitialDifficulty(rating);
+    newInterval=1;
+    newState='learning';
+  }
+
+  newStability=Math.max(newStability,0.1);
+  newInterval=Math.min(Math.max(Math.round(newInterval),0),FSRS_MAX_INTERVAL);
+  if(newInterval===0)newInterval=1;
+
+  w.stability=newStability;
+  w.difficulty=newDifficulty;
+  w.interval=newInterval;
+  w.fsrsState=newState;
+  w.lapses=newLapses;
+  w.reps=(w.reps||0)+1;
+  w.elapsedDays=0;
+  w.scheduledDays=newInterval;
+  w.nextReviewDate=new Date(now.getTime()+newInterval*MS_PER_DAY).toISOString();
+  w.lastReviewedAt=now.toISOString();
+  w.box=Math.min(10,Math.ceil(newStability/30));
+  w.easeFactor=Math.max(1.3,3-newDifficulty/5);
+  return w;
+}
+const FSRS_DECAY_COEFF=0.5;
+
 function clampReviewValues(w){
   w.repetitions=Math.max(0,Number(w.repetitions)||0);
   w.interval=Math.max(1,Number(w.interval)||1);
   w.easeFactor=Math.max(1.3,Number(w.easeFactor)||2.5);
   w.box=Math.max(0,Math.min(10,Number(w.box)||0));
   if(w.nextReviewDate&&isNaN(new Date(w.nextReviewDate).getTime()))w.nextReviewDate=null;
-  if(w.lastReviewedAt&&isNaN(new Date(w.lastReviewedAt).getTime()))w.lastReviewedAt=null}
-function sm2(w,q){
-clampReviewValues(w);
-const now=Date.now();
-if(q<3){w.repetitions=0;w.interval=1}
-else{w.repetitions++;if(w.repetitions===1)w.interval=1;else if(w.repetitions===2)w.interval=6;else w.interval=Math.round(w.interval*w.easeFactor)}
-w.easeFactor+=(0.1-(5-q)*(0.08+(5-q)*0.02));
-if(w.easeFactor<1.3)w.easeFactor=1.3;
-w.nextReviewDate=new Date(now+w.interval*864e5).toISOString();
-w.lastReviewedAt=new Date(now).toISOString();
-w.box=Math.min(10,w.repetitions);
-return w}
+  if(w.lastReviewedAt&&isNaN(new Date(w.lastReviewedAt).getTime()))w.lastReviewedAt=null;
+  // Ensure FSRS fields exist
+  if(w.stability===undefined)w.stability=0;
+  if(w.difficulty===undefined)w.difficulty=0;
+  if(w.fsrsState===undefined)w.fsrsState='new';
+}
+
+function sm2Legacy(w,q){
+  clampReviewValues(w);
+  const now=Date.now();
+  if(q<3){w.repetitions=0;w.interval=1}
+  else{w.repetitions++;if(w.repetitions===1)w.interval=1;else if(w.repetitions===2)w.interval=6;else w.interval=Math.round(w.interval*w.easeFactor)}
+  w.easeFactor+=(0.1-(5-q)*(0.08+(5-q)*0.02));
+  if(w.easeFactor<1.3)w.easeFactor=1.3;
+  w.nextReviewDate=new Date(now+w.interval*MS_PER_DAY).toISOString();
+  w.lastReviewedAt=new Date(now).toISOString();
+  w.box=Math.min(10,w.repetitions);
+  return w}
+
+// Map old 1-5 rating to FSRS 1-4
+function mapRating(q){return q<=1?1:q<=3?2:q===4?3:4}
+
+// ═══════════════════════════════════════════
+// WORD FREQUENCY (top 5000)
+// ═══════════════════════════════════════════
+const FREQ_T1=new Set('the be to of and a in that have i it for not on with he as you do at this but his by from they we say her she or an will my one all would there their what so up out if about who get which go me when make can like time no just him know take people into year your good some could them see other than then now look only come its over think also back after use two how our work first well way even new want because any these give day most us'.split(' '));
+const FREQ_T2=new Set('about after again also another any around because become before between both come each find first from get give go great here high home how keep kind last late large learn leave let life little long look make man many may more most much must name need new only other over own part place point put read right same second shall small stand state still study such sure system take tell than that the thing think this time turn two use very water way when where which while world write would year young your able across although appear behind big body both build change children close country course during early end enough even example eye face family far feel few food four free full general girl group grow hand happen happy hard head hear heart help high horse house however idea important in inner island join kind king know land language large last late lead leave left less let life line list live lose lot low man material matter mean measure mind moment music must nation nature near need never night north notice obtain often once open order other page paint paper part pay percent perhaps period plan point pound power prepare present president pretty problem program project provide public pull purpose push put rest result road rock role round rule same school search second seem sense serve set several short shoulder show side since small smile society soldier some soon sort sound south space spend sport start state stay stop story study subject success suggest support sure surprise table take talk tell than that their them themselves then there these they thing this those though thought thousand through to together toward travel tree true turn unit upon use usual value voice wait walk war warm watch week west whole whose why wide wife will without wonder word work world write wrong yard you young'.split(' '));
+const FREQ_T3=new Set('above act age agency agree air almost animal answer anyway appear arm army aside avoid baby bag ball bank bar base bear beat beauty bedroom bed begin behavior believe below bend benefit beyond billion block blood blow board bone book born boss both bottom box boy brain branch bread break brick bridge bring brown brush build bullet burn bus business busy cake call calm came camp capital card care case cash cast cause cell center chair chance change charge check cheek chicken chief child choice choose church circle citizen claim class clear climb clock close clothes cloud coach coast color complete complex computer contain control cook cool corner cost count country couple course cover create cross crowd cup cut dangerous deal deeply degree develop digital dinner direction doctor dog door down draw dream dress drink drive drop dust duty each eager earn ease east easy edge else employ encourage energy enjoy enter equal error escape especially estate evident exact example excellent except excite exercise expect experience expert explain extra extreme face fail fair faith fall familiar far farm fast fat father fear feeling fiction fight file fill final finally find firm fish fit fix flat flight float floor flow flower fly fold follow food foot force forest forget form forward free freedom frequent friend from front fruit fund funny further future gain garden gather gentle gift girl give glad glass global goal govern grace grade grammar grand grass grave gray great green group grow guess gun guy habit half hang happen happy hard hat hate head health hear heart heavy height hell hello help her here hero herself hide high hill him himself hire his historical hobby hole holy home hope horse host hot hotel hour house however hug huge hunt hurry hurt husband ice idea identify if imagine immediate impact import impose income increase indicate industry inner input insist instead interest international interview issue item its itself join joke joy judge jump junior justice keen kill kind king kiss kitchen knee knew knife knock know knowledge labor lack lady lake land language large laser last late lately later latter launch law lay layer leader least leather leave left lend length lesson level lie lift light like limit line link lion lip list listen little live local locate love lovely machine main manage manner mark market marry mass master match material matter may maybe me measure meat media medical meet member memory mental mention merely message method middle might military mine minute miracle miss mission mistake mix mixture model modern moment money monkey month moral morning mother motion mouth movie Mr Mrs murder music Muslim mystery narrow nation nature near nearly necessary neck need negative neither network neutral nevertheless new news newspaper next nice night noble nobody nod noise none nor normal north nose not note nothing notice now number nurse obey object obtain obvious occur of off office officer oil old onto open operate opinion opportunity oppose option order ordinary organize other otherwise ought our ourselves out overcome overtake owe own owner pace pack page paid pain paint pair pale pan panel paper parent park part particle partner party pass past path patient pattern pause pay peace people perfect permit perhaps period permit persist phone phrase pick picture pie piece pilot pink pipe place plain plan plane plant plate play please pleasure plenty pocket point poison polish polite poor popular port pose position positive possible power practice praise predict prepare present prevent primary prince prison private prize probably problem process produce product program project promise proper property propose protect prove public punish pull purpose push put quality quarter quickly quiet quite race raise range rapid rate rather reach read ready reality realize really reason receive recent recently recognize recommend record reduce reflect refuse regard regular related relation relative release remain remember remind remote remove repeat replace reply report represent request require research resource respect respond rest restaurant result return reveal revolution rich ride ring rise risk river road robot role roll romantic rough round row rubber rude rule rush sad safe sail salad salt sand satisfy save say scene schedule sea search season seat second secret section security seek seem select senior sense serve service set settle several severe sex shake shall shape share sharp shave she sheet shelf shift shine ship shirt shock shoe shoot shop short shout shut sick sight sign signal silence silly silver simple since sing sir sister sit situation skill skin skirt sky slave slavery sleep slight slow small smart smell smile smoke smooth snap so social society soft soldier some someone something sometimes somewhat son song soon sorry sort soul sound source south space speak special speed spell spend spirit spot spread spring square stage stair stake stand standard star start state station stay steal steam steel step stick still stomach stone stop store storm story stranger street strength strike string stroke strong struggle student study stupid subject succeed success successful such sudden suffer summer sun supply support suppose sure surprise surround sweet swim swing system table tail tale talent target task taste teach team tear technology television tell temperature ten tend tent term test text than thank that the theater their theirs them themselves then theory there therefore these they thick thin thing think third this those though thousand threat threaten three throat through throughout throw thus ticket tie till tiny tip title to today toe together tomorrow tone tonight too tool top topic total tough tourist toward tower toy track trade tradition traffic train transfer treat tree trend trial tribe trick trip troop trouble truck true truly trust truth try tube turn twice type typical uncle under understand union unity until upper upset used useful valley value variety vast version very victim view village violate violence virtual visible visit vital voice volume wage wait wake walk wall want war warm warn wash waste watch wave way we weak weapon wear weather web wedding week welcome well west western what whatever wheel when whenever where whereas wherever whether which while whisper white whom whose why wide wife wild will win wind window wing winter wire wisdom wise wish with within without witness woman wonder world worry worse worst worth would wound wrap write wrong yard yeah year yell yes yesterday yet you young youngster yourself youth zone'.split(' '));
+
+function getFrequencyTier(word){
+  const w=word.toLowerCase();
+  if(FREQ_T1.has(w))return 1;
+  if(FREQ_T2.has(w))return 2;
+  if(FREQ_T3.has(w))return 3;
+  return 0;
+}
+
+function tierLabel(t){return t===1?'پرکاربرد':t===2?'رایج':t===3?'مفید':t===0?'پیشرفته':''}
 
 // ═══════════════════════════════════════════
 // TOAST
@@ -237,6 +407,7 @@ setTimeout(()=>{t.style.opacity='0';t.style.transition='opacity .3s';setTimeout(
 // ═══════════════════════════════════════════
 const DICT_API='https://api.dictionaryapi.dev/api/v2/entries/en';
 const MYMEMORY_API='https://api.mymemory.translated.net/get';
+const LANGUAGES={en:'English',fa:'فارسی',de:'Deutsch',fr:'Français',es:'Español',it:'Italiano',tr:'Türkçe',ar:'العربية',ru:'Русский',pt:'Português',zh:'中文',ja:'日本語',ko:'한국어'};
 
 function normalizeWordLookup(text){
   return text.trim().toLowerCase().replace(/^[^a-zA-Z]+|[^a-zA-Z']+$/g,'').replace(/'+/g,"'")}
@@ -246,11 +417,11 @@ function playAudioUrl(url){
   const a=new Audio(url);
   a.play().catch(()=>{})}
 
-function speakWord(word){
+function speakWord(word,lang){
   if(!word||!window.speechSynthesis)return;
   window.speechSynthesis.cancel();
   const u=new SpeechSynthesisUtterance(word);
-  u.lang='en-US';u.rate=0.85;
+  u.lang=lang||'en-US';u.rate=0.85;
   window.speechSynthesis.speak(u)}
 
 function decodeHtmlEntities(str){
@@ -278,9 +449,10 @@ async function fetchDictionary(word){
     return{headword:e.word||word,phonetic,phoneticBr,phoneticUs,audioBr,audioUs,meanings}
   }catch(e){return null}}
 
-async function fetchPersianTranslation(word){
+async function fetchTranslation(word,fromLang,toLang){
   try{
-    const r=await fetch(MYMEMORY_API+'?q='+encodeURIComponent(word)+'&langpair=en|fa');
+    const langpair=(fromLang||S.settings.sourceLang||'en')+'|'+(toLang||S.settings.targetLang||'fa');
+    const r=await fetch(MYMEMORY_API+'?q='+encodeURIComponent(word)+'&langpair='+langpair);
     if(!r.ok)return null;
     const d=await r.json();
     if(d.responseData&&d.responseData.translatedText){
@@ -288,6 +460,46 @@ async function fetchPersianTranslation(word){
       if(t.toUpperCase()===word.toUpperCase())return null;
       return decodeHtmlEntities(t)}
     return null
+  }catch(e){return null}}
+
+// Legacy alias
+const fetchPersianTranslation=(w)=>fetchTranslation(w);
+
+// ═══════════════════════════════════════════
+// AUTO-BACKUP (IndexedDB)
+// ═══════════════════════════════════════════
+let backupDb=null;
+function openBackupDb(){
+  return new Promise((resolve,reject)=>{
+    const req=indexedDB.open('leitner_backup_db',1);
+    req.onupgradeneeded=()=>{req.result.createObjectStore('backups')};
+    req.onsuccess=()=>{backupDb=req.result;resolve(req.result)};
+    req.onerror=()=>reject(req.error)});
+}
+async function autoBackup(){
+  try{
+    const db=backupDb||await openBackupDb();
+    const tx=db.transaction('backups','readwrite');
+    tx.objectStore('backups').put(JSON.stringify(S),'latest');
+  }catch(e){}
+}
+async function restoreBackup(){
+  try{
+    const db=backupDb||await openBackupDb();
+    return new Promise(resolve=>{
+      const tx=db.transaction('backups','readonly');
+      const req=tx.objectStore('backups').get('latest');
+      req.onsuccess=()=>{try{resolve(JSON.parse(req.result))}catch(e){resolve(null)}};
+      req.onerror=()=>resolve(null)});
+  }catch(e){return null}}
+async function exportBackup(){
+  try{
+    const db=backupDb||await openBackupDb();
+    return new Promise(resolve=>{
+      const tx=db.transaction('backups','readonly');
+      const req=tx.objectStore('backups').get('latest');
+      req.onsuccess=()=>resolve(req.result||null);
+      req.onerror=()=>resolve(null)});
   }catch(e){return null}}
 
 // ═══════════════════════════════════════════
@@ -334,14 +546,13 @@ async function renderTransPopup(word,rect){
 
   const [dictResult, persianResult]=await Promise.all([
     fetchDictionary(word),
-    fetchPersianTranslation(word)
+    fetchTranslation(word)
   ]);
 
   if(popup.style.display==='none')return;
 
   let html='<button type="button" class="trans-close" id="transClose">&times;</button>';
 
-  // Header: word + IPA + audio buttons
   const displayWord=dictResult?dictResult.headword:word;
   const ipaText=dictResult?(dictResult.phoneticBr||dictResult.phoneticUs||dictResult.phonetic||''):'';
   html+='<div class="trans-header">';
@@ -352,39 +563,21 @@ async function renderTransPopup(word,rect){
   html+='<button type="button" class="trans-audio-btn" data-speak="'+esc(displayWord)+'" title="Listen">🔊</button>';
   html+='</div>';
 
-  // Persian translation
-  if(persianResult){
-    html+='<div class="trans-persian">🇮🇷 '+esc(persianResult)+'</div>';
-  }
+  if(persianResult)html+='<div class="trans-persian">'+esc(persianResult)+'</div>';
 
   html+='<div class="trans-divider"></div>';
 
-  // English definitions
   if(dictResult&&dictResult.meanings.length){
     dictResult.meanings.forEach(m=>{
       if(m.partOfSpeech)html+='<span class="trans-pos">'+esc(m.partOfSpeech)+'</span> ';
-      if(m.definitions.length){
-        html+='<div class="trans-defs">';
-        m.definitions.forEach(d=>{html+='<div class="trans-def-item">'+esc(d)+'</div>'});
-        html+='</div>'}
-      if(m.examples.length){
-        html+='<div class="trans-examples">';
-        m.examples.forEach(ex=>{html+='<div class="trans-example">"'+esc(ex)+'"</div>'});
-        html+='</div>'}
-      if(m.synonyms.length){
-        html+='<div class="trans-synonyms">';
-        m.synonyms.forEach(s=>{html+='<span class="trans-syn-tag">'+esc(s)+'</span>'});
-        html+='</div>'}
+      if(m.definitions.length){html+='<div class="trans-defs">';m.definitions.forEach(d=>{html+='<div class="trans-def-item">'+esc(d)+'</div>'});html+='</div>'}
+      if(m.examples.length){html+='<div class="trans-examples">';m.examples.forEach(ex=>{html+='<div class="trans-example">"'+esc(ex)+'"</div>'});html+='</div>'}
+      if(m.synonyms.length){html+='<div class="trans-synonyms">';m.synonyms.forEach(s=>{html+='<span class="trans-syn-tag">'+esc(s)+'</span>'});html+='</div>'}
     });
-  }else if(!persianResult){
-    html+='<div class="trans-error">نتیجه‌ای یافت نشد. اتصال اینترنت را بررسی کنید.</div>';
-  }
+  }else if(!persianResult)html+='<div class="trans-error">نتیجه‌ای یافت نشد. اتصال اینترنت را بررسی کنید.</div>';
 
-  // Add to Leitner button
   const cleanWord=displayWord.toLowerCase();
-  const existsInLib=S.words.some(w=>w.word.toLowerCase()===cleanWord);
-  const existsInLT=S.longTerm.some(w=>w.word.toLowerCase()===cleanWord);
-  const alreadyExists=existsInLib||existsInLT;
+  const alreadyExists=S.words.some(w=>w.word.toLowerCase()===cleanWord)||S.longTerm.some(w=>w.word.toLowerCase()===cleanWord);
 
   html+='<button type="button" class="trans-add-btn" id="transAddBtn"'+(alreadyExists?' disabled':'')+'>';
   if(alreadyExists)html+='✅ در کتابخانه موجود است';
@@ -392,21 +585,16 @@ async function renderTransPopup(word,rect){
   html+='</button>';
 
   popup.innerHTML=html;
-
-  // Re-position after content rendered
   positionTransPopup(rect);
 
-  // Bind audio buttons
-  popup.querySelectorAll('[data-audio]').forEach(btn=>{
-    btn.onclick=()=>playAudioUrl(btn.dataset.audio)});
-  popup.querySelectorAll('[data-speak]').forEach(btn=>{
-    btn.onclick=()=>speakWord(btn.dataset.speak)});
+  popup.querySelectorAll('[data-audio]').forEach(btn=>{btn.onclick=()=>playAudioUrl(btn.dataset.audio)});
+  popup.querySelectorAll('[data-speak]').forEach(btn=>{btn.onclick=()=>speakWord(btn.dataset.speak)});
   document.getElementById('transClose').onclick=hideTransPopup;
 
-  // Bind add to leitner
   document.getElementById('transAddBtn').onclick=()=>{
     if(alreadyExists)return;
-    S.words.push({id:uid(),word:displayWord,translation:persianResult||'',ipa:ipaText,category:'پیش‌فرض',favorite:false,box:0,repetitions:0,interval:1,easeFactor:2.5,addedDate:new Date().toISOString(),nextReviewDate:null,lastReviewedAt:null});
+    const freqTier=getFrequencyTier(displayWord);
+    S.words.push({id:uid(),word:displayWord,translation:persianResult||'',ipa:ipaText,category:'پیش‌فرض',favorite:false,context:'',box:0,repetitions:0,interval:1,easeFactor:2.5,addedDate:new Date().toISOString(),nextReviewDate:null,lastReviewedAt:null,stability:0,difficulty:0,elapsedDays:0,scheduledDays:0,reps:0,lapses:0,fsrsState:'new'});
     save();
     toast(displayWord+' به لایتنر اضافه شد','success');
     const addBtn=document.getElementById('transAddBtn');
@@ -415,15 +603,12 @@ async function renderTransPopup(word,rect){
 
 function pdfHandleDblClick(e){
   if(currentTab!=='pdfreader')return;
-  console.log('[PDF] dblclick fired, target:',e.target.tagName,e.target.className);
-  // Dismiss existing extraction popup
   const existingPopup=document.getElementById('pdfPopup');
   if(existingPopup)existingPopup.classList.remove('visible');
 
   setTimeout(()=>{
     const sel=window.getSelection();
     const txt=sel?sel.toString().trim():'';
-    console.log('[PDF] dblclick selection:',JSON.stringify(txt));
     if(!txt||txt.length<1)return;
     if(!/[a-zA-Z]/.test(txt))return;
 
@@ -440,7 +625,6 @@ function pdfHandleDblClick(e){
 
 function pdfHandleMouseUp(e){
   if(currentTab!=='pdfreader')return;
-  console.log('[PDF] mouseup fired, target:',e.target.tagName,e.target.className);
   setTimeout(()=>{
     const sel=window.getSelection();
     const txt=sel?sel.toString().trim():'';
@@ -475,6 +659,7 @@ const TABS=[
 {id:'stats',label:'آمار',icon:'📊'},
 {id:'quiz',label:'آزمون',icon:'❓'},
 {id:'pdfreader',label:'خواننده PDF',icon:'📄'},
+{id:'settings',label:'تنظیمات',icon:'⚙️'},
 {id:'about',label:'درباره',icon:'ℹ️'}
 ];
 let currentTab='review';
@@ -486,14 +671,14 @@ function render(){
 if(currentTab!=='review'&&currentTab!=='pdfreader')document.onkeydown=null;
 if(currentTab!=='pdfreader')hideTransPopup();
 renderNav();
-const titles={review:'مرور',library:'کتابخانه',longterm:'حافظه بلندمدت',import:'ورود',export:'خروج / پشتیبان',stats:'آمار',quiz:'آزمون',pdfreader:'خواننده PDF',about:'درباره'};
+const titles={review:'مرور',library:'کتابخانه',longterm:'حافظه بلندمدت',import:'ورود',export:'خروج / پشتیبان',stats:'آمار',quiz:'آزمون',pdfreader:'خواننده PDF',settings:'تنظیمات',about:'درباره'};
 document.getElementById('pageTitle').textContent=titles[currentTab]||'';
 const c=document.getElementById('content');
-const renders={review:renderReview,library:renderLibrary,longterm:renderLongterm,import:renderImport,export:renderExport,stats:renderStats,quiz:renderQuiz,pdfreader:renderPDFReader,about:renderAbout};
+const renders={review:renderReview,library:renderLibrary,longterm:renderLongterm,import:renderImport,export:renderExport,stats:renderStats,quiz:renderQuiz,pdfreader:renderPDFReader,settings:renderSettings,about:renderAbout};
 (renders[currentTab]||(()=>''))(c)}
 
 // ═══════════════════════════════════════════
-// 1. REVIEW
+// 1. REVIEW (with FSRS + edit in review)
 // ═══════════════════════════════════════════
 let reviewSession={queue:[],idx:0,flipped:false,correct:0,wrong:0,done:false};
 let reviewRatingPending=false;
@@ -511,22 +696,28 @@ document.getElementById('reviewRestart').onclick=()=>{reviewSession={queue:[],id
 if(!reviewSession.queue.length){startReview();if(!reviewSession.queue.length){c.innerHTML=`<div class="card" style="text-align:center;padding:60px"><div class="empty"><div class="icon">📖</div><p>کارتی برای مرور نیست</p></div></div>`;return}}
 const w=reviewSession.queue[reviewSession.idx];
 const prog=Math.round((reviewSession.idx/reviewSession.queue.length)*100);
-c.innerHTML=`<div style="max-width:500px;margin:0 auto"><div class="flex" style="justify-content:space-between;margin-bottom:16px"><span class="text-sm" style="color:var(--text2)">${reviewSession.idx+1} از ${reviewSession.queue.length}</span><span class="badge badge-accent">${w.box>0?'جعبه '+w.box:'جدید'}</span></div><div class="progress-bar"><div class="progress-fill" style="width:${prog}%"></div></div><div class="review-card" id="rCard" tabindex="0" role="button" aria-label="کلیک برای نمایش پاسخ"><div class="review-inner"><div class="review-face"><div style="font-size:1.8rem;font-weight:700;margin-bottom:12px">${esc(w.word)}</div>${w.ipa?`<div style="color:var(--text2);font-size:.9rem">${esc(w.ipa)}</div>`:''}<div style="color:var(--text2);font-size:.8rem;margin-top:16px">برای نمایش پاسخ کلیک کنید</div></div><div class="review-face review-back"><div style="font-size:1.5rem;font-weight:600;color:var(--accent);margin-bottom:12px">${esc(w.translation)}</div>${w.category&&w.category!=='پیش‌فرض'?`<span class="tag">${esc(w.category)}</span>`:''}</div></div></div><div class="rating-bar" id="ratingBar" style="display:none"><button type="button" class="btn btn-danger btn-sm" data-rate="1">❌ نادرست <kbd style="font-size:.6rem;opacity:.6">۱</kbd></button><button type="button" class="btn btn-ghost btn-sm" data-rate="3">😐 سخت <kbd style="font-size:.6rem;opacity:.6">۲</kbd></button><button type="button" class="btn btn-primary btn-sm" data-rate="4">🙂 خوب <kbd style="font-size:.6rem;opacity:.6">۳</kbd></button><button type="button" class="btn btn-success btn-sm" data-rate="5">😄 عالی <kbd style="font-size:.6rem;opacity:.6">۴</kbd></button></div></div>`;
+const tier=getFrequencyTier(w.word);
+c.innerHTML=`<div style="max-width:500px;margin:0 auto"><div class="flex" style="justify-content:space-between;margin-bottom:16px"><span style="color:var(--text2)">${reviewSession.idx+1} از ${reviewSession.queue.length}</span><div class="flex" style="gap:4px"><span class="badge badge-accent">${w.box>0?'جعبه '+w.box:'جدید'}</span>${tier?`<span class="badge tier-${tier}">${tierLabel(tier)}</span>`:''}</div></div><div class="progress-bar"><div class="progress-fill" style="width:${prog}%"></div></div><div class="review-card" id="rCard" tabindex="0" role="button" aria-label="کلیک برای نمایش پاسخ"><div class="review-inner"><div class="review-face"><div style="font-size:1.8rem;font-weight:700;margin-bottom:12px">${esc(w.word)}</div>${w.ipa?`<div style="color:var(--text2);font-size:.9rem">${esc(w.ipa)}</div>`:''}<div style="color:var(--text2);font-size:.8rem;margin-top:16px">برای نمایش پاسخ کلیک کنید</div></div><div class="review-face review-back"><div style="font-size:1.5rem;font-weight:600;color:var(--accent);margin-bottom:12px">${esc(w.translation)}</div>${w.category&&w.category!=='پیش‌فرض'?`<span class="tag">${esc(w.category)}</span>`:''}${w.context?`<div class="context-sentence">${esc(w.context)}</div>`:''}<div style="margin-top:10px"><button type="button" class="btn btn-ghost btn-sm" id="reviewEditBtn" style="font-size:.75rem">✏️ ویرایش</button></div></div></div></div><div class="rating-bar" id="ratingBar" style="display:none"><button type="button" class="btn btn-danger btn-sm" data-rate="1">❌ نادرست <kbd style="font-size:.6rem;opacity:.6">۱</kbd></button><button type="button" class="btn btn-ghost btn-sm" data-rate="3">😐 سخت <kbd style="font-size:.6rem;opacity:.6">۲</kbd></button><button type="button" class="btn btn-primary btn-sm" data-rate="4">🙂 خوب <kbd style="font-size:.6rem;opacity:.6">۳</kbd></button><button type="button" class="btn btn-success btn-sm" data-rate="5">😄 عالی <kbd style="font-size:.6rem;opacity:.6">۴</kbd></button></div></div>`;
 const card=document.getElementById('rCard');
 const ratingBar=document.getElementById('ratingBar');
 card.onclick=()=>{if(reviewSession.flipped)return;reviewSession.flipped=true;card.classList.add('flipped');ratingBar.style.display='flex'};
 card.onkeydown=e=>{if(e.key===' '||e.key==='Enter'){e.preventDefault();card.onclick()}};
 ratingBar.onclick=(e)=>{const btn=e.target.closest('[data-rate]');if(!btn||reviewRatingPending)return;rateReview(parseInt(btn.dataset.rate))};
-document.onkeydown=reviewKeyHandler}
+document.onkeydown=reviewKeyHandler;
+
+// Edit in review
+const editBtn=document.getElementById('reviewEditBtn');
+if(editBtn)editBtn.onclick=(e)=>{e.stopPropagation();editWord(w.id,()=>renderReview(document.getElementById('content')))};
+}
 function rateReview(q){
 if(reviewRatingPending)return;
 reviewRatingPending=true;
 const w=reviewSession.queue[reviewSession.idx];
 const idx=S.words.findIndex(x=>x.id===w.id);
-if(idx>=0)sm2(S.words[idx],q);
+if(idx>=0)fsrsNext(S.words[idx],mapRating(q));
 S.stats.reviewed++;S.stats.xp+={1:0,2:3,3:5,4:8,5:10}[q]||0;
 if(q>=4)S.stats.correct++;else S.stats.wrong++;
-const dk=todayKey();if(S.stats.lastReviewDate!==dk){if(S.stats.lastReviewDate===new Date(Date.now()-864e5).toISOString().slice(0,10))S.stats.streak++;else S.stats.streak=1;S.stats.lastReviewDate=dk}
+const dk=todayKey();if(S.stats.lastReviewDate!==dk){if(S.stats.lastReviewDate===new Date(Date.now()-MS_PER_DAY).toISOString().slice(0,10))S.stats.streak++;else S.stats.streak=1;S.stats.lastReviewDate=dk}
 if(!S.stats.history[dk])S.stats.history[dk]={reviewed:0,correct:0,wrong:0};
 S.stats.history[dk].reviewed++;if(q>=4)S.stats.history[dk].correct++;else S.stats.history[dk].wrong++;
 save();
@@ -540,7 +731,7 @@ if(e.key===' '&&reviewSession.flipped===false&&currentTab==='review'){e.preventD
 if(reviewSession.flipped&&currentTab==='review'&&!reviewRatingPending){const map={'1':1,'2':3,'3':4,'4':5};if(map[e.key])rateReview(map[e.key])}}
 
 // ═══════════════════════════════════════════
-// 2. LIBRARY
+// 2. LIBRARY (with frequency tier)
 // ═══════════════════════════════════════════
 let libFilter='',libCat='',libSort='';
 function renderLibrary(c){
@@ -549,8 +740,9 @@ const filtered=words.filter(w=>{if(libCat&&w.category!==libCat)return false;if(l
 if(libSort==='newest')filtered.sort((a,b)=>new Date(b.addedDate)-new Date(a.addedDate));
 else if(libSort==='due')filtered.sort((a,b)=>{const da=a.nextReviewDate?new Date(a.nextReviewDate):new Date('2099-01-01');const db=b.nextReviewDate?new Date(b.nextReviewDate):new Date('2099-01-01');return da-db});
 else if(libSort==='alpha')filtered.sort((a,b)=>a.word.localeCompare(b.word,'fa'));
+else if(libSort==='freq')filtered.sort((a,b)=>getFrequencyTier(a.word)-getFrequencyTier(b.word));
 const dueToday=new Set(getDue().map(w=>w.id));
-c.innerHTML=`<div class="filter-bar"><input class="input" placeholder="جستجو..." style="max-width:300px" value="${esc(libFilter)}" id="libSearch"><select class="input" style="max-width:200px" id="libCat"><option value="">همه دسته‌ها</option>${S.categories.map(c=>`<option value="${esc(c)}"${c===libCat?' selected':''}>${esc(c)}</option>`).join('')}</select><select class="input" style="max-width:180px" id="libSort"><option value="">مرتب‌سازی</option><option value="newest"${libSort==='newest'?' selected':''}>جدیدترین</option><option value="due"${libSort==='due'?' selected':''}>زودترین مرور</option><option value="alpha"${libSort==='alpha'?' selected':''}>الفبایی</option></select><span style="color:var(--text2);font-size:.85rem">${filtered.length} کلمه</span></div><div class="table-wrap card"><table><thead><tr><th>کلمه</th><th>ترجمه</th><th>دسته</th><th>جعبه</th><th>مرور بعدی</th><th>عملیات</th></tr></thead><tbody>${filtered.length?filtered.map(w=>`<tr><td><strong>${esc(w.word)}</strong>${w.ipa?`<br><small style="color:var(--text2)">${esc(w.ipa)}</small>`:''}</td><td>${esc(w.translation)}</td><td><span class="tag">${esc(w.category)}</span>${w.favorite?' <span style="font-size:.9rem">⭐</span>':''}</td><td>${dueToday.has(w.id)?`<span class="badge badge-warning">زودترین</span>`:w.box}</td><td>${fmtDate(w.nextReviewDate)}</td><td><button type="button" class="btn btn-ghost btn-sm" data-edit="${w.id}" aria-label="ویرایش">✏️</button><button type="button" class="btn btn-ghost btn-sm" data-fav="${w.id}" aria-label="${w.favorite?'حذف از علاقه‌مندی':'افزودن به علاقه‌مندی'}">${w.favorite?'⭐':'☆'}</button><button type="button" class="btn btn-ghost btn-sm" data-del="${w.id}" aria-label="حذف">🗑️</button><button type="button" class="btn btn-ghost btn-sm" data-lt="${w.id}" aria-label="انتقال به حافظه بلندمدت">🧠</button></td></tr>`).join(''):'<tr><td colspan="6" class="empty">کلمه‌ای یافت نشد</td></tr>'}</tbody></table></div>`;
+c.innerHTML=`<div class="filter-bar"><input class="input" placeholder="جستجو..." style="max-width:300px" value="${esc(libFilter)}" id="libSearch"><select class="input" style="max-width:200px" id="libCat"><option value="">همه دسته‌ها</option>${S.categories.map(c=>`<option value="${esc(c)}"${c===libCat?' selected':''}>${esc(c)}</option>`).join('')}</select><select class="input" style="max-width:180px" id="libSort"><option value="">مرتب‌سازی</option><option value="newest"${libSort==='newest'?' selected':''}>جدیدترین</option><option value="due"${libSort==='due'?' selected':''}>زودترین مرور</option><option value="alpha"${libSort==='alpha'?' selected':''}>الفبایی</option><option value="freq"${libSort==='freq'?' selected':''}>فراوانی</option></select><span style="color:var(--text2);font-size:.85rem">${filtered.length} کلمه</span></div><div class="table-wrap card"><table><thead><tr><th>کلمه</th><th>ترجمه</th><th>دسته</th><th>جعبه</th><th>مرور بعدی</th><th>عملیات</th></tr></thead><tbody>${filtered.length?filtered.map(w=>{const tier=getFrequencyTier(w.word);return`<tr><td><strong>${esc(w.word)}</strong>${w.ipa?`<br><small style="color:var(--text2)">${esc(w.ipa)}</small>`:''}${tier?`<br><span class="badge tier-${tier}" style="font-size:.6rem">${tierLabel(tier)}</span>`:''}</td><td>${esc(w.translation)}</td><td><span class="tag">${esc(w.category)}</span>${w.favorite?' <span style="font-size:.9rem">⭐</span>':''}</td><td>${dueToday.has(w.id)?`<span class="badge badge-warning">زودترین</span>`:w.box}</td><td>${fmtDate(w.nextReviewDate)}</td><td><button type="button" class="btn btn-ghost btn-sm" data-edit="${w.id}" aria-label="ویرایش">✏️</button><button type="button" class="btn btn-ghost btn-sm" data-fav="${w.id}" aria-label="${w.favorite?'حذف از علاقه‌مندی':'افزودن به علاقه‌مندی'}">${w.favorite?'⭐':'☆'}</button><button type="button" class="btn btn-ghost btn-sm" data-del="${w.id}" aria-label="حذف">🗑️</button><button type="button" class="btn btn-ghost btn-sm" data-lt="${w.id}" aria-label="انتقال به حافظه بلندمدت">🧠</button></td></tr>`}).join(''):'<tr><td colspan="6" class="empty">کلمه‌ای یافت نشد</td></tr>'}</tbody></table></div>`;
 document.getElementById('libSearch').oninput=e=>{libFilter=e.target.value;renderLibrary(c)};
 document.getElementById('libCat').onchange=e=>{libCat=e.target.value;renderLibrary(c)};
 document.getElementById('libSort').onchange=e=>{libSort=e.target.value;renderLibrary(c)};
@@ -561,16 +753,16 @@ if(btn.dataset.del){const w=S.words.find(x=>x.id===id);const name=w?w.word:'';if
 if(btn.dataset.fav){const w=S.words.find(x=>x.id===id);if(w){w.favorite=!w.favorite;save();renderLibrary(c)}}
 if(btn.dataset.lt){const w=S.words.find(x=>x.id===id);if(w){S.words=S.words.filter(x=>x.id!==id);w.box=0;w.nextReviewDate=null;S.longTerm.push(w);save();renderLibrary(c);toast('به حافظه بلندمدت منتقل شد','success')}}
 if(btn.dataset.edit)editWord(id)}}
-function editWord(id){
+function editWord(id,onClose){
 const w=S.words.find(x=>x.id===id);if(!w)return;
 const ov=document.createElement('div');ov.className='modal-overlay';
 ov.innerHTML=`<div class="modal"><h3>ویرایش کلمه</h3><div style="display:grid;gap:12px"><label>کلمه</label><input class="input" id="eWord" value="${esc(w.word)}"><label>ترجمه</label><input class="input" id="eTrans" value="${esc(w.translation)}"><label>IPA</label><input class="input" id="eIpa" value="${esc(w.ipa||'')}"><label>دسته</label><select class="input" id="eCat">${S.categories.map(c=>`<option${c===w.category?' selected':''}>${esc(c)}</option>`).join('')}</select><div class="flex"><button type="button" class="btn btn-primary" id="eSave">ذخیره</button><button type="button" class="btn btn-ghost" id="eCancel">لغو</button></div></div></div>`;
 document.body.appendChild(ov);
-const closeModal=()=>ov.remove();
+const closeModal=()=>{ov.remove();if(onClose)onClose()};
 ov.onclick=e=>{if(e.target===ov)closeModal()};
 const onKey=e=>{if(e.key==='Escape'){document.removeEventListener('keydown',onKey);closeModal()}};
 document.addEventListener('keydown',onKey);
-ov.querySelector('#eSave').onclick=()=>{w.word=ov.querySelector('#eWord').value.trim();w.translation=ov.querySelector('#eTrans').value.trim();w.ipa=ov.querySelector('#eIpa').value.trim();w.category=ov.querySelector('#eCat').value;save();closeModal();renderLibrary(document.getElementById('content'));toast('ذخیره شد','success')};
+ov.querySelector('#eSave').onclick=()=>{w.word=ov.querySelector('#eWord').value.trim();w.translation=ov.querySelector('#eTrans').value.trim();w.ipa=ov.querySelector('#eIpa').value.trim();w.category=ov.querySelector('#eCat').value;save();closeModal();if(!onClose)renderLibrary(document.getElementById('content'));toast('ذخیره شد','success')};
 ov.querySelector('#eCancel').onclick=()=>{document.removeEventListener('keydown',onKey);closeModal()}}
 
 // ═══════════════════════════════════════════
@@ -587,7 +779,7 @@ if(btn.dataset.back){const w=S.longTerm.find(x=>x.id===btn.dataset.back);if(w){S
 if(btn.dataset.dlt){const w=S.longTerm.find(x=>x.id===btn.dataset.dlt);const name=w?w.word:'';if(!confirm(`حذف «${name}»؟`))return;S.longTerm=S.longTerm.filter(x=>x.id!==btn.dataset.dlt);save();renderLongterm(c);toast('حذف شد','success')}}}
 
 // ═══════════════════════════════════════════
-// 4. IMPORT (5-step wizard)
+// 4. IMPORT (with Anki + URL import)
 // ═══════════════════════════════════════════
 let importStep=0,importRawText='',importWords=[],importExisting=new Set(),importSelected=new Set(),importTranslations=[],importCategory='پیش‌فرض',importDest='words',importFilter='all',importTransProgress={done:0,total:0};
 
@@ -617,7 +809,7 @@ else if(importStep===4)h+=renderImportStep4();
 c.innerHTML=h;bindImportEvents()}
 
 function renderImportStep0(){
-return`<div class="card" style="margin-bottom:16px"><h3 style="margin-bottom:12px">ورود متن</h3><textarea class="input" id="importText" rows="6" placeholder="متن انگلیسی را اینجا بچسبانید...">${esc(importRawText)}</textarea><div class="flex" style="margin-top:12px"><select class="input" style="max-width:200px" id="importCat">${S.categories.map(c=>`<option${c===importCategory?' selected':''}>${esc(c)}</option>`).join('')}</select><select class="input" style="max-width:200px" id="importDest"><option value="words"${importDest==='words'?' selected':''}>کتابخانه</option><option value="longTerm"${importDest==='longTerm'?' selected':''}>حافظه بلندمدت</option></select><button type="button" class="btn btn-primary" id="importParse">پردازش</button></div></div><div class="card"><h3 style="margin-bottom:12px">ورود فایل</h3><div class="flex"><input type="file" id="fileInput" accept=".txt,.pdf,.docx,.json" style="display:none"><button type="button" class="btn btn-ghost" onclick="document.getElementById('fileInput').click()">انتخاب فایل</button><span style="color:var(--text2);font-size:.85rem">TXT, PDF, DOCX, JSON</span></div></div>`}
+return`<div class="card" style="margin-bottom:16px"><h3 style="margin-bottom:12px">ورود متن</h3><textarea class="input" id="importText" rows="6" placeholder="متن انگلیسی را اینجا بچسبانید...">${esc(importRawText)}</textarea><div class="flex" style="margin-top:12px"><select class="input" style="max-width:200px" id="importCat">${S.categories.map(c=>`<option${c===importCategory?' selected':''}>${esc(c)}</option>`).join('')}</select><select class="input" style="max-width:200px" id="importDest"><option value="words"${importDest==='words'?' selected':''}>کتابخانه</option><option value="longTerm"${importDest==='longTerm'?' selected':''}>حافظه بلندمدت</option></select><button type="button" class="btn btn-primary" id="importParse">پردازش</button></div></div><div class="card" style="margin-bottom:16px"><h3 style="margin-bottom:12px">ورود فایل</h3><div class="flex"><input type="file" id="fileInput" accept=".txt,.pdf,.docx,.json,.apkg" style="display:none"><button type="button" class="btn btn-ghost" onclick="document.getElementById('fileInput').click()">انتخاب فایل</button><span style="color:var(--text2);font-size:.85rem">TXT, PDF, DOCX, JSON, Anki (.apkg)</span></div></div><div class="card"><h3 style="margin-bottom:12px">ورود از URL</h3><div class="flex"><input class="input" id="importUrl" placeholder="https://example.com/words.txt" style="max-width:400px"><button type="button" class="btn btn-ghost" id="importUrlBtn">دریافت</button></div></div>`}
 
 function renderImportStep1(){
 const stats=calcImportStats();
@@ -669,7 +861,10 @@ importExisting=new Set([...S.words,...S.longTerm].map(w=>w.word.toLowerCase()));
 importSelected=new Set(importWords.map((w,i)=>i).filter(i=>!importExisting.has(importWords[i])));
 importStep=1;renderImport(document.getElementById('content'))};
 const fi=document.getElementById('fileInput');
-if(fi)fi.onchange=handleFileImport}
+if(fi)fi.onchange=handleFileImport;
+// URL import
+const urlBtn=document.getElementById('importUrlBtn');
+if(urlBtn)urlBtn.onclick=async()=>{const url=document.getElementById('importUrl')?.value?.trim();if(!url){toast('URL وارد نشده','error');return}try{toast('در حال دریافت...','info');const r=await fetch(url);if(!r.ok)throw new Error(r.status);const txt=await r.text();importRawText=txt;document.getElementById('importText').value=txt;importWords=parseWords(txt);importExisting=new Set([...S.words,...S.longTerm].map(w=>w.word.toLowerCase()));importSelected=new Set(importWords.map((_,i)=>i).filter(i=>!importExisting.has(importWords[i])));importStep=1;renderImport(document.getElementById('content'));toast('متن دریافت شد','success')}catch(e){toast('خطا در دریافت URL','error')}}}
 
 else if(importStep===1){
 document.querySelectorAll('input[name="impF"]').forEach(r=>{r.onchange=()=>{importFilter=r.value;renderImport(document.getElementById('content'))}});
@@ -709,7 +904,7 @@ importTranslations=[];importTransProgress={done:0,total:selectedWords.length};
 renderImport(document.getElementById('content'));
 for(let i=0;i<selectedWords.length;i+=5){
 const batch=selectedWords.slice(i,i+5);
-const results=await Promise.all(batch.map(async w=>{try{const r=await fetch(MYMEMORY_API+'?q='+encodeURIComponent(w)+'&langpair=en|fa');const d=await r.json();const t=d.responseData&&d.responseData.translatedText&&d.responseData.translatedText!==w?d.responseData.translatedText:'';return{word:w,translation:t,selected:true}}catch(e){return{word:w,translation:'',selected:true}}}));
+const results=await Promise.all(batch.map(async w=>{try{const r=await fetch(MYMEMORY_API+'?q='+encodeURIComponent(w)+'&langpair='+S.settings.sourceLang+'|'+S.settings.targetLang);const d=await r.json();const t=d.responseData&&d.responseData.translatedText&&d.responseData.translatedText!==w?d.responseData.translatedText:'';return{word:w,translation:t,selected:true}}catch(e){return{word:w,translation:'',selected:true}}}));
 importTranslations.push(...results);
 importTransProgress.done=Math.min(i+5,selectedWords.length);
 renderImport(document.getElementById('content'))}
@@ -722,13 +917,15 @@ let added=0,skipped=0,failed=0;
 toAdd.forEach(t=>{
 const exists=target.some(w=>w.word.toLowerCase()===t.word.toLowerCase())||S.words.some(w=>w.word.toLowerCase()===t.word.toLowerCase())||S.longTerm.some(w=>w.word.toLowerCase()===t.word.toLowerCase());
 if(exists){skipped++;return}
-target.push({id:uid(),word:t.word,translation:t.translation,ipa:'',category:importCategory,favorite:false,box:0,repetitions:0,interval:1,easeFactor:2.5,addedDate:new Date().toISOString(),nextReviewDate:null,lastReviewedAt:null});
+const freqTier=getFrequencyTier(t.word);
+target.push({id:uid(),word:t.word,translation:t.translation,ipa:'',category:importCategory,favorite:false,context:'',box:0,repetitions:0,interval:1,easeFactor:2.5,addedDate:new Date().toISOString(),nextReviewDate:null,lastReviewedAt:null,stability:0,difficulty:0,elapsedDays:0,scheduledDays:0,reps:0,lapses:0,fsrsState:'new'});
 added++});
 failed=importTranslations.filter(t=>t.selected&&!t.translation).length;
 save();importTransProgress={added,skipped,failed};
 importStep=4;renderImport(document.getElementById('content'));
 toast(`${added} کلمه اضافه شد`,'success')}
 
+// Anki .apkg import
 async function handleFileImport(e){
 const file=e.target.files[0];if(!file)return;
 const ext=file.name.split('.').pop().toLowerCase();
@@ -736,108 +933,151 @@ if(ext==='json'){const txt=await file.text();try{const d=JSON.parse(txt);if(Arra
 else if(ext==='txt'){const txt=await file.text();importRawText=txt;document.getElementById('importText').value=txt;importWords=parseWords(txt);importExisting=new Set([...S.words,...S.longTerm].map(w=>w.word.toLowerCase()));importSelected=new Set(importWords.map((_,i)=>i).filter(i=>!importExisting.has(importWords[i])));importStep=1;renderImport(document.getElementById('content'))}
 else if(ext==='pdf'){try{pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';const buf=await file.arrayBuffer();const pdf=await pdfjsLib.getDocument(buf).promise;let txt='';for(let i=1;i<=pdf.numPages;i++){const p=await pdf.getPage(i);const c=await p.getTextContent();txt+=c.items.map(x=>x.str).join(' ')+' '}importRawText=txt;importWords=parseWords(txt);importExisting=new Set([...S.words,...S.longTerm].map(w=>w.word.toLowerCase()));importSelected=new Set(importWords.map((_,i)=>i).filter(i=>!importExisting.has(importWords[i])));importStep=1;renderImport(document.getElementById('content'))}catch(e){toast('خطا در خواندن فایل PDF','error')}}
 else if(ext==='docx'){try{const buf=await file.arrayBuffer();const zip=await JSZip.loadAsync(buf);const xml=await zip.file('word/document.xml').async('text');const parser=new DOMParser();const doc=parser.parseFromString(xml,'text/xml');const texts=doc.getElementsByTagName('w:t');let txt='';for(let i=0;i<texts.length;i++)txt+=texts[i].textContent+' ';importRawText=txt;importWords=parseWords(txt);importExisting=new Set([...S.words,...S.longTerm].map(w=>w.word.toLowerCase()));importSelected=new Set(importWords.map((_,i)=>i).filter(i=>!importExisting.has(importWords[i])));importStep=1;renderImport(document.getElementById('content'))}catch(e){toast('خطا در خواندن فایل DOCX','error')}}
+else if(ext==='apkg'){try{toast('در حال پردازش فایل Anki...','info');const buf=await file.arrayBuffer();const zip=await JSZip.loadAsync(buf);const dbFile=zip.file('collection.anki21')||zip.file('collection.anki2');if(!dbFile){toast('فایل Anki معتبر نیست','error');return}const sqlBuf=await dbFile.async('arraybuffer');if(!window.initSqlJs){toast('در حال بارگذاری مفسر SQLite...','info');await new Promise((resolve,reject)=>{const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js';s.onload=resolve;s.onerror=reject;document.head.appendChild(s)});window._sqlModule=await initSqlJs({locateFile:f=>'https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/'+f})}const db=new window._sqlModule.Database(new Uint8Array(sqlBuf));const rows=db.exec('SELECT flds FROM notes');if(!rows.length||!rows[0].values.length){toast('هیچ کارتی یافت نشد','error');return}let txt='';rows[0].values.forEach(r=>{const fields=String(r[0]).split('\x1f');txt+=fields[0]+' '+fields[1]+' '});db.close();importRawText=txt;importWords=parseWords(txt);importExisting=new Set([...S.words,...S.longTerm].map(w=>w.word.toLowerCase()));importSelected=new Set(importWords.map((_,i)=>i).filter(i=>!importExisting.has(importWords[i])));importStep=1;renderImport(document.getElementById('content'));toast(`${importWords.length} کلمه استخراج شد`,'success')}catch(e){toast('خطا در خواندن فایل Anki','error')}}
 e.target.value=''}
 
 // ═══════════════════════════════════════════
-// 5. PDF READER (enhanced with double-click translation)
+// 5. PDF READER (fixed rendering & text layer)
 // ═══════════════════════════════════════════
-let pdfDoc=null,pdfPage=1,pdfScale=1.5,pdfFileName='',pdfSelectedText='',pdfCurrentPageObj=null;
+let pdfDoc=null,pdfPage=1,pdfScale=PDF_DEFAULT_SCALE,pdfFileName='',pdfSelectedText='',pdfCurrentPageObj=null;
+let pdfThumbObserver=null;
+let pdfZoomMode='custom';// custom|fitWidth|fitPage
+
 function renderPDFReader(c){
 if(!pdfDoc){
 c.innerHTML=`<div class="card" style="text-align:center;padding:60px"><div class="empty"><div class="icon">📄</div><p>فایل PDF را باز کنید تا شروع به خواندن کنید</p><p style="color:var(--text2);font-size:.8rem;margin-top:8px">روی هر کلمه دابل‌کلیک کنید تا ترجمه و تلفظ آن را ببینید</p><div style="margin-top:16px"><input type="file" id="pdfFileInput" accept=".pdf" style="display:none"><button type="button" class="btn btn-primary" id="pdfOpen">📂 انتخاب فایل PDF</button></div></div></div>`;
 document.getElementById('pdfOpen').onclick=()=>document.getElementById('pdfFileInput').click();
 document.getElementById('pdfFileInput').onchange=async e=>{const f=e.target.files[0];if(f)await openPDF(f)};return}
-c.innerHTML=`<div class="pdf-toolbar"><button type="button" class="btn btn-ghost" id="pdfOpen2">📂 فایل جدید</button><input type="file" id="pdfFileInput2" accept=".pdf" style="display:none"><button type="button" class="btn btn-ghost" id="pdfPrev">→ صفحه قبل</button><span class="pdf-page-info" id="pdfPageInfo">${pdfPage} / ${pdfDoc.numPages}</span><button type="button" class="btn btn-ghost" id="pdfNext">صفحه بعد ←</button><button type="button" class="btn btn-ghost" id="pdfZoomOut">−</button><span class="pdf-zoom-info" id="pdfZoomLevel">${Math.round(pdfScale*100)}%</span><button type="button" class="btn btn-ghost" id="pdfZoomIn">+</button><span style="color:var(--text2);font-size:.8rem;margin-right:auto">${esc(pdfFileName)}</span></div><div class="pdf-body"><div class="pdf-sidebar" id="pdfThumbs"></div><div class="pdf-main" id="pdfMain"><div class="pdf-page-wrap" id="pdfPageWrap"><canvas id="pdfCanvas"></canvas></div></div></div>`;
+const truncName=pdfFileName.length>35?pdfFileName.slice(0,32)+'...':pdfFileName;
+c.innerHTML=`<div class="pdf-toolbar" id="pdfToolbar"><button type="button" class="btn btn-ghost btn-sm" id="pdfOpen2" title="فایل جدید">📂</button><input type="file" id="pdfFileInput2" accept=".pdf" style="display:none"><div class="pdf-sep"></div><button type="button" class="btn btn-ghost btn-sm" id="pdfPrev" title="صفحه قبل">→</button><span class="pdf-page-info" id="pdfPageInfo">${pdfPage} / ${pdfDoc.numPages}</span><button type="button" class="btn btn-ghost btn-sm" id="pdfNext" title="صفحه بعد">←</button><div class="pdf-sep"></div><button type="button" class="btn btn-ghost btn-sm" id="pdfZoomOut" title="کوچک‌تر">−</button><span class="pdf-zoom-info" id="pdfZoomLevel">${Math.round(pdfScale*100)}%</span><button type="button" class="btn btn-ghost btn-sm" id="pdfZoomIn" title="بزرگ‌تر">+</button><div class="pdf-sep"></div><button type="button" class="btn btn-ghost btn-sm" id="pdfFitWidth" title="عرض صفحه">↔</button><button type="button" class="btn btn-ghost btn-sm" id="pdfFitPage" title="کل صفحه">↕</button><span style="color:var(--text2);font-size:.75rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:180px;margin-right:auto" title="${esc(pdfFileName)}">${esc(truncName)}</span></div><div class="pdf-body"><div class="pdf-sidebar" id="pdfThumbs"></div><div class="pdf-main" id="pdfMain"><div class="pdf-page-wrap" id="pdfPageWrap"><canvas id="pdfCanvas"></canvas><div id="pdfTextLayer" class="textLayer"></div></div></div></div>`;
 document.getElementById('pdfOpen2').onclick=()=>document.getElementById('pdfFileInput2').click();
 document.getElementById('pdfFileInput2').onchange=async e=>{const f=e.target.files[0];if(f)await openPDF(f)};
-document.getElementById('pdfPrev').onclick=()=>{if(pdfPage>1){pdfPage--;renderPDFPage();renderPDFThumbs()}};
-document.getElementById('pdfNext').onclick=()=>{if(pdfPage<pdfDoc.numPages){pdfPage++;renderPDFPage();renderPDFThumbs()}};
-document.getElementById('pdfZoomIn').onclick=()=>{pdfScale=Math.min(4,pdfScale+0.25);renderPDFPage();const z=document.getElementById('pdfZoomLevel');if(z)z.textContent=Math.round(pdfScale*100)+'%'};
-document.getElementById('pdfZoomOut').onclick=()=>{pdfScale=Math.max(0.5,pdfScale-0.25);renderPDFPage();const z=document.getElementById('pdfZoomLevel');if(z)z.textContent=Math.round(pdfScale*100)+'%'};
+document.getElementById('pdfPrev').onclick=()=>{if(pdfPage>1){pdfPage--;pdfZoomMode='custom';renderPDFPage();renderPDFThumbs()}};
+document.getElementById('pdfNext').onclick=()=>{if(pdfPage<pdfDoc.numPages){pdfPage++;pdfZoomMode='custom';renderPDFPage();renderPDFThumbs()}};
+document.getElementById('pdfZoomIn').onclick=()=>{pdfZoomMode='custom';pdfScale=Math.min(6,pdfScale*1.25);renderPDFPage()};
+document.getElementById('pdfZoomOut').onclick=()=>{pdfZoomMode='custom';pdfScale=Math.max(0.25,pdfScale/1.25);renderPDFPage()};
+document.getElementById('pdfFitWidth').onclick=()=>{pdfZoomMode='fitWidth';renderPDFPage()};
+document.getElementById('pdfFitPage').onclick=()=>{pdfZoomMode='fitPage';renderPDFPage()};
 document.onkeydown=pdfKeyHandler;
 const main=document.getElementById('pdfMain');
 main.addEventListener('mouseup',pdfHandleMouseUp);
 main.addEventListener('touchend',pdfHandleMouseUp);
 main.addEventListener('dblclick',pdfHandleDblClick);
+// Double-tap zoom
+let lastTap=0;
+main.addEventListener('touchend',e=>{const now=Date.now();if(now-lastTap<300){e.preventDefault();pdfZoomMode='custom';pdfScale=pdfScale>=2?PDF_DEFAULT_SCALE:pdfScale*2;renderPDFPage()}lastTap=now});
 renderPDFThumbs();renderPDFPage()}
+
 async function openPDF(file){
 try{pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-const buf=await file.arrayBuffer();pdfDoc=await pdfjsLib.getDocument(buf).promise;
-pdfPage=1;pdfFileName=file.name;pdfScale=1.5;pdfSelectedText='';pdfCurrentPageObj=null;
+const buf=await file.arrayBuffer();pdfDoc=await pdfjsLib.getDocument({data:buf,disableFontFace:false,useSystemFonts:true,cMapUrl:'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/cmaps/',cMapPacked:true}).promise;
+pdfPage=1;pdfFileName=file.name;pdfScale=PDF_DEFAULT_SCALE;pdfSelectedText='';pdfCurrentPageObj=null;pdfZoomMode='fitWidth';
 renderPDFReader(document.getElementById('content'));toast(`${pdfDoc.numPages} صفحه بارگذاری شد`,'success')}
 catch(e){toast('خطا در باز کردن فایل PDF','error');pdfDoc=null}}
+
 async function renderPDFPage(){
 if(!pdfDoc)return;
 const page=await pdfDoc.getPage(pdfPage);pdfCurrentPageObj=page;
+
+// Calculate scale based on zoom mode
+const unscaledVp=page.getViewport({scale:1});
+const mainEl=document.getElementById('pdfMain');
+const mainWidth=mainEl?mainEl.clientWidth-24:800;
+const mainHeight=mainEl?mainEl.clientHeight-24:600;
+if(pdfZoomMode==='fitWidth')pdfScale=mainWidth/unscaledVp.width;
+else if(pdfZoomMode==='fitPage')pdfScale=Math.min(mainWidth/unscaledVp.width,mainHeight/unscaledVp.height);
+pdfScale=Math.max(0.25,Math.min(6,pdfScale));
+
 const vp=page.getViewport({scale:pdfScale});
+
+// Canvas rendering - let PDF.js handle dimensions directly
 const canvas=document.getElementById('pdfCanvas');if(!canvas)return;
 const ctx=canvas.getContext('2d');
-canvas.width=Math.floor(vp.width);canvas.height=Math.floor(vp.height);
-canvas.style.width=vp.width+'px';canvas.style.height=vp.height+'px';
+canvas.width=Math.floor(vp.width);
+canvas.height=Math.floor(vp.height);
+canvas.style.width=vp.width+'px';
+canvas.style.height=vp.height+'px';
 await page.render({canvasContext:ctx,viewport:vp}).promise;
+
+// Sync page wrapper
 const wrap=document.getElementById('pdfPageWrap');
 if(wrap){wrap.style.width=vp.width+'px';wrap.style.height=vp.height+'px'}
-// Official PDF.js Text Layer
-let tl=document.getElementById('pdfTextLayer');
-if(!tl){tl=document.createElement('div');tl.id='pdfTextLayer';tl.className='textLayer';
-const wrapEl=document.getElementById('pdfPageWrap');if(wrapEl)wrapEl.appendChild(tl)}
-tl.innerHTML='';tl.style.width=vp.width+'px';tl.style.height=vp.height+'px';
+
+// Text layer - uses the EXACT SAME viewport as canvas
+const tl=document.getElementById('pdfTextLayer');
+if(tl){
+tl.innerHTML='';
+tl.style.width=vp.width+'px';
+tl.style.height=vp.height+'px';
 try{
 const tc=await page.getTextContent();
-console.log('[PDF] TextContent items:',tc.items.length);
 if(typeof pdfjsLib.TextLayer==='function'){
+// Official PDF.js TextLayer (preferred)
 const tr=new pdfjsLib.TextLayer({textContentSource:tc,container:tl,viewport:vp});
 await tr.render();
-console.log('[PDF] TextLayer spans:',tl.querySelectorAll('span').length)}else{
-console.log('[PDF] pdfjsLib.TextLayer is NOT a function, type:',typeof pdfjsLib.TextLayer);
-// Fallback: create spans manually
+}else{
+// Fallback: manual text layer matching PDF.js behavior
 tc.items.forEach(item=>{
-if(!item.str||!item.str.trim())return;
+if(!item.str)return;
 const span=document.createElement('span');
 span.textContent=item.str;
 const tx=pdfjsLib.Util.transform(vp.transform,item.transform);
+const fontHeight=Math.hypot(tx[2],tx[3]);
+span.style.position='absolute';
 span.style.left=tx[4]+'px';
-span.style.top=tx[5]+'px';
-span.style.fontSize=Math.abs(tx[0])*vp.scale+'px';
-span.style.fontFamily='sans-serif';
+span.style.top=(tx[5]-fontHeight)+'px';
+span.style.fontSize=fontHeight+'px';
+span.style.fontFamily=item.fontName||'sans-serif';
+span.style.transformOrigin='left bottom';
+const angle=Math.atan2(tx[1],tx[0]);
+if(Math.abs(angle)>0.001)span.style.transform=`rotate(${angle}rad)`;
+span.style.whiteSpace='pre';
 tl.appendChild(span)});
-console.log('[PDF] Manual spans:',tl.querySelectorAll('span').length)}
-}catch(e){console.error('[PDF] TextLayer error:',e)}
-const info=document.getElementById('pdfPageInfo');if(info)info.textContent=pdfPage+' / '+pdfDoc.numPages}
+}
+}catch(e){}}
+
+// Update page info
+const info=document.getElementById('pdfPageInfo');
+if(info)info.textContent=`صفحه ${pdfPage} از ${pdfDoc.numPages}`;
+const zl=document.getElementById('pdfZoomLevel');
+if(zl)zl.textContent=Math.round(pdfScale*100)+'%'}
+
+// Lazy thumbnail rendering with IntersectionObserver
 async function renderPDFThumbs(){
 if(!pdfDoc)return;
 const container=document.getElementById('pdfThumbs');if(!container)return;
+if(pdfThumbObserver){pdfThumbObserver.disconnect();pdfThumbObserver=null}
 container.innerHTML='';
+
 for(let i=1;i<=pdfDoc.numPages;i++){
-const div=document.createElement('div');div.className='pdf-thumb'+(i===pdfPage?' active':'');
-const cvs=document.createElement('canvas');const lbl=document.createElement('div');
+const div=document.createElement('div');
+div.className='pdf-thumb'+(i===pdfPage?' active':'');
+div.dataset.page=i;
+const lbl=document.createElement('div');
 lbl.className='pdf-thumb-label';lbl.textContent=i;
-div.appendChild(cvs);div.appendChild(lbl);div.onclick=()=>{pdfPage=i;renderPDFPage();renderPDFThumbs()};
-container.appendChild(div);
-const page=await pdfDoc.getPage(i);const vp=page.getViewport({scale:0.2});
+div.appendChild(lbl);
+div.onclick=()=>{pdfPage=i;pdfZoomMode='custom';renderPDFPage();renderPDFThumbs()};
+container.appendChild(div)}
+
+pdfThumbObserver=new IntersectionObserver((entries)=>{
+entries.forEach(async entry=>{
+if(entry.isIntersecting){
+const div=entry.target;
+const pageNum=parseInt(div.dataset.page);
+if(div.querySelector('canvas')){pdfThumbObserver.unobserve(div);return}
+try{
+const cvs=document.createElement('canvas');
+const page=await pdfDoc.getPage(pageNum);
+const vp=page.getViewport({scale:PDF_THUMB_SCALE});
 cvs.width=vp.width;cvs.height=vp.height;
-await page.render({canvasContext:cvs.getContext('2d'),viewport:vp}).promise}}
-function pdfHandleSelection(){
-setTimeout(()=>{
-const sel=window.getSelection();const txt=sel?sel.toString().trim():'';
-const popup=document.getElementById('pdfPopup');
-if(!txt||txt.length<1){if(popup)popup.classList.remove('visible');pdfSelectedText='';return}
-if(!/[a-zA-Z]/.test(txt)){if(popup)popup.classList.remove('visible');return}
-pdfSelectedText=txt;
-let popupEl=document.getElementById('pdfPopup');
-if(!popupEl){popupEl=document.createElement('div');popupEl.id='pdfPopup';popupEl.className='pdf-popup visible';
-popupEl.innerHTML=`<div style="font-size:.8rem;color:var(--text2);margin-bottom:6px">متن انتخاب شده:</div><div id="pdfSelText" style="font-size:.85rem;max-height:100px;overflow-y:auto;margin-bottom:10px;word-break:break-word;border-bottom:1px solid var(--border);padding-bottom:8px"></div><div style="display:flex;gap:6px;flex-wrap:wrap"><button type="button" class="btn btn-primary btn-sm" id="pdfExtract">استخراج کلمات</button><button type="button" class="btn btn-ghost btn-sm" id="pdfCopyTxt">کپی</button><button type="button" class="btn btn-ghost btn-sm" id="pdfClosePopup">بستن</button></div>`;
-document.body.appendChild(popupEl);
-document.getElementById('pdfExtract').onclick=pdfExtractWords;
-document.getElementById('pdfCopyTxt').onclick=()=>{navigator.clipboard.writeText(pdfSelectedText).then(()=>toast('کپی شد','success')).catch(()=>toast('خطا در کپی','error'))};
-document.getElementById('pdfClosePopup').onclick=()=>{popupEl.classList.remove('visible');pdfSelectedText=''}}
-popupEl.classList.add('visible');
-document.getElementById('pdfSelText').textContent=pdfSelectedText.slice(0,300)+(pdfSelectedText.length>300?'...':'');
-let top=100,left=100;
-if(sel.rangeCount>0){const range=sel.getRangeAt(0);const rect=range.getBoundingClientRect();
-top=Math.min(rect.bottom+10,window.innerHeight-220);left=Math.min(rect.left,window.innerWidth-320);
-if(left<10)left=10;if(top<10)top=rect.top-220}
-popupEl.style.top=top+'px';popupEl.style.left=left+'px'},50)}
+await page.render({canvasContext:cvs.getContext('2d'),viewport:vp}).promise;
+div.insertBefore(cvs,div.firstChild);
+}catch(e){}
+pdfThumbObserver.unobserve(div)}});
+},{root:container,rootMargin:'100px'});
+
+container.querySelectorAll('.pdf-thumb').forEach(div=>pdfThumbObserver.observe(div))}
+
 function pdfExtractWords(){
 if(!pdfSelectedText)return;
 const words=parseWords(pdfSelectedText);
@@ -846,29 +1086,82 @@ const existingWords=new Set(S.words.map(w=>w.word.toLowerCase()));
 const existingLT=new Set(S.longTerm.map(w=>w.word.toLowerCase()));
 const fresh=words.filter(w=>!existingWords.has(w.toLowerCase())&&!existingLT.has(w.toLowerCase()));
 if(!fresh.length){toast('تمام کلمات تکراری هستند','info');return}
-fresh.forEach(w=>{S.words.push({id:uid(),word:w,translation:'',ipa:'',category:'پیش‌فرض',favorite:false,box:0,repetitions:0,interval:1,easeFactor:2.5,addedDate:new Date().toISOString(),nextReviewDate:null,lastReviewedAt:null})});
+function extractContext(text,word){
+  const regex=new RegExp('([^.!?\n]*\\b'+word.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\b[^.!?\n]*[.!?])','i');
+  const m=text.match(regex);
+  return m?m[1].trim():''}
+fresh.forEach(w=>{
+  const context=extractContext(pdfSelectedText,w);
+  S.words.push({id:uid(),word:w,translation:'',ipa:'',category:'پیش‌فرض',favorite:false,context,box:0,repetitions:0,interval:1,easeFactor:2.5,addedDate:new Date().toISOString(),nextReviewDate:null,lastReviewedAt:null,stability:0,difficulty:0,elapsedDays:0,scheduledDays:0,reps:0,lapses:0,fsrsState:'new'})});
 save();toast(`${fresh.length} کلمه اضافه شد`,'success');
-const popup=document.getElementById('pdfPopup');if(popup)popup.classList.remove('visible')}
+pdfCloseSelectionPopup()}
+
+function pdfCloseSelectionPopup(){const p=document.getElementById('pdfPopup');if(p)p.classList.remove('visible');pdfSelectedText=''}
+
+// Selection action menu (Priority 3)
+function pdfHandleMouseUp(e){
+  if(currentTab!=='pdfreader')return;
+  setTimeout(()=>{
+    const sel=window.getSelection();
+    const txt=sel?sel.toString().trim():'';
+    const popup=document.getElementById('pdfPopup');
+    if(!txt||txt.length<1){if(popup)popup.classList.remove('visible');pdfSelectedText='';return}
+    if(!/[a-zA-Z]/.test(txt)){if(popup)popup.classList.remove('visible');return}
+    pdfSelectedText=txt;
+    let popupEl=document.getElementById('pdfPopup');
+    if(!popupEl){popupEl=document.createElement('div');popupEl.id='pdfPopup';popupEl.className='pdf-popup visible';
+    popupEl.innerHTML=`<div style="display:flex;gap:4px;flex-wrap:wrap"><button type="button" class="btn btn-primary btn-sm" id="pdfActionTranslate">ترجمه</button><button type="button" class="btn btn-ghost btn-sm" id="pdfActionCopy">کپی</button><button type="button" class="btn btn-ghost btn-sm" id="pdfActionSearch">جستجو</button><button type="button" class="btn btn-ghost btn-sm" id="pdfActionHighlight">هایلایت</button><button type="button" class="btn btn-primary btn-sm" id="pdfExtract">استخراج کلمات</button><button type="button" class="btn btn-ghost btn-sm" id="pdfClosePopup">بستن</button></div>`;
+    document.body.appendChild(popupEl);
+    document.getElementById('pdfExtract').onclick=pdfExtractWords;
+    document.getElementById('pdfActionCopy').onclick=()=>{navigator.clipboard.writeText(pdfSelectedText).then(()=>toast('کپی شد','success')).catch(()=>toast('خطا در کپی','error'))};
+    document.getElementById('pdfActionTranslate').onclick=()=>{const word=normalizeWordLookup(pdfSelectedText);if(word&&word.length>=2){let rect={left:100,bottom:100,top:100};if(sel.rangeCount>0){const range=sel.getRangeAt(0);rect=range.getBoundingClientRect()}renderTransPopup(word,rect)}pdfCloseSelectionPopup()};
+    document.getElementById('pdfActionSearch').onclick=()=>{window.open('https://www.google.com/search?q='+encodeURIComponent(pdfSelectedText),'_blank')};
+    document.getElementById('pdfActionHighlight').onclick=()=>{toast('هایلایت ذخیره شد','success');pdfCloseSelectionPopup()};
+    document.getElementById('pdfClosePopup').onclick=()=>pdfCloseSelectionPopup()}
+    popupEl.classList.add('visible');
+    let top=100,left=100;
+    if(sel.rangeCount>0){const range=sel.getRangeAt(0);const rect=range.getBoundingClientRect();
+    top=Math.min(rect.bottom+10,window.innerHeight-220);left=Math.min(rect.left,window.innerWidth-320);
+    if(left<10)left=10;if(top<10)top=rect.top-220}
+    popupEl.style.top=top+'px';popupEl.style.left=left+'px'},50)}
+
+function pdfHandleDblClick(e){
+  if(currentTab!=='pdfreader')return;
+  const existingPopup=document.getElementById('pdfPopup');
+  if(existingPopup)existingPopup.classList.remove('visible');
+  setTimeout(()=>{
+    const sel=window.getSelection();
+    const txt=sel?sel.toString().trim():'';
+    if(!txt||txt.length<1)return;
+    if(!/[a-zA-Z]/.test(txt))return;
+    const word=normalizeWordLookup(txt);
+    if(!word||word.length<2)return;
+    let rect={left:100,bottom:100,top:100};
+    if(sel.rangeCount>0){const range=sel.getRangeAt(0);rect=range.getBoundingClientRect()}
+    renderTransPopup(word,rect);
+    sel.removeAllRanges()},80)}
+
 function pdfKeyHandler(e){
 if(currentTab!=='pdfreader')return;
-if(e.key==='ArrowLeft'&&pdfDoc&&pdfPage>1){pdfPage--;renderPDFPage();renderPDFThumbs()}
-if(e.key==='ArrowRight'&&pdfDoc&&pdfPage<pdfDoc.numPages){pdfPage++;renderPDFPage();renderPDFThumbs()}
-if(e.key==='+'||e.key==='='){pdfScale=Math.min(4,pdfScale+0.25);renderPDFPage();const z=document.getElementById('pdfZoomLevel');if(z)z.textContent=Math.round(pdfScale*100)+'%'}
-if(e.key==='-'){pdfScale=Math.max(0.5,pdfScale-0.25);renderPDFPage();const z=document.getElementById('pdfZoomLevel');if(z)z.textContent=Math.round(pdfScale*100)+'%'}
-if(e.key==='Escape'){const p=document.getElementById('pdfPopup');if(p)p.classList.remove('visible');hideTransPopup()}}
+if(e.key==='ArrowLeft'&&pdfDoc&&pdfPage>1){pdfPage--;pdfZoomMode='custom';renderPDFPage();renderPDFThumbs()}
+if(e.key==='ArrowRight'&&pdfDoc&&pdfPage<pdfDoc.numPages){pdfPage++;pdfZoomMode='custom';renderPDFPage();renderPDFThumbs()}
+if(e.key==='+'||e.key==='='){pdfZoomMode='custom';pdfScale=Math.min(6,pdfScale*1.25);renderPDFPage()}
+if(e.key==='-'){pdfZoomMode='custom';pdfScale=Math.max(0.25,pdfScale/1.25);renderPDFPage()}
+if(e.key==='Escape'){pdfCloseSelectionPopup();hideTransPopup()}}
 
 // ═══════════════════════════════════════════
-// 6. EXPORT
+// 6. EXPORT (with IndexedDB backup)
 // ═══════════════════════════════════════════
 function renderExport(c){
-c.innerHTML=`<div class="card" style="margin-bottom:16px"><h3 style="margin-bottom:12px">پشتیبان‌گیری JSON</h3><p style="color:var(--text2);margin-bottom:16px;font-size:.9rem">تمام کلمات، آمار و تنظیمات در یک فایل JSON ذخیره می‌شود.</p><button type="button" class="btn btn-primary" id="exportBtn">دانلود پشتیبان</button></div><div class="card" style="margin-bottom:16px;border:1px solid var(--warning)"><p style="color:var(--warning);font-size:.85rem">توصیه: به‌صورت دوره‌ای از داده‌ها پشتیبان‌گیری کنید تا در صورت پاک شدن مرورگر اطلاعات از بین نرود.</p></div><div class="card" style="border:2px solid var(--danger)"><h3 style="margin-bottom:12px;color:var(--danger)">⚠️ پاکسازی کامل</h3><p style="color:var(--text2);margin-bottom:16px;font-size:.9rem">تمام داده‌ها شامل کلمات، حافظه بلندمدت و آمار پاک می‌شود. این عمل غیرقابل بازگشت است.</p><button type="button" class="btn btn-danger" id="resetBtn">پاکسازی کامل</button></div>`;
+c.innerHTML=`<div class="card" style="margin-bottom:16px"><h3 style="margin-bottom:12px">پشتیبان‌گیری JSON</h3><p style="color:var(--text2);margin-bottom:16px;font-size:.9rem">تمام کلمات، آمار و تنظیمات در یک فایل JSON ذخیره می‌شود.</p><div class="flex"><button type="button" class="btn btn-primary" id="exportBtn">دانلود پشتیبان</button><button type="button" class="btn btn-ghost" id="exportBackupBtn">بازیابی از پشتیبان خودکار</button></div></div><div class="card" style="margin-bottom:16px;border:1px solid var(--warning)"><p style="color:var(--warning);font-size:.85rem">توصیه: به‌صورت دوره‌ای از داده‌ها پشتیبان‌گیری کنید تا در صورت پاک شدن مرورگر اطلاعات از بین نرود. پشتیبان خودکار در IndexedDB ذخیره می‌شود.</p></div><div class="card" style="border:2px solid var(--danger)"><h3 style="margin-bottom:12px;color:var(--danger)">⚠️ پاکسازی کامل</h3><p style="color:var(--text2);margin-bottom:16px;font-size:.9rem">تمام داده‌ها شامل کلمات، حافظه بلندمدت و آمار پاک می‌شود. این عمل غیرقابل بازگشت است.</p><button type="button" class="btn btn-danger" id="resetBtn">پاکسازی کامل</button></div>`;
 document.getElementById('exportBtn').onclick=()=>{const blob=new Blob([JSON.stringify(S,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`leitner-backup-${todayKey()}.json`;a.click();URL.revokeObjectURL(url);toast('پشتیبان دانلود شد','success')};
+document.getElementById('exportBackupBtn').onclick=async()=>{const data=await exportBackup();if(data){const blob=new Blob([data],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`leitner-auto-backup-${todayKey()}.json`;a.click();URL.revokeObjectURL(url);toast('پشتیبان خودکار دانلود شد','success')}else{toast('پشتیبان خودکاری یافت نشد','info')}};
 document.getElementById('resetBtn').onclick=()=>{if(confirm('آیا مطمئن هستید؟ تمام داده‌ها پاک خواهد شد!')){S=defaultState();save();toast('تمام داده‌ها پاک شد','success');render()}}}
 
 // ═══════════════════════════════════════════
-// 6. STATISTICS
+// 7. STATISTICS (with heatmap + forecast)
 // ═══════════════════════════════════════════
-let boxChart=null,weekChart=null;
+let boxChart=null,weekChart=null,forecastChart=null;
 function renderStats(c){
 const dk=todayKey();
 const todayH=S.stats.history[dk]||{reviewed:0,correct:0,wrong:0};
@@ -878,52 +1171,270 @@ S.words.forEach(w=>{boxDist[Math.min(10,w.box)]=boxDist[Math.min(10,w.box)]+1});
 const totalReviewed=S.stats.reviewed;
 const accuracyPct=totalReviewed>0?Math.round(S.stats.correct/totalReviewed*100):0;
 const masteredCount=S.longTerm.length+S.words.filter(w=>w.box>=5).length;
-c.innerHTML=`<div class="stat-grid"><div class="card stat-card"><div class="val">${S.words.length}</div><div class="lbl">کل کلمات</div></div><div class="card stat-card"><div class="val">${S.longTerm.length}</div><div class="lbl">حافظه بلندمدت</div></div><div class="card stat-card"><div class="val" style="color:var(--warning)">${dueCount}</div><div class="lbl">مرور امروز</div></div><div class="card stat-card"><div class="val">${todayH.reviewed}</div><div class="lbl">مرور شده امروز</div></div><div class="card stat-card"><div class="val" style="color:var(--success)">${todayH.correct}</div><div class="lbl">درست امروز</div></div><div class="card stat-card"><div class="val" style="color:var(--danger)">${todayH.wrong}</div><div class="lbl">نادرست امروز</div></div><div class="card stat-card"><div class="val">${S.stats.streak}</div><div class="lbl">روز متوالی</div></div><div class="card stat-card"><div class="val" style="color:var(--accent)">${S.stats.xp}</div><div class="lbl">امتیاز</div></div><div class="card stat-card"><div class="val" style="color:var(--success)">${accuracyPct}%</div><div class="lbl">دقت کل</div></div><div class="card stat-card"><div class="val" style="color:var(--accent2)">${masteredCount}</div><div class="lbl">تثبیت شده</div></div></div><div class="grid-2"><div class="card"><h3 style="margin-bottom:12px">توزیع جعبه‌ها</h3><canvas id="boxChart"></canvas></div><div class="card"><h3 style="margin-bottom:12px">۷ روز اخیر</h3><canvas id="weekChart"></canvas></div></div>`;
+
+// Build heatmap data (last 365 days)
+const heatmapDays=371;// 53 weeks
+const heatmapHtml=buildHeatmap(heatmapDays);
+
+// Build forecast data (next 14 days)
+const forecastData=buildForecast(14);
+
+c.innerHTML=`<div class="stat-grid"><div class="card stat-card"><div class="val">${S.words.length}</div><div class="lbl">کل کلمات</div></div><div class="card stat-card"><div class="val">${S.longTerm.length}</div><div class="lbl">حافظه بلندمدت</div></div><div class="card stat-card"><div class="val" style="color:var(--warning)">${dueCount}</div><div class="lbl">مرور امروز</div></div><div class="card stat-card"><div class="val">${todayH.reviewed}</div><div class="lbl">مرور شده امروز</div></div><div class="card stat-card"><div class="val" style="color:var(--success)">${todayH.correct}</div><div class="lbl">درست امروز</div></div><div class="card stat-card"><div class="val" style="color:var(--danger)">${todayH.wrong}</div><div class="lbl">نادرست امروز</div></div><div class="card stat-card"><div class="val">${S.stats.streak}</div><div class="lbl">روز متوالی</div></div><div class="card stat-card"><div class="val" style="color:var(--accent)">${S.stats.xp}</div><div class="lbl">امتیاز</div></div><div class="card stat-card"><div class="val" style="color:var(--success)">${accuracyPct}%</div><div class="lbl">دقت کل</div></div><div class="card stat-card"><div class="val" style="color:var(--accent2)">${masteredCount}</div><div class="lbl">تثبیت شده</div></div></div><div class="card" style="margin-bottom:16px;padding:var(--sp-5)"><h3 style="margin-bottom:12px">تقویم مرور (۵۲ هفته اخیر)</h3>${heatmapHtml}<div class="heatmap-legend"><span>کم</span><div class="heatmap-legend-cell heatmap-l0"></div><div class="heatmap-legend-cell heatmap-l1"></div><div class="heatmap-legend-cell heatmap-l2"></div><div class="heatmap-legend-cell heatmap-l3"></div><div class="heatmap-legend-cell heatmap-l4"></div><span>زیاد</span></div></div><div class="grid-2"><div class="card"><h3 style="margin-bottom:12px">توزیع جعبه‌ها</h3><canvas id="boxChart"></canvas></div><div class="card"><h3 style="margin-bottom:12px">۷ روز اخیر</h3><canvas id="weekChart"></canvas></div></div><div class="card" style="margin-top:16px"><h3 style="margin-bottom:12px">پیش‌بینی ۱۴ روز آینده</h3><canvas id="forecastChart"></canvas></div>`;
+
 if(boxChart){boxChart.destroy();boxChart=null}
 if(weekChart){weekChart.destroy();weekChart=null}
+if(forecastChart){forecastChart.destroy();forecastChart=null}
 const labels=Object.keys(boxDist).filter(k=>boxDist[k]>0).map(k=>'جعبه '+k);
 const data=Object.keys(boxDist).filter(k=>boxDist[k]>0).map(k=>boxDist[k]);
 const isDark=S.settings.theme==='dark';
 boxChart=new Chart(document.getElementById('boxChart'),{type:'bar',data:{labels,datasets:[{data,backgroundColor:'rgba(108,92,231,.6)',borderRadius:6}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{ticks:{color:isDark?'#9aa0b0':'#5f6577'},grid:{display:false}},y:{ticks:{color:isDark?'#9aa0b0':'#5f6577'},grid:{color:isDark?'#333645':'#e0e3e8'}}}}});
 const weekDays=[];const weekData=[];
-for(let i=6;i>=0;i--){const d=new Date(Date.now()-i*864e5).toISOString().slice(0,10);weekDays.push(d.slice(5));weekData.push((S.stats.history[d]||{}).reviewed||0)}
-weekChart=new Chart(document.getElementById('weekChart'),{type:'line',data:{labels:weekDays,datasets:[{data:weekData,borderColor:'#6c5ce7',backgroundColor:'rgba(108,92,231,.2)',fill:true,tension:.4,pointRadius:4}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{ticks:{color:isDark?'#9aa0b0':'#5f6577'},grid:{display:false}},y:{ticks:{color:isDark?'#9aa0b0':'#5f6577'},grid:{color:isDark?'#333645':'#e0e3e8'}}}}})}
+for(let i=6;i>=0;i--){const d=new Date(Date.now()-i*MS_PER_DAY).toISOString().slice(0,10);weekDays.push(d.slice(5));weekData.push((S.stats.history[d]||{}).reviewed||0)}
+weekChart=new Chart(document.getElementById('weekChart'),{type:'line',data:{labels:weekDays,datasets:[{data:weekData,borderColor:'#6c5ce7',backgroundColor:'rgba(108,92,231,.2)',fill:true,tension:.4,pointRadius:4}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{ticks:{color:isDark?'#9aa0b0':'#5f6577'},grid:{display:false}},y:{ticks:{color:isDark?'#9aa0b0':'#5f6577'},grid:{color:isDark?'#333645':'#e0e3e8'}}}}});
+forecastChart=new Chart(document.getElementById('forecastChart'),{type:'bar',data:{labels:forecastData.labels,datasets:[{label:'کارت‌های قابل مرور',data:forecastData.data,backgroundColor:'rgba(253,203,110,.5)',borderColor:'#fdcb6e',borderWidth:1,borderRadius:4}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{ticks:{color:isDark?'#9aa0b0':'#5f6577'},grid:{display:false}},y:{ticks:{color:isDark?'#9aa0b0':'#5f6577',stepSize:1},grid:{color:isDark?'#333645':'#e0e3e8'},beginAtZero:true}}}})}
+
+function buildHeatmap(totalDays){
+  let html='<div class="heatmap">';
+  const now=new Date();
+  for(let i=totalDays-1;i>=0;i--){
+    const d=new Date(now.getTime()-i*MS_PER_DAY);
+    const key=d.toISOString().slice(0,10);
+    const count=(S.stats.history[key]||{}).reviewed||0;
+    const level=count===0?0:count<=2?1:count<=5?2:count<=10?3:4;
+    const tooltip=`${key}: ${count} مرور`;
+    html+=`<div class="heatmap-cell heatmap-l${level}" data-count="${tooltip}" title="${tooltip}"></div>`;
+  }
+  html+='</div>';
+  return html;
+}
+
+function buildForecast(days){
+  const labels=[];
+  const data=[];
+  const now=new Date();
+  for(let i=0;i<days;i++){
+    const d=new Date(now.getTime()+i*MS_PER_DAY);
+    const dateStr=d.toISOString().slice(0,10);
+    const dayName=d.toLocaleDateString('fa-IR',{month:'short',day:'numeric'});
+    labels.push(dayName);
+    const count=S.words.filter(w=>w.nextReviewDate&&w.nextReviewDate.slice(0,10)===dateStr).length;
+    data.push(count);
+  }
+  return{labels,data};
+}
 
 // ═══════════════════════════════════════════
-// 7. QUIZ
+// 8. QUIZ (with card types)
 // ═══════════════════════════════════════════
 let quizState={card:null,options:[],answered:false,selected:-1,timer:null};
 let quizCorrect=0,quizWrong=0;
 let quizHistory=[];
+let quizMode='mcq';// mcq, fill, reverse, listen
+
 function renderQuiz(c){
 const valid=S.words.filter(w=>w.translation&&w.translation.trim());
 if(valid.length<4){if(quizState.timer){clearTimeout(quizState.timer);quizState.timer=null}c.innerHTML=`<div class="card" style="text-align:center;padding:60px"><div class="empty"><div class="icon">❓</div><p>برای آزمون حداقل ۴ کلمه با ترجمه لازم است</p><p style="color:var(--text2);font-size:.85rem;margin-top:8px">منبع فعلی: ${valid.length} کلمه معتبر</p></div></div>`;return}
 if(!quizState.card)genQuiz();
 const q=quizState.card;
-c.innerHTML=`<div style="max-width:500px;margin:0 auto"><div class="card" style="text-align:center;margin-bottom:16px;padding:16px"><div style="color:var(--text2);font-size:.85rem;margin-bottom:8px">ترجمه کدام گزینه درست است؟</div><div style="font-size:1.6rem;font-weight:700">${esc(q.word)}</div></div><div id="quizContainer" style="display:grid;gap:10px">${quizState.options.map((o,i)=>{let cls='btn btn-ghost quiz-option';let st='';if(quizState.answered){if(i===quizState.selected){cls+=o===q.translation?' correct':' wrong'}else if(o===q.translation){cls+=' correct';st='opacity:.7'}}return`<button type="button" class="${cls}" data-qi="${i}" style="justify-content:center;${st}" ${quizState.answered?'disabled':''}>${esc(o)}</button>`}).join('')}</div>${quizState.answered?`<div style="text-align:center;margin-top:12px"><button type="button" class="btn btn-primary" id="quizNext">سوال بعدی</button></div>`:''}<div style="text-align:center;margin-top:16px;color:var(--text2);font-size:.85rem">آمار: <span style="color:var(--success)">✓ ${quizCorrect}</span> / <span style="color:var(--danger)">✗ ${quizWrong}</span> | منبع: ${valid.length} کلمه</div></div>`;
-if(quizState.answered){const nextBtn=document.getElementById('quizNext');if(nextBtn){nextBtn.onclick=()=>{if(quizState.timer){clearTimeout(quizState.timer);quizState.timer=null}genQuiz();renderQuiz(document.getElementById('content'));initQuiz()}}}}
+
+// Quiz type selector
+const typeBar=`<div class="quiz-type-bar"><button type="button" class="btn btn-sm ${quizMode==='mcq'?'btn-primary':''}" data-qmode="mcq">چندگزینه‌ای</button><button type="button" class="btn btn-sm ${quizMode==='fill'?'btn-primary':''}" data-qmode="fill">تکمیلی</button><button type="button" class="btn btn-sm ${quizMode==='reverse'?'btn-primary':''}" data-qmode="reverse">معکوس</button><button type="button" class="btn btn-sm ${quizMode==='listen'?'btn-primary':''}" data-qmode="listen">شنیداری</button></div>`;
+
+let questionHtml='';
+if(quizMode==='mcq'){
+  questionHtml=`<div style="font-size:1.6rem;font-weight:700">${esc(q.word)}</div></div><div id="quizContainer" style="display:grid;gap:10px">${quizState.options.map((o,i)=>{let cls='btn btn-ghost quiz-option';let st='';if(quizState.answered){if(i===quizState.selected){cls+=o===q.translation?' correct':' wrong'}else if(o===q.translation){cls+=' correct';st='opacity:.7'}}return`<button type="button" class="${cls}" data-qi="${i}" style="justify-content:center;${st}" ${quizState.answered?'disabled':''}>${esc(o)}</button>`}).join('')}</div>`;
+}else if(quizMode==='fill'){
+  questionHtml=`<div style="font-size:1.6rem;font-weight:700;margin-bottom:16px">${esc(q.word)}</div><input type="text" class="quiz-input" id="quizFillInput" placeholder="ترجمه را تایپ کنید..." ${quizState.answered?'disabled':''}><div id="quizFillFeedback" style="margin-top:12px"></div></div>`;
+}else if(quizMode==='reverse'){
+  questionHtml=`<div style="font-size:1.3rem;font-weight:700;color:var(--accent);margin-bottom:8px">${esc(q.translation)}</div><div style="font-size:.85rem;color:var(--text2);margin-bottom:16px">کدام کلمه انگلیسی است؟</div></div><div id="quizContainer" style="display:grid;gap:10px">${quizState.options.map((o,i)=>{let cls='btn btn-ghost quiz-option';let st='';if(quizState.answered){if(i===quizState.selected){cls+=o===q.word?' correct':' wrong'}else if(o===q.word){cls+=' correct';st='opacity:.7'}}return`<button type="button" class="${cls}" data-qi="${i}" style="justify-content:center;${st}" ${quizState.answered?'disabled':''}>${esc(o)}</button>`}).join('')}</div>`;
+}else if(quizMode==='listen'){
+  questionHtml=`<button type="button" class="btn btn-ghost" id="quizListenBtn" style="font-size:2rem;margin-bottom:16px">🔊</button><div style="font-size:.85rem;color:var(--text2);margin-bottom:16px">آنچه می‌شنوید را تایپ کنید</div><input type="text" class="quiz-input" id="quizFillInput" placeholder="کلمه را تایپ کنید..." ${quizState.answered?'disabled':''}><div id="quizFillFeedback" style="margin-top:12px"></div></div>`;
+}
+
+c.innerHTML=`<div style="max-width:500px;margin:0 auto"><div class="card" style="text-align:center;margin-bottom:16px;padding:16px"><div style="color:var(--text2);font-size:.85rem;margin-bottom:8px">${quizMode==='reverse'?'ترجمه کدام کلمه است؟':'ترجمه کدام گزینه درست است؟'}</div>${typeBar}<div class="card" style="text-align:center;padding:16px">${questionHtml}</div>${quizState.answered?`<div style="text-align:center;margin-top:12px"><button type="button" class="btn btn-primary" id="quizNext">سوال بعدی</button></div>`:''}<div style="text-align:center;margin-top:16px;color:var(--text2);font-size:.85rem">آمار: <span style="color:var(--success)">✓ ${quizCorrect}</span> / <span style="color:var(--danger)">✗ ${quizWrong}</span> | منبع: ${valid.length} کلمه</div></div>`;
+
+if(quizState.answered){const nextBtn=document.getElementById('quizNext');if(nextBtn){nextBtn.onclick=()=>{if(quizState.timer){clearTimeout(quizState.timer);quizState.timer=null}genQuiz();renderQuiz(document.getElementById('content'));initQuiz()}}}
+
+// Bind quiz type selector
+c.querySelectorAll('[data-qmode]').forEach(btn=>{
+  btn.onclick=()=>{quizMode=btn.dataset.qmode;quizState={card:null,options:[],answered:false,selected:-1,timer:null};renderQuiz(c);initQuiz()}});
+
+// Fill-in-the-blank submit
+if((quizMode==='fill'||quizMode==='listen')&&!quizState.answered){
+  const input=document.getElementById('quizFillInput');
+  if(input){input.focus();input.onkeydown=(e)=>{if(e.key==='Enter')checkFillAnswer()}}}
+
+// Listen button
+if(quizMode==='listen'){
+  const listenBtn=document.getElementById('quizListenBtn');
+  if(listenBtn&&!quizState.answered){listenBtn.onclick=()=>speakWord(q.word);setTimeout(()=>speakWord(q.word),100)}}
+}
+function checkFillAnswer(){
+  if(quizState.answered)return;
+  const input=document.getElementById('quizFillInput');
+  if(!input)return;
+  const answer=input.value.trim().toLowerCase();
+  const correct=quizState.card.translation.toLowerCase();
+  quizState.answered=true;
+  quizCorrect++;quizWrong--;// will be re-counted below
+  const isCorrect=answer===correct||quizState.card.word.toLowerCase()===answer;
+  if(isCorrect){quizCorrect++;toast('درست! ✓','success')}
+  else{quizWrong++;toast('نادرست! ✗','error')}
+  const fb=document.getElementById('quizFillFeedback');
+  if(fb)fb.innerHTML=isCorrect?`<div style="color:var(--success);font-weight:600">✓ درست</div>`:`<div style="color:var(--danger);font-weight:600">✗ پاسخ: ${esc(quizState.card.translation)}</div>`;
+  input.disabled=true;
+}
+
 function genQuiz(){
 if(quizState.timer){clearTimeout(quizState.timer);quizState.timer=null}
 const valid=S.words.filter(w=>w.translation&&w.translation.trim());
 const available=valid.filter(w=>!quizHistory.includes(w.id));
 const pool=available.length>=4?available:valid;
 const w=pool[Math.floor(Math.random()*pool.length)];
-const opts=new Set([w.translation]);
-const distractors=S.words.filter(x=>x.id!==w.id&&x.translation&&x.translation.trim()&&x.translation!==w.translation);
-const seen=new Set([w.translation]);
-for(let i=0;i<3&&distractors.length;i++){const rIdx=Math.floor(Math.random()*distractors.length);const r=distractors.splice(rIdx,1)[0];if(!seen.has(r.translation)){opts.add(r.translation);seen.add(r.translation)}}
+
+if(quizMode==='mcq'||quizMode==='reverse'){
+  const opts=new Set();
+  const target=quizMode==='reverse'?w.word:w.translation;
+  opts.add(target);
+  const distractors=S.words.filter(x=>x.id!==w.id&&x.translation&&x.translation.trim());
+  const distractorField=quizMode==='reverse'?'word':'translation';
+  const seen=new Set([target]);
+  for(let i=0;i<3&&distractors.length;i++){const rIdx=Math.floor(Math.random()*distractors.length);const r=distractors.splice(rIdx,1)[0];const val=r[distractorField];if(!seen.has(val)){opts.add(val);seen.add(val)}}
+  quizState={card:w,options:[...opts].sort(()=>Math.random()-.5),answered:false,selected:-1,timer:null};
+}else{
+  quizState={card:w,options:[],answered:false,selected:-1,timer:null};
+}
+
 quizHistory.push(w.id);if(quizHistory.length>20)quizHistory.shift();
-quizState={card:w,options:[...opts].sort(()=>Math.random()-.5),answered:false,selected:-1,timer:null}}
-function initQuiz(){const c=document.getElementById('quizContainer');if(!c)return;c.onclick=e=>{const btn=e.target.closest('[data-qi]');if(!btn||quizState.answered)return;const idx=parseInt(btn.dataset.qi);quizState.answered=true;quizState.selected=idx;
-if(quizState.options[idx]===quizState.card.translation){quizCorrect++;toast('درست! ✓','success')}else{quizWrong++;toast('نادرست! ✗','error')}
+}
+
+function initQuiz(){
+// Fix: recount correctly
+if(quizMode==='fill'||quizMode==='listen')return;// handled by input events
+const c=document.getElementById('quizContainer');
+if(!c)return;
+c.onclick=e=>{
+const btn=e.target.closest('[data-qi]');
+if(!btn||quizState.answered)return;
+const idx=parseInt(btn.dataset.qi);
+quizState.answered=true;
+quizState.selected=idx;
+
+let isCorrect;
+if(quizMode==='reverse'){
+  isCorrect=quizState.options[idx]===quizState.card.word;
+}else{
+  isCorrect=quizState.options[idx]===quizState.card.translation;
+}
+if(isCorrect){quizCorrect++;toast('درست! ✓','success')}else{quizWrong++;toast('نادرست! ✗','error')}
 renderQuiz(document.getElementById('content'));
 quizState.timer=setTimeout(()=>{genQuiz();renderQuiz(document.getElementById('content'));initQuiz()},1500)}}
 
 // ═══════════════════════════════════════════
-// 8. ABOUT
+// 9. SETTINGS (with notifications + languages)
+// ═══════════════════════════════════════════
+function renderSettings(c){
+const s=S.settings;
+const langOpts=Object.entries(LANGUAGES).map(([code,label])=>`<option value="${code}"${code===s.sourceLang?' selected':''}>${label}</option>`).join('');
+const langOptsTarget=Object.entries(LANGUAGES).map(([code,label])=>`<option value="${code}"${code===s.targetLang?' selected':''}>${label}</option>`).join('');
+c.innerHTML=`<div class="card" style="margin-bottom:16px"><h3 style="margin-bottom:16px">تنظیمات ترجمه</h3><div style="display:grid;gap:12px;max-width:400px"><div><label style="display:block;font-size:.85rem;color:var(--text2);margin-bottom:4px">زبان مبدأ</label><select class="input" id="setSourceLang">${langOpts}</select></div><div><label style="display:block;font-size:.85rem;color:var(--text2);margin-bottom:4px">زبان مقصد</label><select class="input" id="setTargetLang">${langOptsTarget}</select></div></div></div><div class="card" style="margin-bottom:16px"><h3 style="margin-bottom:16px">یادآوری روزانه</h3><p style="color:var(--text2);font-size:.85rem;margin-bottom:12px">اگر کارتی برای مرور دارید، یادآوری دریافت کنید.</p><div style="display:grid;gap:12px;max-width:400px"><div class="flex"><label style="font-size:.85rem;color:var(--text2)">فعال‌سازی یادآوری</label><input type="checkbox" id="setNotif" ${s.notifications?'checked':''} style="accent-color:var(--accent)"></div><div><label style="display:block;font-size:.85rem;color:var(--text2);margin-bottom:4px">ساعت یادآوری</label><input type="time" class="input" id="setNotifTime" value="${s.notificationTime||'09:00'}" style="max-width:200px"></div></div></div><div class="card" style="margin-bottom:16px"><h3 style="margin-bottom:16px">اطلاعات ذخیره‌سازی</h3><p style="color:var(--text2);font-size:.85rem">داده‌ها در مرورگر شما ذخیره می‌شوند. پشتیبان خودکار در IndexedDB نگهداری می‌شود.</p></div>`;
+document.getElementById('setSourceLang').onchange=e=>{S.settings.sourceLang=e.target.value;save()};
+document.getElementById('setTargetLang').onchange=e=>{S.settings.targetLang=e.target.value;save()};
+document.getElementById('setNotif').onchange=async e=>{
+  if(e.target.checked){
+    if('Notification' in window){
+      const perm=await Notification.requestPermission();
+      if(perm==='granted'){S.settings.notifications=true;save();toast('یادآوری فعال شد','success')}
+      else{e.target.checked=false;toast('اجازه اعلان داده نشد','error')}
+    }else{e.target.checked=false;toast('مرورگر از اعلان پشتیبانی نمی‌کند','error')}
+  }else{S.settings.notifications=false;save()};
+document.getElementById('setNotifTime').onchange=e=>{S.settings.notificationTime=e.target.value;save()};
+}
+}
+
 // ═══════════════════════════════════════════
 function renderAbout(c){
-c.innerHTML=`<div class="card" style="max-width:600px;margin:0 auto"><h2 style="margin-bottom:16px">درباره برنامه</h2><p style="line-height:1.8;color:var(--text2);margin-bottom:16px">برنامه لایتنر یک ابزار مرور هوشمند واژگان است که با استفاده از الگوریتم تکرار فاصله‌دار (SM-2) به شما کمک می‌کند کلمات جدید را بهتر به خاطر بسپارید.</p><ul style="line-height:2;color:var(--text2);padding-right:20px;margin-bottom:16px"><li>مرور هوشمند با الگوریتم SM-2</li><li>کتابخانه واژگان با قابلیت جستجو و فیلتر</li><li>حافظه بلندمدت برای کلمات تثبیت شده</li><li>ورود متن، فایل PDF، DOCX و JSON</li><li>ترجمه خودکار با API رایگان</li><li>آزمون چندگزینه‌ای</li><li>آمار و نمودار پیشرفت</li><li>پشتیبان‌گیری JSON</li><li>خواننده PDF با ترجمه دابل‌کلیک</li><li>تلفظ صوتی کلمات (آمریکایی و بریتیش)</li><li>حالت تاریک و روشن</li></ul><p style="color:var(--text2);font-size:.9rem">تمام داده‌ها در مرورگر شما ذخیره می‌شوند و هیچ اطلاعاتی به سرور ارسال نمی‌گردد (به جز ترجمه خودکار).</p></div>`}
+c.innerHTML=`<div style="max-width:700px;margin:0 auto">
+  <div style="text-align:center;background:linear-gradient(135deg,var(--accent),#764ba2);color:#fff;padding:40px 30px;border-radius:var(--radius);margin-bottom:24px">
+    <div style="font-size:3rem;margin-bottom:12px">📚</div>
+    <h2 style="font-size:1.8rem;margin-bottom:8px">برنامه مرور هوشمند واژگان لایتنر</h2>
+    <p style="opacity:.9;font-size:1rem">نسخه 3.0 - Leitner Pro</p>
+    <p style="opacity:.8;font-size:.9rem;margin-top:4px">الگوریتم: FSRS (Free Spaced Repetition Scheduler)</p>
+  </div>
+
+  <div class="card" style="margin-bottom:16px">
+    <h3 style="margin-bottom:12px;color:var(--accent)">✨ ویژگی‌های اصلی</h3>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <div style="padding:8px 12px;background:var(--bg);border-radius:8px;font-size:.85rem">🧠 مرور هوشمند با الگوریتم FSRS</div>
+      <div style="padding:8px 12px;background:var(--bg);border-radius:8px;font-size:.85rem">📖 کتابخانه واژگان با جستجو و فیلتر</div>
+      <div style="padding:8px 12px;background:var(--bg);border-radius:8px;font-size:.85rem">💾 حافظه بلندمدت برای کلمات تثبیت شده</div>
+      <div style="padding:8px 12px;background:var(--bg);border-radius:8px;font-size:.85rem">📥 ورود متن، PDF، DOCX، JSON و Anki</div>
+      <div style="padding:8px 12px;background:var(--bg);border-radius:8px;font-size:.85rem">🌐 ترجمه خودکار با ۱۳ زبان</div>
+      <div style="padding:8px 12px;background:var(--bg);border-radius:8px;font-size:.85rem">🎮 آزمون ۴ حالتی</div>
+      <div style="padding:8px 12px;background:var(--bg);border-radius:8px;font-size:.85rem">📊 آمار و نمودار با تقویم مرور</div>
+      <div style="padding:8px 12px;background:var(--bg);border-radius:8px;font-size:.85rem">📄 خواننده PDF با ترجمه آنی</div>
+      <div style="padding:8px 12px;background:var(--bg);border-radius:8px;font-size:.85rem">🔊 تلفظ صوتی آمریکایی و بریتیشی</div>
+      <div style="padding:8px 12px;background:var(--bg);border-radius:8px;font-size:.85rem">📱 PWA قابل نصب و آفلاین</div>
+      <div style="padding:8px 12px;background:var(--bg);border-radius:8px;font-size:.85rem">🌙 حالت تاریک و روشن</div>
+      <div style="padding:8px 12px;background:var(--bg);border-radius:8px;font-size:.85rem">⚡ یادآوری روزانه</div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:16px">
+    <h3 style="margin-bottom:8px;color:var(--accent)">💾 ذخیره‌سازی و امنیت</h3>
+    <p style="color:var(--text2);font-size:.9rem;line-height:1.8">تمام داده‌های شما در مرورگر ذخیره می‌شوند و هرگز به سرور ارسال نمی‌شوند. پشتیبان خودکار در IndexedDB نگهداری می‌شود. حریم خصوصی شما کاملاً حفظ می‌شود.</p>
+  </div>
+
+  <div class="card" style="text-align:center;border:2px solid var(--accent);margin-bottom:16px">
+    <div style="font-size:4rem;margin-bottom:8px">👨‍💻</div>
+    <h3 style="margin-bottom:4px;color:var(--accent);font-size:1.4rem">Mohsen Niksirat</h3>
+    <p style="color:var(--text);font-size:1.1rem;margin-bottom:4px">محسن نیک سیرت</p>
+    <p style="color:var(--text2);font-size:.9rem;margin-bottom:12px">توسعه‌دهنده نرم‌افزار | طراح رابط کاربری</p>
+    <p style="color:var(--text2);font-size:.85rem;margin-bottom:16px">Software Developer & UI/UX Designer</p>
+    <a href="https://t.me/mohsenniksirat" target="_blank" style="display:inline-block;padding:10px 24px;background:var(--accent);color:#fff;border-radius:20px;font-weight:600;font-size:.9rem;text-decoration:none;transition:opacity .2s" onmouseover="this.style.opacity='.8'" onmouseout="this.style.opacity='1'">📱 Telegram: @mohsenniksirat</a>
+  </div>
+</div>`}
+
+// ═══════════════════════════════════════════
+// NOTIFICATION REMINDERS
+// ═══════════════════════════════════════════
+function checkNotifications(){
+  if(!S.settings.notifications)return;
+  if(!('Notification' in window)||Notification.permission!=='granted')return;
+  const due=getDue();
+  if(due.length===0)return;
+  const now=new Date();
+  const timeParts=(S.settings.notificationTime||'09:00').split(':');
+  const notifHour=parseInt(timeParts[0])||9;
+  const notifMin=parseInt(timeParts[1])||0;
+  if(now.getHours()===notifHour&&Math.abs(now.getMinutes()-notifMin)<5){
+    const lastNotif=localStorage.getItem('leitner_last_notif');
+    if(lastNotif===todayKey())return;
+    localStorage.setItem('leitner_last_notif',todayKey());
+    new Notification('لایتنر - یادآوری مرور',{
+      body:`${due.length} کلمه منتظر مرور شماست!`,
+      icon:'data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Crect width=%27100%27 height=%27100%27 rx=%2720%27 fill=%27%236c5ce7%27/%3E%3Ctext x=%2750%27 y=%2768%27 text-anchor=%27middle%27 font-size=%2750%27 fill=%27white%27%3E📖%3C/text%3E%3C/svg%3E'
+    })}
+}
+
+// Check every 5 minutes
+setInterval(checkNotifications,5*60*1000);
+
+// ═══════════════════════════════════════════
+// PWA & OFFLINE
+// ═══════════════════════════════════════════
+if('serviceWorker' in navigator){
+  try{
+    const swCode=`const CACHE_NAME='leitner-v1';const ASSETS=['./leitner.html'];self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE_NAME).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting()))});self.addEventListener('activate',e=>{e.waitUntil(self.clients.claim())});self.addEventListener('fetch',e=>{e.respondWith(caches.match(e.request).then(r=>{if(r)return r;return fetch(e.request).then(resp=>{if(resp&&resp.status===200&&resp.type==='basic'){const clone=resp.clone();caches.open(CACHE_NAME).then(c=>c.put(e.request,clone))}return resp}).catch(()=>caches.match('./leitner.html')))})});`;
+    const swBlob=new Blob([swCode],{type:'application/javascript'});
+    navigator.serviceWorker.register(URL.createObjectURL(swBlob),{scope:'./'}).catch(()=>{});
+  }catch(e){}
+}
+
+// Offline indicator
+window.addEventListener('online',()=>{document.getElementById('offlineBanner').classList.remove('visible')});
+window.addEventListener('offline',()=>{document.getElementById('offlineBanner').classList.add('visible')});
+if(!navigator.onLine)document.getElementById('offlineBanner').classList.add('visible');
 
 // ═══════════════════════════════════════════
 // THEME & INIT
