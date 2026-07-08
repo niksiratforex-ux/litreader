@@ -101,10 +101,15 @@ tr:hover td{background:var(--card-hover)}
 .pdf-page-wrap{position:relative;display:inline-block;background:#fff;border-radius:6px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,.2);line-height:0}
 .pdf-page-wrap canvas{display:block}
 .pdf-page-wrap .textLayer{position:absolute;left:0;top:0;right:0;bottom:0;overflow:hidden;opacity:.25;line-height:1.0;pointer-events:auto;-webkit-text-size-adjust:none;text-size-adjust:none}
-.pdf-page-wrap .textLayer>span{color:transparent;position:absolute;white-space:pre;cursor:text;transform-origin:0% 0%}
+.pdf-page-wrap .textLayer>span,.pdf-page-wrap .textLayer>br{color:transparent;position:absolute;white-space:pre;cursor:text;transform-origin:0% 0%;-webkit-tap-highlight-color:rgba(108,92,231,.3);z-index:1}
 .pdf-page-wrap .textLayer .highlight{margin:-1px;padding:1px;background-color:rgba(180,0,180,.2);border-radius:2px}
+.pdf-page-wrap .textLayer .highlight.appended{display:inline}
+.pdf-page-wrap .textLayer .highlight.begin{border-radius:2px 0 0 2px}
+.pdf-page-wrap .textLayer .highlight.end{border-radius:0 2px 2px 0}
+.pdf-page-wrap .textLayer .highlight.middle{border-radius:0}
 .pdf-page-wrap .textLayer ::selection{background:rgba(108,92,231,.4)}
 .pdf-page-wrap .textLayer ::-moz-selection{background:rgba(108,92,231,.4)}
+.pdf-page-wrap .textLayer span::selection,.pdf-page-wrap .textLayer br::selection{background:rgba(108,92,231,.4)}
 .pdf-popup{position:fixed;z-index:300;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px;box-shadow:var(--shadow);display:none;max-width:300px;width:auto}
 .pdf-popup.visible{display:block}
 .pdf-popup .btn{margin:2px 0}
@@ -239,7 +244,9 @@ function sanitizeCard(c){
   box:Math.max(0,Math.min(10,Number(c.box)||0)),repetitions:Math.max(0,Number(c.repetitions)||0),interval:Math.max(1,Number(c.interval)||1),easeFactor:Math.max(1.3,Number(c.easeFactor)||2.5),
   addedDate:c.addedDate||new Date().toISOString(),nextReviewDate:c.nextReviewDate||null,lastReviewedAt:c.lastReviewedAt||null,
   // FSRS fields
-  stability:Number(c.stability)||0,difficulty:Number(c.difficulty)||0,elapsedDays:Number(c.elapsedDays)||0,scheduledDays:Number(c.scheduledDays)||0,reps:Number(c.reps)||0,lapses:Number(c.lapses)||0,fsrsState:String(c.fsrsState||'new')}
+  stability:Number(c.stability)||0,difficulty:Number(c.difficulty)||0,elapsedDays:Number(c.elapsedDays)||0,scheduledDays:Number(c.scheduledDays)||0,reps:Number(c.reps)||0,lapses:Number(c.lapses)||0,fsrsState:String(c.fsrsState||'new'),
+  // Dictionary details
+  definitions:Array.isArray(c.definitions)?c.definitions:[],examples:Array.isArray(c.examples)?c.examples:[],synonyms:Array.isArray(c.synonyms)?c.synonyms:[],partOfSpeech:String(c.partOfSpeech||'').trim(),audioUs:String(c.audioUs||'').trim(),audioBr:String(c.audioBr||'').trim()}
 }
 
 function loadState(){try{const d=localStorage.getItem(LS_KEY);if(!d)return defaultState();const p=JSON.parse(d);const s={...defaultState(),...p};s.words=(p.words||[]).map(sanitizeCard).filter(w=>w.word);s.longTerm=(p.longTerm||[]).map(sanitizeCard).filter(w=>w.word);s.stats={...defaultState().stats,...(p.stats||{})};if(Array.isArray(s.stats.history))s.stats.history={};s.settings={...defaultState().settings,...(p.settings||{})};return s}catch(e){return defaultState()}}
@@ -593,8 +600,11 @@ async function renderTransPopup(word,rect){
 
   document.getElementById('transAddBtn').onclick=()=>{
     if(alreadyExists)return;
-    const freqTier=getFrequencyTier(displayWord);
-    S.words.push({id:uid(),word:displayWord,translation:persianResult||'',ipa:ipaText,category:'پیش‌فرض',favorite:false,context:'',box:0,repetitions:0,interval:1,easeFactor:2.5,addedDate:new Date().toISOString(),nextReviewDate:null,lastReviewedAt:null,stability:0,difficulty:0,elapsedDays:0,scheduledDays:0,reps:0,lapses:0,fsrsState:'new'});
+    const allDefs=dictResult?dictResult.meanings.flatMap(m=>m.definitions):[];
+    const allExamples=dictResult?dictResult.meanings.flatMap(m=>m.examples):[];
+    const allSynonyms=dictResult?dictResult.meanings.flatMap(m=>m.synonyms):[];
+    const pos=dictResult&&dictResult.meanings[0]?dictResult.meanings[0].partOfSpeech:'';
+    S.words.push({id:uid(),word:displayWord,translation:persianResult||'',ipa:ipaText,category:'پیش‌فرض',favorite:false,context:'',box:0,repetitions:0,interval:1,easeFactor:2.5,addedDate:new Date().toISOString(),nextReviewDate:null,lastReviewedAt:null,stability:0,difficulty:0,elapsedDays:0,scheduledDays:0,reps:0,lapses:0,fsrsState:'new',definitions:allDefs,examples:allExamples,synonyms:allSynonyms,partOfSpeech:pos,audioUs:dictResult?dictResult.audioUs||'':'',audioBr:dictResult?dictResult.audioBr||'':''});
     save();
     toast(displayWord+' به لایتنر اضافه شد','success');
     const addBtn=document.getElementById('transAddBtn');
@@ -697,12 +707,14 @@ if(!reviewSession.queue.length){startReview();if(!reviewSession.queue.length){c.
 const w=reviewSession.queue[reviewSession.idx];
 const prog=Math.round((reviewSession.idx/reviewSession.queue.length)*100);
 const tier=getFrequencyTier(w.word);
-c.innerHTML=`<div style="max-width:500px;margin:0 auto"><div class="flex" style="justify-content:space-between;margin-bottom:16px"><span style="color:var(--text2)">${reviewSession.idx+1} از ${reviewSession.queue.length}</span><div class="flex" style="gap:4px"><span class="badge badge-accent">${w.box>0?'جعبه '+w.box:'جدید'}</span>${tier?`<span class="badge tier-${tier}">${tierLabel(tier)}</span>`:''}</div></div><div class="progress-bar"><div class="progress-fill" style="width:${prog}%"></div></div><div class="review-card" id="rCard" tabindex="0" role="button" aria-label="کلیک برای نمایش پاسخ"><div class="review-inner"><div class="review-face"><div style="font-size:1.8rem;font-weight:700;margin-bottom:12px">${esc(w.word)}</div>${w.ipa?`<div style="color:var(--text2);font-size:.9rem">${esc(w.ipa)}</div>`:''}<div style="color:var(--text2);font-size:.8rem;margin-top:16px">برای نمایش پاسخ کلیک کنید</div></div><div class="review-face review-back"><div style="font-size:1.5rem;font-weight:600;color:var(--accent);margin-bottom:12px">${esc(w.translation)}</div>${w.category&&w.category!=='پیش‌فرض'?`<span class="tag">${esc(w.category)}</span>`:''}${w.context?`<div class="context-sentence">${esc(w.context)}</div>`:''}<div style="margin-top:10px"><button type="button" class="btn btn-ghost btn-sm" id="reviewEditBtn" style="font-size:.75rem">✏️ ویرایش</button></div></div></div></div><div class="rating-bar" id="ratingBar" style="display:none"><button type="button" class="btn btn-danger btn-sm" data-rate="1">❌ نادرست <kbd style="font-size:.6rem;opacity:.6">۱</kbd></button><button type="button" class="btn btn-ghost btn-sm" data-rate="3">😐 سخت <kbd style="font-size:.6rem;opacity:.6">۲</kbd></button><button type="button" class="btn btn-primary btn-sm" data-rate="4">🙂 خوب <kbd style="font-size:.6rem;opacity:.6">۳</kbd></button><button type="button" class="btn btn-success btn-sm" data-rate="5">😄 عالی <kbd style="font-size:.6rem;opacity:.6">۴</kbd></button></div></div>`;
+c.innerHTML=`<div style="max-width:500px;margin:0 auto"><div class="flex" style="justify-content:space-between;margin-bottom:16px"><span style="color:var(--text2)">${reviewSession.idx+1} از ${reviewSession.queue.length}</span><div class="flex" style="gap:4px"><span class="badge badge-accent">${w.box>0?'جعبه '+w.box:'جدید'}</span>${tier?`<span class="badge tier-${tier}">${tierLabel(tier)}</span>`:''}</div></div><div class="progress-bar"><div class="progress-fill" style="width:${prog}%"></div></div><div class="review-card" id="rCard" tabindex="0" role="button" aria-label="کلیک برای نمایش پاسخ"><div class="review-inner"><div class="review-face"><div style="font-size:1.8rem;font-weight:700;margin-bottom:12px">${esc(w.word)} <button type="button" class="trans-audio-btn" id="reviewSpeakBtn" title="شنیدن تلفظ" style="vertical-align:middle;font-size:1rem">🔊</button></div>${w.ipa?`<div style="color:var(--text2);font-size:.9rem">${esc(w.ipa)}</div>`:''}<div style="color:var(--text2);font-size:.8rem;margin-top:16px">برای نمایش پاسخ کلیک کنید</div></div><div class="review-face review-back"><div style="font-size:1.5rem;font-weight:600;color:var(--accent);margin-bottom:12px">${esc(w.translation)}</div>${w.category&&w.category!=='پیش‌فرض'?`<span class="tag">${esc(w.category)}</span>`:''}${w.context?`<div class="context-sentence">${esc(w.context)}</div>`:''}<div style="margin-top:10px"><button type="button" class="btn btn-ghost btn-sm" id="reviewEditBtn" style="font-size:.75rem">✏️ ویرایش</button></div></div></div></div><div class="rating-bar" id="ratingBar" style="display:none"><button type="button" class="btn btn-danger btn-sm" data-rate="1">❌ نادرست <kbd style="font-size:.6rem;opacity:.6">۱</kbd></button><button type="button" class="btn btn-ghost btn-sm" data-rate="3">😐 سخت <kbd style="font-size:.6rem;opacity:.6">۲</kbd></button><button type="button" class="btn btn-primary btn-sm" data-rate="4">🙂 خوب <kbd style="font-size:.6rem;opacity:.6">۳</kbd></button><button type="button" class="btn btn-success btn-sm" data-rate="5">😄 عالی <kbd style="font-size:.6rem;opacity:.6">۴</kbd></button></div></div>`;
 const card=document.getElementById('rCard');
 const ratingBar=document.getElementById('ratingBar');
 card.onclick=()=>{if(reviewSession.flipped)return;reviewSession.flipped=true;card.classList.add('flipped');ratingBar.style.display='flex'};
 card.onkeydown=e=>{if(e.key===' '||e.key==='Enter'){e.preventDefault();card.onclick()}};
 ratingBar.onclick=(e)=>{const btn=e.target.closest('[data-rate]');if(!btn||reviewRatingPending)return;rateReview(parseInt(btn.dataset.rate))};
+const reviewSpeakBtn=document.getElementById('reviewSpeakBtn');
+if(reviewSpeakBtn)reviewSpeakBtn.onclick=(e)=>{e.stopPropagation();speakWord(w.word)};
 document.onkeydown=reviewKeyHandler;
 
 // Edit in review
@@ -742,12 +754,13 @@ else if(libSort==='due')filtered.sort((a,b)=>{const da=a.nextReviewDate?new Date
 else if(libSort==='alpha')filtered.sort((a,b)=>a.word.localeCompare(b.word,'fa'));
 else if(libSort==='freq')filtered.sort((a,b)=>getFrequencyTier(a.word)-getFrequencyTier(b.word));
 const dueToday=new Set(getDue().map(w=>w.id));
-c.innerHTML=`<div class="filter-bar"><input class="input" placeholder="جستجو..." style="max-width:300px" value="${esc(libFilter)}" id="libSearch"><select class="input" style="max-width:200px" id="libCat"><option value="">همه دسته‌ها</option>${S.categories.map(c=>`<option value="${esc(c)}"${c===libCat?' selected':''}>${esc(c)}</option>`).join('')}</select><select class="input" style="max-width:180px" id="libSort"><option value="">مرتب‌سازی</option><option value="newest"${libSort==='newest'?' selected':''}>جدیدترین</option><option value="due"${libSort==='due'?' selected':''}>زودترین مرور</option><option value="alpha"${libSort==='alpha'?' selected':''}>الفبایی</option><option value="freq"${libSort==='freq'?' selected':''}>فراوانی</option></select><span style="color:var(--text2);font-size:.85rem">${filtered.length} کلمه</span></div><div class="table-wrap card"><table><thead><tr><th>کلمه</th><th>ترجمه</th><th>دسته</th><th>جعبه</th><th>مرور بعدی</th><th>عملیات</th></tr></thead><tbody>${filtered.length?filtered.map(w=>{const tier=getFrequencyTier(w.word);return`<tr><td><strong>${esc(w.word)}</strong>${w.ipa?`<br><small style="color:var(--text2)">${esc(w.ipa)}</small>`:''}${tier?`<br><span class="badge tier-${tier}" style="font-size:.6rem">${tierLabel(tier)}</span>`:''}</td><td>${esc(w.translation)}</td><td><span class="tag">${esc(w.category)}</span>${w.favorite?' <span style="font-size:.9rem">⭐</span>':''}</td><td>${dueToday.has(w.id)?`<span class="badge badge-warning">زودترین</span>`:w.box}</td><td>${fmtDate(w.nextReviewDate)}</td><td><button type="button" class="btn btn-ghost btn-sm" data-edit="${w.id}" aria-label="ویرایش">✏️</button><button type="button" class="btn btn-ghost btn-sm" data-fav="${w.id}" aria-label="${w.favorite?'حذف از علاقه‌مندی':'افزودن به علاقه‌مندی'}">${w.favorite?'⭐':'☆'}</button><button type="button" class="btn btn-ghost btn-sm" data-del="${w.id}" aria-label="حذف">🗑️</button><button type="button" class="btn btn-ghost btn-sm" data-lt="${w.id}" aria-label="انتقال به حافظه بلندمدت">🧠</button></td></tr>`}).join(''):'<tr><td colspan="6" class="empty">کلمه‌ای یافت نشد</td></tr>'}</tbody></table></div>`;
+c.innerHTML=`<div class="filter-bar"><input class="input" placeholder="جستجو..." style="max-width:300px" value="${esc(libFilter)}" id="libSearch"><select class="input" style="max-width:200px" id="libCat"><option value="">همه دسته‌ها</option>${S.categories.map(c=>`<option value="${esc(c)}"${c===libCat?' selected':''}>${esc(c)}</option>`).join('')}</select><select class="input" style="max-width:180px" id="libSort"><option value="">مرتب‌سازی</option><option value="newest"${libSort==='newest'?' selected':''}>جدیدترین</option><option value="due"${libSort==='due'?' selected':''}>زودترین مرور</option><option value="alpha"${libSort==='alpha'?' selected':''}>الفبایی</option><option value="freq"${libSort==='freq'?' selected':''}>فراوانی</option></select><span style="color:var(--text2);font-size:.85rem">${filtered.length} کلمه</span></div><div class="table-wrap card"><table><thead><tr><th>کلمه</th><th>ترجمه</th><th>دسته</th><th>جعبه</th><th>مرور بعدی</th><th>عملیات</th></tr></thead><tbody>${filtered.length?filtered.map(w=>{const tier=getFrequencyTier(w.word);return`<tr><td><strong>${esc(w.word)}</strong> <button type="button" class="btn btn-ghost btn-sm" data-speak="${esc(w.word)}" style="padding:2px 6px;font-size:.75rem" title="شنیدن تلفظ">🔊</button>${w.ipa?`<br><small style="color:var(--text2)">${esc(w.ipa)}</small>`:''}${tier?`<br><span class="badge tier-${tier}" style="font-size:.6rem">${tierLabel(tier)}</span>`:''}</td><td>${esc(w.translation)}</td><td><span class="tag">${esc(w.category)}</span>${w.favorite?' <span style="font-size:.9rem">⭐</span>':''}</td><td>${dueToday.has(w.id)?`<span class="badge badge-warning">زودترین</span>`:w.box}</td><td>${fmtDate(w.nextReviewDate)}</td><td><button type="button" class="btn btn-ghost btn-sm" data-edit="${w.id}" aria-label="ویرایش">✏️</button><button type="button" class="btn btn-ghost btn-sm" data-fav="${w.id}" aria-label="${w.favorite?'حذف از علاقه‌مندی':'افزودن به علاقه‌مندی'}">${w.favorite?'⭐':'☆'}</button><button type="button" class="btn btn-ghost btn-sm" data-del="${w.id}" aria-label="حذف">🗑️</button><button type="button" class="btn btn-ghost btn-sm" data-lt="${w.id}" aria-label="انتقال به حافظه بلندمدت">🧠</button></td></tr>`}).join(''):'<tr><td colspan="6" class="empty">کلمه‌ای یافت نشد</td></tr>'}</tbody></table></div>`;
 document.getElementById('libSearch').oninput=e=>{libFilter=e.target.value;renderLibrary(c)};
 document.getElementById('libCat').onchange=e=>{libCat=e.target.value;renderLibrary(c)};
 document.getElementById('libSort').onchange=e=>{libSort=e.target.value;renderLibrary(c)};
 c.querySelector('tbody').onclick=e=>{
 const btn=e.target.closest('button');if(!btn)return;
+if(btn.dataset.speak){speakWord(btn.dataset.speak);return}
 const id=btn.dataset.edit||btn.dataset.del||btn.dataset.fav||btn.dataset.lt;
 if(btn.dataset.del){const w=S.words.find(x=>x.id===id);const name=w?w.word:'';if(!confirm(`حذف «${name}»؟`))return;S.words=S.words.filter(w=>w.id!==id);save();renderLibrary(c);toast('حذف شد','success')}
 if(btn.dataset.fav){const w=S.words.find(x=>x.id===id);if(w){w.favorite=!w.favorite;save();renderLibrary(c)}}
@@ -756,7 +769,15 @@ if(btn.dataset.edit)editWord(id)}}
 function editWord(id,onClose){
 const w=S.words.find(x=>x.id===id);if(!w)return;
 const ov=document.createElement('div');ov.className='modal-overlay';
-ov.innerHTML=`<div class="modal"><h3>ویرایش کلمه</h3><div style="display:grid;gap:12px"><label>کلمه</label><input class="input" id="eWord" value="${esc(w.word)}"><label>ترجمه</label><input class="input" id="eTrans" value="${esc(w.translation)}"><label>IPA</label><input class="input" id="eIpa" value="${esc(w.ipa||'')}"><label>دسته</label><select class="input" id="eCat">${S.categories.map(c=>`<option${c===w.category?' selected':''}>${esc(c)}</option>`).join('')}</select><div class="flex"><button type="button" class="btn btn-primary" id="eSave">ذخیره</button><button type="button" class="btn btn-ghost" id="eCancel">لغو</button></div></div></div>`;
+let detailsHtml='';
+if(w.definitions&&w.definitions.length){
+  detailsHtml+='<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">';
+  if(w.partOfSpeech)detailsHtml+='<span class="trans-pos" style="margin-bottom:6px">'+esc(w.partOfSpeech)+'</span> ';
+  if(w.definitions.length){detailsHtml+='<div style="margin-bottom:6px"><strong style="font-size:.8rem;color:var(--text2)">تعریف:</strong>';w.definitions.slice(0,3).forEach(d=>{detailsHtml+='<div class="trans-def-item">'+esc(d)+'</div>'});detailsHtml+='</div>'}
+  if(w.examples&&w.examples.length){detailsHtml+='<div style="margin-bottom:6px"><strong style="font-size:.8rem;color:var(--text2)">مثال:</strong>';w.examples.slice(0,2).forEach(ex=>{detailsHtml+='<div class="trans-example">"'+esc(ex)+'"</div>'});detailsHtml+='</div>'}
+  if(w.synonyms&&w.synonyms.length){detailsHtml+='<div><strong style="font-size:.8rem;color:var(--text2)">مترادف:</strong> <span style="font-size:.8rem">'+w.synonyms.map(s=>esc(s)).join(', ')+'</span></div>'}
+  detailsHtml+='</div>'}
+ov.innerHTML=`<div class="modal"><h3>ویرایش کلمه</h3><div style="display:grid;gap:12px"><label>کلمه</label><input class="input" id="eWord" value="${esc(w.word)}"><label>ترجمه</label><input class="input" id="eTrans" value="${esc(w.translation)}"><label>IPA</label><input class="input" id="eIpa" value="${esc(w.ipa||'')}"><label>دسته</label><select class="input" id="eCat">${S.categories.map(c=>`<option${c===w.category?' selected':''}>${esc(c)}</option>`).join('')}</select>${detailsHtml}<div class="flex"><button type="button" class="btn btn-primary" id="eSave">ذخیره</button><button type="button" class="btn btn-ghost" id="eCancel">لغو</button></div></div></div>`;
 document.body.appendChild(ov);
 const closeModal=()=>{ov.remove();if(onClose)onClose()};
 ov.onclick=e=>{if(e.target===ov)closeModal()};
@@ -771,10 +792,11 @@ ov.querySelector('#eCancel').onclick=()=>{document.removeEventListener('keydown'
 let ltFilter='';
 function renderLongterm(c){
 const items=S.longTerm.filter(w=>!ltFilter||w.word.toLowerCase().includes(ltFilter.toLowerCase())||w.translation.toLowerCase().includes(ltFilter.toLowerCase()));
-c.innerHTML=`<div class="filter-bar"><input class="input" placeholder="جستجو..." style="max-width:300px" value="${esc(ltFilter)}" id="ltSearch"><span style="color:var(--text2);font-size:.85rem">${items.length} کلمه</span></div><div class="table-wrap card"><table><thead><tr><th>کلمه</th><th>ترجمه</th><th>تاریخ اضافه</th><th>عملیات</th></tr></thead><tbody>${items.length?items.map(w=>`<tr><td><strong>${esc(w.word)}</strong></td><td>${esc(w.translation)}</td><td>${fmtDate(w.addedDate)}</td><td><button type="button" class="btn btn-ghost btn-sm" data-back="${w.id}" aria-label="بازگشت به کتابخانه">↩️ بازگشت</button><button type="button" class="btn btn-ghost btn-sm" data-dlt="${w.id}" aria-label="حذف">🗑️</button></td></tr>`).join(''):'<tr><td colspan="4" class="empty">حافظه بلندمدت خالی است</td></tr>'}</tbody></table></div>`;
+c.innerHTML=`<div class="filter-bar"><input class="input" placeholder="جستجو..." style="max-width:300px" value="${esc(ltFilter)}" id="ltSearch"><span style="color:var(--text2);font-size:.85rem">${items.length} کلمه</span></div><div class="table-wrap card"><table><thead><tr><th>کلمه</th><th>ترجمه</th><th>تاریخ اضافه</th><th>عملیات</th></tr></thead><tbody>${items.length?items.map(w=>`<tr><td><strong>${esc(w.word)}</strong>${w.ipa?`<br><small style="color:var(--text2)">${esc(w.ipa)}</small>`:''} <button type="button" class="btn btn-ghost btn-sm" data-speak="${esc(w.word)}" style="padding:2px 6px;font-size:.75rem" title="شنیدن تلفظ">🔊</button></td><td>${esc(w.translation)}</td><td>${fmtDate(w.addedDate)}</td><td><button type="button" class="btn btn-ghost btn-sm" data-back="${w.id}" aria-label="بازگشت به کتابخانه">↩️ بازگشت</button><button type="button" class="btn btn-ghost btn-sm" data-dlt="${w.id}" aria-label="حذف">🗑️</button></td></tr>`).join(''):'<tr><td colspan="4" class="empty">حافظه بلندمدت خالی است</td></tr>'}</tbody></table></div>`;
 document.getElementById('ltSearch').oninput=e=>{ltFilter=e.target.value;renderLongterm(c)};
 c.querySelector('tbody').onclick=e=>{
 const btn=e.target.closest('button');if(!btn)return;
+if(btn.dataset.speak){speakWord(btn.dataset.speak);return}
 if(btn.dataset.back){const w=S.longTerm.find(x=>x.id===btn.dataset.back);if(w){S.longTerm=S.longTerm.filter(x=>x.id!==w.id);w.box=1;w.nextReviewDate=null;S.words.push(w);save();renderLongterm(c);toast('بازگشت به کتابخانه','success')}}
 if(btn.dataset.dlt){const w=S.longTerm.find(x=>x.id===btn.dataset.dlt);const name=w?w.word:'';if(!confirm(`حذف «${name}»؟`))return;S.longTerm=S.longTerm.filter(x=>x.id!==btn.dataset.dlt);save();renderLongterm(c);toast('حذف شد','success')}}}
 
@@ -844,7 +866,7 @@ h+=`<div class="import-review-wrap"><table class="import-review-table"><thead><t
 importTranslations.forEach((t,i)=>{
 h+=`<tr><td><input type="checkbox" data-ri="${i}"${t.selected?' checked':''}></td><td><strong>${esc(t.word)}</strong></td><td><input type="text" data-rt="${i}" value="${esc(t.translation)}"></td></tr>`});
 h+=`</tbody></table></div>`;
-h+=`<div class="flex" style="justify-content:space-between;margin-top:16px"><button type="button" class="btn btn-ghost" id="impBack2">بازگشت</button><button type="button" class="btn btn-success" id="impAdd">افزودن به لایتنر (${importTranslations.filter(t=>t.selected).length})</button></div></div>`;
+h+=`<div class="flex" style="justify-content:space-between;margin-top:16px"><button type="button" class="btn btn-ghost" id="impBack2">بازگشت</button><div class="flex" style="gap:6px;flex-wrap:wrap"><button type="button" class="btn btn-danger btn-sm" id="impDeleteSelected">حذف انتخاب شده</button><button type="button" class="btn btn-ghost" id="impAddKnown">افزودن به عنوان شناخته شده</button><button type="button" class="btn btn-success" id="impAdd">افزودن به لایتنر (${importTranslations.filter(t=>t.selected).length})</button></div></div></div>`;
 return h}
 
 function renderImportStep4(){
@@ -868,7 +890,16 @@ if(urlBtn)urlBtn.onclick=async()=>{const url=document.getElementById('importUrl'
 
 else if(importStep===1){
 document.querySelectorAll('input[name="impF"]').forEach(r=>{r.onchange=()=>{importFilter=r.value;renderImport(document.getElementById('content'))}});
-document.querySelectorAll('[data-ii]').forEach(cb=>{cb.onchange=()=>{const idx=parseInt(cb.dataset.ii);if(cb.checked)importSelected.add(idx);else importSelected.delete(idx);renderImport(document.getElementById('content'))}});
+document.querySelectorAll('[data-ii]').forEach(cb=>{cb.onchange=()=>{
+  // Save scroll position before re-render
+  const scrollEl=document.querySelector('.import-word-grid');
+  const scrollPos=scrollEl?scrollEl.scrollTop:0;
+  const idx=parseInt(cb.dataset.ii);if(cb.checked)importSelected.add(idx);else importSelected.delete(idx);
+  renderImport(document.getElementById('content'));
+  // Restore scroll position after re-render
+  const newScrollEl=document.querySelector('.import-word-grid');
+  if(newScrollEl)newScrollEl.scrollTop=scrollPos;
+}});
 const sa=document.getElementById('impSelAll');
 if(sa)sa.onclick=()=>{getImportFiltered().forEach(({idx})=>importSelected.add(idx));renderImport(document.getElementById('content'))};
 const da=document.getElementById('impDeselAll');
@@ -879,7 +910,14 @@ const trans=document.getElementById('impTranslate');
 if(trans)trans.onclick=()=>{importStep=2;renderImport(document.getElementById('content'));startTranslation()}}
 
 else if(importStep===3){
-document.querySelectorAll('[data-ri]').forEach(cb=>{cb.onchange=()=>{importTranslations[parseInt(cb.dataset.ri)].selected=cb.checked;renderImport(document.getElementById('content'))}});
+document.querySelectorAll('[data-ri]').forEach(cb=>{cb.onchange=()=>{
+  const scrollEl=document.querySelector('.import-review-wrap');
+  const scrollPos=scrollEl?scrollEl.scrollTop:0;
+  importTranslations[parseInt(cb.dataset.ri)].selected=cb.checked;
+  renderImport(document.getElementById('content'));
+  const newScrollEl=document.querySelector('.import-review-wrap');
+  if(newScrollEl)newScrollEl.scrollTop=scrollPos;
+}});
 document.querySelectorAll('[data-rt]').forEach(inp=>{inp.oninput=()=>{importTranslations[parseInt(inp.dataset.rt)].translation=inp.value}});
 const ca=document.getElementById('impRevCheckAll');
 if(ca)ca.onchange=()=>{importTranslations.forEach(t=>t.selected=ca.checked);renderImport(document.getElementById('content'))};
@@ -890,7 +928,16 @@ if(da)da.onclick=()=>{importTranslations.forEach(t=>t.selected=false);renderImpo
 const back=document.getElementById('impBack2');
 if(back)back.onclick=()=>{importStep=1;renderImport(document.getElementById('content'))};
 const add=document.getElementById('impAdd');
-if(add)add.onclick=addSelectedToLeitner}
+if(add)add.onclick=addSelectedToLeitner;
+const addKnown=document.getElementById('impAddKnown');
+if(addKnown)addKnown.onclick=addSelectedAsKnown;
+const delSel=document.getElementById('impDeleteSelected');
+if(delSel)delSel.onclick=()=>{
+  importTranslations=importTranslations.filter(t=>!t.selected);
+  if(!importTranslations.length){importStep=4;importTransProgress={added:0,skipped:0,failed:0}}
+  renderImport(document.getElementById('content'));
+  toast('انتخاب شده‌ها حذف شدند','success');
+}}
 
 else if(importStep===4){
 const again=document.getElementById('impAgain');
@@ -904,7 +951,14 @@ importTranslations=[];importTransProgress={done:0,total:selectedWords.length};
 renderImport(document.getElementById('content'));
 for(let i=0;i<selectedWords.length;i+=5){
 const batch=selectedWords.slice(i,i+5);
-const results=await Promise.all(batch.map(async w=>{try{const r=await fetch(MYMEMORY_API+'?q='+encodeURIComponent(w)+'&langpair='+S.settings.sourceLang+'|'+S.settings.targetLang);const d=await r.json();const t=d.responseData&&d.responseData.translatedText&&d.responseData.translatedText!==w?d.responseData.translatedText:'';return{word:w,translation:t,selected:true}}catch(e){return{word:w,translation:'',selected:true}}}));
+const results=await Promise.all(batch.map(async w=>{try{
+  const [transResult,dictResult]=await Promise.all([fetchTranslation(w),fetchDictionary(w)]);
+  const allDefs=dictResult?dictResult.meanings.flatMap(m=>m.definitions):[];
+  const allExamples=dictResult?dictResult.meanings.flatMap(m=>m.examples):[];
+  const allSynonyms=dictResult?dictResult.meanings.flatMap(m=>m.synonyms):[];
+  const pos=dictResult&&dictResult.meanings[0]?dictResult.meanings[0].partOfSpeech:'';
+  return{word:w,translation:transResult||'',ipa:dictResult?(dictResult.phoneticBr||dictResult.phoneticUs||dictResult.phonetic||''):'',definitions:allDefs,examples:allExamples,synonyms:allSynonyms,partOfSpeech:pos,audioUs:dictResult?dictResult.audioUs||'':'',audioBr:dictResult?dictResult.audioBr||'':'',selected:true};
+}catch(e){return{word:w,translation:'',selected:true}}}));
 importTranslations.push(...results);
 importTransProgress.done=Math.min(i+5,selectedWords.length);
 renderImport(document.getElementById('content'))}
@@ -917,13 +971,26 @@ let added=0,skipped=0,failed=0;
 toAdd.forEach(t=>{
 const exists=target.some(w=>w.word.toLowerCase()===t.word.toLowerCase())||S.words.some(w=>w.word.toLowerCase()===t.word.toLowerCase())||S.longTerm.some(w=>w.word.toLowerCase()===t.word.toLowerCase());
 if(exists){skipped++;return}
-const freqTier=getFrequencyTier(t.word);
-target.push({id:uid(),word:t.word,translation:t.translation,ipa:'',category:importCategory,favorite:false,context:'',box:0,repetitions:0,interval:1,easeFactor:2.5,addedDate:new Date().toISOString(),nextReviewDate:null,lastReviewedAt:null,stability:0,difficulty:0,elapsedDays:0,scheduledDays:0,reps:0,lapses:0,fsrsState:'new'});
+target.push({id:uid(),word:t.word,translation:t.translation,ipa:t.ipa||'',category:importCategory,favorite:false,context:'',box:0,repetitions:0,interval:1,easeFactor:2.5,addedDate:new Date().toISOString(),nextReviewDate:null,lastReviewedAt:null,stability:0,difficulty:0,elapsedDays:0,scheduledDays:0,reps:0,lapses:0,fsrsState:'new',definitions:t.definitions||[],examples:t.examples||[],synonyms:t.synonyms||[],partOfSpeech:t.partOfSpeech||'',audioUs:t.audioUs||'',audioBr:t.audioBr||''});
 added++});
 failed=importTranslations.filter(t=>t.selected&&!t.translation).length;
 save();importTransProgress={added,skipped,failed};
 importStep=4;renderImport(document.getElementById('content'));
 toast(`${added} کلمه اضافه شد`,'success')}
+
+function addSelectedAsKnown(){
+const toAdd=importTranslations.filter(t=>t.selected&&t.translation);
+let added=0,skipped=0;
+toAdd.forEach(t=>{
+const exists=S.words.some(w=>w.word.toLowerCase()===t.word.toLowerCase())||S.longTerm.some(w=>w.word.toLowerCase()===t.word.toLowerCase());
+if(exists){skipped++;return}
+S.longTerm.push({id:uid(),word:t.word,translation:t.translation,ipa:t.ipa||'',category:importCategory,favorite:false,context:'',box:0,repetitions:0,interval:1,easeFactor:2.5,addedDate:new Date().toISOString(),nextReviewDate:null,lastReviewedAt:null,stability:0,difficulty:0,elapsedDays:0,scheduledDays:0,reps:0,lapses:0,fsrsState:'new',definitions:t.definitions||[],examples:t.examples||[],synonyms:t.synonyms||[],partOfSpeech:t.partOfSpeech||'',audioUs:t.audioUs||'',audioBr:t.audioBr||''});
+added++});
+save();
+importTranslations=importTranslations.filter(t=>!t.selected||!t.translation);
+if(!importTranslations.length){importStep=4;importTransProgress={added,skipped,failed:0}}
+renderImport(document.getElementById('content'));
+toast(`${added} کلمه به عنوان شناخته شده اضافه شد`,'success')}
 
 // Anki .apkg import
 async function handleFileImport(e){
@@ -931,7 +998,7 @@ const file=e.target.files[0];if(!file)return;
 const ext=file.name.split('.').pop().toLowerCase();
 if(ext==='json'){const txt=await file.text();try{const d=JSON.parse(txt);if(Array.isArray(d.words)){const valid=d.words.filter(w=>w&&typeof w.word==='string'&&w.word.trim());if(!valid.length){toast('فایل JSON کلمه معتبری ندارد','error');return}const existingWords=new Set(S.words.map(w=>w.word.toLowerCase()));const existingLT=new Set(S.longTerm.map(w=>w.word.toLowerCase()));const fresh=valid.filter(w=>!existingWords.has(w.word.toLowerCase())&&!existingLT.has(w.word.toLowerCase())).map(sanitizeCard);S.words.push(...fresh);save();toast(`${fresh.length} کلمه وارد شد (${valid.length-fresh.length} تکراری رد شد)`,'success');importStep=0;renderImport(document.getElementById('content'))}else{toast('ساختار JSON معتبر نیست','error')}}catch(e){toast('خطا در خواندن JSON','error')}}
 else if(ext==='txt'){const txt=await file.text();importRawText=txt;document.getElementById('importText').value=txt;importWords=parseWords(txt);importExisting=new Set([...S.words,...S.longTerm].map(w=>w.word.toLowerCase()));importSelected=new Set(importWords.map((_,i)=>i).filter(i=>!importExisting.has(importWords[i])));importStep=1;renderImport(document.getElementById('content'))}
-else if(ext==='pdf'){try{pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';const buf=await file.arrayBuffer();const pdf=await pdfjsLib.getDocument(buf).promise;let txt='';for(let i=1;i<=pdf.numPages;i++){const p=await pdf.getPage(i);const c=await p.getTextContent();txt+=c.items.map(x=>x.str).join(' ')+' '}importRawText=txt;importWords=parseWords(txt);importExisting=new Set([...S.words,...S.longTerm].map(w=>w.word.toLowerCase()));importSelected=new Set(importWords.map((_,i)=>i).filter(i=>!importExisting.has(importWords[i])));importStep=1;renderImport(document.getElementById('content'))}catch(e){toast('خطا در خواندن فایل PDF','error')}}
+else if(ext==='pdf'){try{if(!pdfjsLib.GlobalWorkerOptions.workerSrc||pdfjsLib.GlobalWorkerOptions.workerSrc.includes('cdnjs')){try{const wr=await fetch('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js');const wb=await wr.blob();pdfjsLib.GlobalWorkerOptions.workerSrc=URL.createObjectURL(wb)}catch(x){pdfjsLib.GlobalWorkerOptions.workerSrc=''}}const buf=await file.arrayBuffer();const pdf=await pdfjsLib.getDocument({data:buf,disableFontFace:false,useSystemFonts:true,cMapUrl:'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/cmaps/',cMapPacked:true}).promise;let txt='';for(let i=1;i<=pdf.numPages;i++){const p=await pdf.getPage(i);const c=await p.getTextContent();txt+=c.items.map(x=>x.str).join(' ')+' '}importRawText=txt;importWords=parseWords(txt);importExisting=new Set([...S.words,...S.longTerm].map(w=>w.word.toLowerCase()));importSelected=new Set(importWords.map((_,i)=>i).filter(i=>!importExisting.has(importWords[i])));importStep=1;renderImport(document.getElementById('content'))}catch(e){toast('خطا در خواندن فایل PDF','error')}}
 else if(ext==='docx'){try{const buf=await file.arrayBuffer();const zip=await JSZip.loadAsync(buf);const xml=await zip.file('word/document.xml').async('text');const parser=new DOMParser();const doc=parser.parseFromString(xml,'text/xml');const texts=doc.getElementsByTagName('w:t');let txt='';for(let i=0;i<texts.length;i++)txt+=texts[i].textContent+' ';importRawText=txt;importWords=parseWords(txt);importExisting=new Set([...S.words,...S.longTerm].map(w=>w.word.toLowerCase()));importSelected=new Set(importWords.map((_,i)=>i).filter(i=>!importExisting.has(importWords[i])));importStep=1;renderImport(document.getElementById('content'))}catch(e){toast('خطا در خواندن فایل DOCX','error')}}
 else if(ext==='apkg'){try{toast('در حال پردازش فایل Anki...','info');const buf=await file.arrayBuffer();const zip=await JSZip.loadAsync(buf);const dbFile=zip.file('collection.anki21')||zip.file('collection.anki2');if(!dbFile){toast('فایل Anki معتبر نیست','error');return}const sqlBuf=await dbFile.async('arraybuffer');if(!window.initSqlJs){toast('در حال بارگذاری مفسر SQLite...','info');await new Promise((resolve,reject)=>{const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js';s.onload=resolve;s.onerror=reject;document.head.appendChild(s)});window._sqlModule=await initSqlJs({locateFile:f=>'https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/'+f})}const db=new window._sqlModule.Database(new Uint8Array(sqlBuf));const rows=db.exec('SELECT flds FROM notes');if(!rows.length||!rows[0].values.length){toast('هیچ کارتی یافت نشد','error');return}let txt='';rows[0].values.forEach(r=>{const fields=String(r[0]).split('\x1f');txt+=fields[0]+' '+fields[1]+' '});db.close();importRawText=txt;importWords=parseWords(txt);importExisting=new Set([...S.words,...S.longTerm].map(w=>w.word.toLowerCase()));importSelected=new Set(importWords.map((_,i)=>i).filter(i=>!importExisting.has(importWords[i])));importStep=1;renderImport(document.getElementById('content'));toast(`${importWords.length} کلمه استخراج شد`,'success')}catch(e){toast('خطا در خواندن فایل Anki','error')}}
 e.target.value=''}
@@ -942,6 +1009,7 @@ e.target.value=''}
 let pdfDoc=null,pdfPage=1,pdfScale=PDF_DEFAULT_SCALE,pdfFileName='',pdfSelectedText='',pdfCurrentPageObj=null;
 let pdfThumbObserver=null;
 let pdfZoomMode='custom';// custom|fitWidth|fitPage
+let pdfMouseUpTimer=null;let pdfDblClickPending=false;
 
 function renderPDFReader(c){
 if(!pdfDoc){
@@ -963,13 +1031,89 @@ const main=document.getElementById('pdfMain');
 main.addEventListener('mouseup',pdfHandleMouseUp);
 main.addEventListener('touchend',pdfHandleMouseUp);
 main.addEventListener('dblclick',pdfHandleDblClick);
-// Double-tap zoom
-let lastTap=0;
-main.addEventListener('touchend',e=>{const now=Date.now();if(now-lastTap<300){e.preventDefault();pdfZoomMode='custom';pdfScale=pdfScale>=2?PDF_DEFAULT_SCALE:pdfScale*2;renderPDFPage()}lastTap=now});
+main.addEventListener('mousedown',()=>{pdfDblClickPending=false;clearTimeout(pdfMouseUpTimer)});
+// Double-tap: select word on Android (no zoom — use toolbar buttons instead)
+let lastTap=0;let lastTapX=0;let lastTapY=0;
+main.addEventListener('touchend',e=>{
+  if(currentTab!=='pdfreader')return;
+  const now=Date.now();
+  const t=e.changedTouches?e.changedTouches[0]:null;
+  const tx=t?t.clientX:0;const ty=t?t.clientY:0;
+  if(now-lastTap<350&&Math.abs(tx-lastTapX)<30&&Math.abs(ty-lastTapY)<30){
+    // Double-tap detected — suppress action popup and show translation only
+    clearTimeout(pdfMouseUpTimer);pdfDblClickPending=true;
+    pdfCloseSelectionPopup();
+    const trySelect=(attempt)=>{
+      setTimeout(()=>{
+        const sel=window.getSelection();
+        const txt=sel?sel.toString().trim():'';
+        if(txt&&txt.length>=1&&/[a-zA-Z]/.test(txt)){
+          const word=normalizeWordLookup(txt);
+          if(word&&word.length>=2){
+            let rect={left:tx,top:ty,bottom:ty+20};
+            if(sel.rangeCount>0){try{rect=sel.getRangeAt(0).getBoundingClientRect()}catch(x){}}
+            renderTransPopup(word,rect);
+            sel.removeAllRanges();
+            return;
+          }
+        }
+        if(attempt<2)trySelect(attempt+1);
+      },attempt===0?200:400);
+    };
+    trySelect(0);
+    lastTap=0;return}
+  lastTap=now;lastTapX=tx;lastTapY=ty});
+// Long-press: select word on Android (backup for double-tap)
+let longPressTimer=null;
+main.addEventListener('touchstart',e=>{
+  if(currentTab!=='pdfreader')return;
+  const t=e.changedTouches?e.changedTouches[0]:null;
+  if(!t)return;
+  longPressTimer=setTimeout(()=>{
+    try{
+      const range=document.caretRangeFromPoint(t.clientX,t.clientY);
+      if(!range)return;
+      const node=range.startContainer;
+      const offset=range.startOffset;
+      if(node.nodeType===Node.TEXT_NODE){
+        const text=node.textContent;
+        let start=offset,end=offset;
+        while(start>0&&/\w/.test(text[start-1]))start--;
+        while(end<text.length&&/\w/.test(text[end]))end++;
+        if(start<end){
+          const range2=document.createRange();
+          range2.setStart(node,start);
+          range2.setEnd(node,end);
+          const sel=window.getSelection();
+          sel.removeAllRanges();
+          sel.addRange(range2);
+          const word=normalizeWordLookup(text.substring(start,end));
+          if(word&&word.length>=2&&/[a-zA-Z]/.test(word)){
+            const rect=range2.getBoundingClientRect();
+            renderTransPopup(word,rect);
+          }
+        }
+      }
+    }catch(x){}
+  },500);
+},{passive:true});
+main.addEventListener('touchend',()=>{clearTimeout(longPressTimer)});
+main.addEventListener('touchmove',()=>{clearTimeout(longPressTimer)});
 renderPDFThumbs();renderPDFPage()}
 
 async function openPDF(file){
-try{pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+try{
+// Use Blob URL worker to avoid CDN loading issues in WebView
+if(!pdfjsLib.GlobalWorkerOptions.workerSrc||pdfjsLib.GlobalWorkerOptions.workerSrc.includes('cdnjs')){
+  try{
+    const wkResp=await fetch('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js');
+    const wkBlob=await wkResp.blob();
+    pdfjsLib.GlobalWorkerOptions.workerSrc=URL.createObjectURL(wkBlob);
+  }catch(wkErr){
+    // Fallback: disable worker entirely
+    pdfjsLib.GlobalWorkerOptions.workerSrc='';
+  }
+}
 const buf=await file.arrayBuffer();pdfDoc=await pdfjsLib.getDocument({data:buf,disableFontFace:false,useSystemFonts:true,cMapUrl:'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/cmaps/',cMapPacked:true}).promise;
 pdfPage=1;pdfFileName=file.name;pdfScale=PDF_DEFAULT_SCALE;pdfSelectedText='';pdfCurrentPageObj=null;pdfZoomMode='fitWidth';
 renderPDFReader(document.getElementById('content'));toast(`${pdfDoc.numPages} صفحه بارگذاری شد`,'success')}
@@ -1016,23 +1160,61 @@ if(typeof pdfjsLib.TextLayer==='function'){
 const tr=new pdfjsLib.TextLayer({textContentSource:tc,container:tl,viewport:vp});
 await tr.render();
 }else{
-// Fallback: manual text layer matching PDF.js behavior
+// Fallback: group adjacent character spans into words using actual font metrics
+const txItems=[];
 tc.items.forEach(item=>{
-if(!item.str)return;
-const span=document.createElement('span');
-span.textContent=item.str;
-const tx=pdfjsLib.Util.transform(vp.transform,item.transform);
-const fontHeight=Math.hypot(tx[2],tx[3]);
-span.style.position='absolute';
-span.style.left=tx[4]+'px';
-span.style.top=(tx[5]-fontHeight)+'px';
-span.style.fontSize=fontHeight+'px';
-span.style.fontFamily=item.fontName||'sans-serif';
-span.style.transformOrigin='left bottom';
-const angle=Math.atan2(tx[1],tx[0]);
-if(Math.abs(angle)>0.001)span.style.transform=`rotate(${angle}rad)`;
-span.style.whiteSpace='pre';
-tl.appendChild(span)});
+  if(!item.str)return;
+  const tx=pdfjsLib.Util.transform(vp.transform,item.transform);
+  const fontHeight=Math.hypot(tx[2],tx[3]);
+  // Calculate actual character width from the transform matrix
+  const scaleX=Math.hypot(tx[0],tx[1]);
+  const charWidth=scaleX>0?scaleX:fontHeight*0.5;
+  // Split into individual characters for precise positioning
+  for(let i=0;i<item.str.length;i++){
+    txItems.push({
+      ch:item.str[i],
+      x:tx[4]+i*charWidth,
+      y:tx[5],
+      endX:tx[4]+(i+1)*charWidth,
+      fontHeight,scaleX,fontName:item.fontName,tx
+    });
+  }
+});
+// Sort by Y then X
+txItems.sort((a,b)=>Math.abs(a.y-b.y)<a.fontHeight*0.5?a.x-b.x:a.y-b.y);
+// Merge characters that belong to the same word
+const groups=[];
+let cur=null;
+const SPACE_WIDTH=fontHeight=>fontHeight*0.25;
+txItems.forEach(item=>{
+  if(!cur){cur={chars:[item.ch],x:item.x,y:item.y,endX:item.endX,fontHeight:item.fontHeight,fontName:item.fontName,tx:item.tx};return}
+  const gap=item.x-cur.endX;
+  const yClose=Math.abs(item.y-cur.y)<cur.fontHeight*0.5;
+  // Merge if on same line and close together (gap < space width)
+  if(yClose&&gap>=-cur.fontHeight*0.1&&gap<SPACE_WIDTH(cur.fontHeight)){
+    cur.chars.push(item.ch);cur.endX=item.endX;
+  }else{
+    groups.push(cur);
+    cur={chars:[item.ch],x:item.x,y:item.y,endX:item.endX,fontHeight:item.fontHeight,fontName:item.fontName,tx:item.tx};
+  }
+});
+if(cur)groups.push(cur);
+// Render each word group as a single span
+groups.forEach(g=>{
+  const text=g.chars.join('');
+  if(!text.trim())return;
+  const span=document.createElement('span');
+  span.textContent=text;
+  span.style.position='absolute';
+  span.style.left=g.x+'px';
+  span.style.top=(g.y-g.fontHeight)+'px';
+  span.style.fontSize=g.fontHeight+'px';
+  span.style.fontFamily=g.fontName||'sans-serif';
+  span.style.transformOrigin='left bottom';
+  const angle=Math.atan2(g.tx[1],g.tx[0]);
+  if(Math.abs(angle)>0.001)span.style.transform=`rotate(${angle}rad)`;
+  span.style.whiteSpace='pre';
+  tl.appendChild(span)});
 }
 }catch(e){}}
 
@@ -1090,18 +1272,35 @@ function extractContext(text,word){
   const regex=new RegExp('([^.!?\n]*\\b'+word.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\b[^.!?\n]*[.!?])','i');
   const m=text.match(regex);
   return m?m[1].trim():''}
-fresh.forEach(w=>{
+// Fetch dictionary details for each word (non-blocking, saves in background)
+fresh.forEach(async w=>{
   const context=extractContext(pdfSelectedText,w);
-  S.words.push({id:uid(),word:w,translation:'',ipa:'',category:'پیش‌فرض',favorite:false,context,box:0,repetitions:0,interval:1,easeFactor:2.5,addedDate:new Date().toISOString(),nextReviewDate:null,lastReviewedAt:null,stability:0,difficulty:0,elapsedDays:0,scheduledDays:0,reps:0,lapses:0,fsrsState:'new'})});
-save();toast(`${fresh.length} کلمه اضافه شد`,'success');
+  let defs=[],exs=[],syns=[],pos='',au='',ab='',ipa='';
+  try{
+    const [dictResult,persianResult]=await Promise.all([fetchDictionary(w),fetchTranslation(w)]);
+    if(dictResult){
+      defs=dictResult.meanings.flatMap(m=>m.definitions);exs=dictResult.meanings.flatMap(m=>m.examples);syns=dictResult.meanings.flatMap(m=>m.synonyms);
+      pos=dictResult.meanings[0]?dictResult.meanings[0].partOfSpeech:'';au=dictResult.audioUs||'';ab=dictResult.audioBr||'';
+      ipa=dictResult.phoneticBr||dictResult.phoneticUs||dictResult.phonetic||'';
+    }
+    const existingIdx=S.words.findIndex(x=>x.word.toLowerCase()===w.toLowerCase());
+    if(existingIdx>=0){S.words[existingIdx].definitions=defs;S.words[existingIdx].examples=exs;S.words[existingIdx].synonyms=syns;S.words[existingIdx].partOfSpeech=pos;S.words[existingIdx].audioUs=au;S.words[existingIdx].audioBr=ab;S.words[existingIdx].ipa=ipa;if(persianResult&&!S.words[existingIdx].translation)S.words[existingIdx].translation=persianResult;}
+    else S.words.push({id:uid(),word:w,translation:persianResult||'',ipa,category:'پیش‌فرض',favorite:false,context,box:0,repetitions:0,interval:1,easeFactor:2.5,addedDate:new Date().toISOString(),nextReviewDate:null,lastReviewedAt:null,stability:0,difficulty:0,elapsedDays:0,scheduledDays:0,reps:0,lapses:0,fsrsState:'new',definitions:defs,examples:exs,synonyms:syns,partOfSpeech:pos,audioUs:au,audioBr:ab});
+  }catch(e){
+    S.words.push({id:uid(),word:w,translation:'',ipa:'',category:'پیش‌فرض',favorite:false,context,box:0,repetitions:0,interval:1,easeFactor:2.5,addedDate:new Date().toISOString(),nextReviewDate:null,lastReviewedAt:null,stability:0,difficulty:0,elapsedDays:0,scheduledDays:0,reps:0,lapses:0,fsrsState:'new',definitions:[],examples:[],synonyms:[],partOfSpeech:'',audioUs:'',audioBr:''});
+  }
+  save()});
+toast(`${fresh.length} کلمه اضافه شد (ترجمه و جزئیات در حال دریافت...)`,'success');
 pdfCloseSelectionPopup()}
 
 function pdfCloseSelectionPopup(){const p=document.getElementById('pdfPopup');if(p)p.classList.remove('visible');pdfSelectedText=''}
 
-// Selection action menu (Priority 3)
+// Selection action menu — delayed to avoid conflict with dblclick
 function pdfHandleMouseUp(e){
   if(currentTab!=='pdfreader')return;
-  setTimeout(()=>{
+  clearTimeout(pdfMouseUpTimer);
+  pdfMouseUpTimer=setTimeout(()=>{
+    if(pdfDblClickPending)return;
     const sel=window.getSelection();
     const txt=sel?sel.toString().trim():'';
     const popup=document.getElementById('pdfPopup');
@@ -1123,12 +1322,13 @@ function pdfHandleMouseUp(e){
     if(sel.rangeCount>0){const range=sel.getRangeAt(0);const rect=range.getBoundingClientRect();
     top=Math.min(rect.bottom+10,window.innerHeight-220);left=Math.min(rect.left,window.innerWidth-320);
     if(left<10)left=10;if(top<10)top=rect.top-220}
-    popupEl.style.top=top+'px';popupEl.style.left=left+'px'},50)}
+    popupEl.style.top=top+'px';popupEl.style.left=left+'px'},200)}
 
 function pdfHandleDblClick(e){
   if(currentTab!=='pdfreader')return;
-  const existingPopup=document.getElementById('pdfPopup');
-  if(existingPopup)existingPopup.classList.remove('visible');
+  clearTimeout(pdfMouseUpTimer);pdfDblClickPending=true;
+  pdfCloseSelectionPopup();
+  hideTransPopup();
   setTimeout(()=>{
     const sel=window.getSelection();
     const txt=sel?sel.toString().trim():'';
@@ -1137,7 +1337,7 @@ function pdfHandleDblClick(e){
     const word=normalizeWordLookup(txt);
     if(!word||word.length<2)return;
     let rect={left:100,bottom:100,top:100};
-    if(sel.rangeCount>0){const range=sel.getRangeAt(0);rect=range.getBoundingClientRect()}
+    if(sel.rangeCount>0){try{const range=sel.getRangeAt(0);rect=range.getBoundingClientRect()}catch(x){}}
     renderTransPopup(word,rect);
     sel.removeAllRanges()},80)}
 
