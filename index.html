@@ -32,7 +32,7 @@ a{color:var(--accent);text-decoration:none}
 .nav-btn.active{background:linear-gradient(135deg,var(--accent),#7c6cf0);color:#fff;font-weight:600;box-shadow:0 4px 16px rgba(108,92,231,.35)}
 .nav-btn:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
 .nav-btn .icon{width:20px;text-align:center;font-size:1.1rem}
-.main{flex:1;margin-right:260px;padding:28px;min-width:0}
+.main{flex:1;padding:28px;min-width:0}
 .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;gap:12px}
 .topbar h2{font-size:1.5rem;font-weight:700;letter-spacing:-.02em}
 .topbar-actions{display:flex;gap:10px;align-items:center}
@@ -87,10 +87,13 @@ tr:hover td{background:var(--card-hover)}
 .theme-toggle{background:none;border:1px solid var(--border);color:var(--text);width:38px;height:38px;border-radius:50%;cursor:pointer;font-size:1.15rem;display:flex;align-items:center;justify-content:center;transition:all .3s}
 .theme-toggle:hover{background:var(--accent-glow);border-color:var(--accent);transform:rotate(30deg)}
 .theme-toggle:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.hamburger{display:none;background:none;border:none;color:var(--text);font-size:1.5rem;cursor:pointer;padding:8px;min-width:44px;min-height:44px;display:flex;align-items:center;justify-content:center;border-radius:10px;transition:background .2s}
+.hamburger{background:none;border:none;color:var(--text);font-size:1.5rem;cursor:pointer;padding:8px;min-width:44px;min-height:44px;display:flex;align-items:center;justify-content:center;border-radius:10px;transition:background .2s}
 .hamburger:hover{background:var(--accent-glow)}
 .hamburger:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-@media(max-width:768px){.sidebar{transform:translateX(100%)}.sidebar.open{transform:translateX(0)}.main{margin-right:0;padding:16px}.hamburger{display:flex}.stat-grid{grid-template-columns:repeat(2,1fr)}.grid-2{grid-template-columns:1fr}}
+.sidebar:not(.open){transform:translateX(100%)}
+.main.sidebar-open{margin-right:260px}
+.main.sidebar-closed{margin-right:0}
+@media(max-width:768px){.sidebar{transform:translateX(100%)}.sidebar.open{transform:translateX(0)}.main{margin-right:0;padding:16px}.stat-grid{grid-template-columns:repeat(2,1fr)}.grid-2{grid-template-columns:1fr}}
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(6px);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px}
 .modal{background:var(--card);border-radius:var(--radius);padding:28px;max-width:500px;width:100%;max-height:80vh;overflow-y:auto;border:1px solid var(--border);box-shadow:0 24px 80px rgba(0,0,0,.5)}
 .modal h3{margin-bottom:18px;font-weight:700}
@@ -110,7 +113,7 @@ tr:hover td{background:var(--card-hover)}
 .pdf-page-wrap{position:relative;display:inline-block;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 12px 40px rgba(0,0,0,.25);line-height:0;transition:box-shadow .3s}
 .pdf-page-wrap:hover{box-shadow:0 16px 50px rgba(0,0,0,.35)}
 .pdf-page-wrap canvas{display:block}
-.pdf-page-wrap .textLayer{position:absolute;left:0;top:0;right:0;bottom:0;overflow:hidden;opacity:.25;line-height:1.0;pointer-events:auto;-webkit-text-size-adjust:none;text-size-adjust:none}
+.pdf-page-wrap .textLayer{position:absolute;left:0;top:0;right:0;bottom:0;overflow:hidden;opacity:0;line-height:1.0;pointer-events:auto;-webkit-text-size-adjust:none;text-size-adjust:none}
 .pdf-page-wrap .textLayer>span,.pdf-page-wrap .textLayer>br{color:transparent;position:absolute;white-space:pre;cursor:text;transform-origin:0% 0%;-webkit-tap-highlight-color:rgba(108,92,231,.3);z-index:1}
 .pdf-page-wrap .textLayer .highlight{margin:-1px;padding:1px;background-color:rgba(180,0,180,.2);border-radius:2px}
 .pdf-page-wrap .textLayer .highlight.appended{display:inline}
@@ -221,13 +224,26 @@ tr:hover td{background:var(--card-hover)}
 .offline-banner{background:linear-gradient(90deg,var(--warning),#f0c040);color:#000;text-align:center;padding:8px;font-size:.82rem;font-weight:600;display:none;letter-spacing:.02em}
 .offline-banner.visible{display:block}
 .eng-quiz-frame{width:100%;height:calc(100vh - 140px);min-height:600px;border:none;border-radius:var(--radius);background:var(--card)}
+/* TEXT SELECTION INPUT */
+.text-selectable{line-height:2.4;direction:ltr;text-align:left;font-size:1rem;user-select:none;-webkit-user-select:none}
+.text-word{display:inline-block;padding:2px 5px;margin:1px;border-radius:6px;cursor:pointer;transition:all .2s;border:1px solid transparent;color:var(--text)}
+.text-word:hover{background:var(--accent-glow);border-color:var(--accent)}
+.text-word.selected{background:linear-gradient(135deg,var(--accent),#7c6cf0);color:#fff;border-color:var(--accent);box-shadow:0 2px 8px rgba(108,92,231,.3)}
+.translated-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;background:var(--bg);border:1px solid var(--border);margin-bottom:6px;transition:all .2s}
+.translated-item:hover{border-color:var(--accent)}
+.translated-item input[type="checkbox"]{accent-color:var(--accent);width:16px;height:16px;flex-shrink:0}
+.translated-item .tw{font-weight:600;min-width:80px;direction:ltr}
+.translated-item .tt{color:var(--success);flex:1;font-weight:500}
+.translated-item.moved{opacity:.5;border-color:var(--success)}
+.translated-item.moved .tw{text-decoration:line-through}
+.sel-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;justify-content:flex-end}
 </style>
 </head>
 <body>
 <div class="offline-banner" id="offlineBanner">⚡ شما آفلاین هستید - داده‌ها محلی ذخیره می‌شوند</div>
 <div class="app">
 <aside class="sidebar" id="sidebar">
-<div class="sidebar-header"><h1>لایتنر</h1><p>مرور هوشمند واژگان</p></div>
+<div class="sidebar-header"><div style="display:flex;align-items:center;justify-content:space-between"><div><h1>لایتنر</h1><p>مرور هوشمند واژگان</p></div><button type="button" class="theme-toggle" id="sidebarLockBtn" title="قفل سایدبار" style="width:32px;height:32px;font-size:.9rem">🔓</button></div></div>
 <nav id="nav"></nav>
 <div style="margin-top:auto;padding:16px 20px"><button class="theme-toggle" id="themeBtn" type="button" aria-label="تغییر پوسته">🌙</button></div>
 </aside>
@@ -251,7 +267,7 @@ const PDF_THUMB_SCALE=0.2;
 const LS_KEY='leitner_v2';
 const LS_BACKUP_KEY='leitner_backup';
 const SCHEMA_VERSION=3;
-function defaultState(){return{words:[],longTerm:[],stats:{reviewed:0,correct:0,wrong:0,streak:0,xp:0,lastReviewDate:null,history:{}},categories:['پیش‌فرض'],settings:{theme:'dark',sourceLang:'en',targetLang:'fa',notifications:false,notificationTime:'09:00'},_version:SCHEMA_VERSION}}
+function defaultState(){return{words:[],longTerm:[],stats:{reviewed:0,correct:0,wrong:0,streak:0,xp:0,lastReviewDate:null,history:{}},categories:['پیش‌فرض'],settings:{theme:'dark',sourceLang:'en',targetLang:'fa',notifications:false,notificationTime:'09:00',sidebarLocked:false},_version:SCHEMA_VERSION}}
 let S=loadState();
 
 function sanitizeCard(c){
@@ -626,52 +642,6 @@ async function renderTransPopup(word,rect){
     if(addBtn){addBtn.disabled=true;addBtn.textContent='✅ در کتابخانه موجود است'}}
 }
 
-function pdfHandleDblClick(e){
-  if(currentTab!=='pdfreader')return;
-  const existingPopup=document.getElementById('pdfPopup');
-  if(existingPopup)existingPopup.classList.remove('visible');
-
-  setTimeout(()=>{
-    const sel=window.getSelection();
-    const txt=sel?sel.toString().trim():'';
-    if(!txt||txt.length<1)return;
-    if(!/[a-zA-Z]/.test(txt))return;
-
-    const word=normalizeWordLookup(txt);
-    if(!word||word.length<2)return;
-
-    let rect={left:100,bottom:100,top:100};
-    if(sel.rangeCount>0){
-      const range=sel.getRangeAt(0);
-      rect=range.getBoundingClientRect()}
-
-    renderTransPopup(word,rect);
-    sel.removeAllRanges()},80)}
-
-function pdfHandleMouseUp(e){
-  if(currentTab!=='pdfreader')return;
-  setTimeout(()=>{
-    const sel=window.getSelection();
-    const txt=sel?sel.toString().trim():'';
-    const popup=document.getElementById('pdfPopup');
-    if(!txt||txt.length<1){if(popup)popup.classList.remove('visible');pdfSelectedText='';return}
-    if(!/[a-zA-Z]/.test(txt)){if(popup)popup.classList.remove('visible');return}
-    pdfSelectedText=txt;
-    let popupEl=document.getElementById('pdfPopup');
-    if(!popupEl){popupEl=document.createElement('div');popupEl.id='pdfPopup';popupEl.className='pdf-popup visible';
-    popupEl.innerHTML=`<div style="font-size:.8rem;color:var(--text2);margin-bottom:6px">متن انتخاب شده:</div><div id="pdfSelText" style="font-size:.85rem;max-height:100px;overflow-y:auto;margin-bottom:10px;word-break:break-word;border-bottom:1px solid var(--border);padding-bottom:8px"></div><div style="display:flex;gap:6px;flex-wrap:wrap"><button type="button" class="btn btn-primary btn-sm" id="pdfExtract">استخراج کلمات</button><button type="button" class="btn btn-ghost btn-sm" id="pdfCopyTxt">کپی</button><button type="button" class="btn btn-ghost btn-sm" id="pdfClosePopup">بستن</button></div>`;
-    document.body.appendChild(popupEl);
-    document.getElementById('pdfExtract').onclick=pdfExtractWords;
-    document.getElementById('pdfCopyTxt').onclick=()=>{navigator.clipboard.writeText(pdfSelectedText).then(()=>toast('کپی شد','success')).catch(()=>toast('خطا در کپی','error'))};
-    document.getElementById('pdfClosePopup').onclick=()=>{popupEl.classList.remove('visible');pdfSelectedText=''}}
-    popupEl.classList.add('visible');
-    document.getElementById('pdfSelText').textContent=pdfSelectedText.slice(0,300)+(pdfSelectedText.length>300?'...':'');
-    let top=100,left=100;
-    if(sel.rangeCount>0){const range=sel.getRangeAt(0);const rect=range.getBoundingClientRect();
-    top=Math.min(rect.bottom+10,window.innerHeight-220);left=Math.min(rect.left,window.innerWidth-320);
-    if(left<10)left=10;if(top<10)top=rect.top-220}
-    popupEl.style.top=top+'px';popupEl.style.left=left+'px'},50)}
-
 // ═══════════════════════════════════════════
 // NAVIGATION
 // ═══════════════════════════════════════════
@@ -692,7 +662,7 @@ let currentTab='review';
 function renderNav(){
 const nav=document.getElementById('nav');
 nav.innerHTML=TABS.map(t=>`<button type="button" class="nav-btn${t.id===currentTab?' active':''}" data-tab="${t.id}"><span class="icon">${t.icon}</span>${t.label}</button>`).join('');
-nav.querySelectorAll('.nav-btn').forEach(b=>b.onclick=()=>{currentTab=b.dataset.tab;render();document.getElementById('sidebar').classList.remove('open')})}
+nav.querySelectorAll('.nav-btn').forEach(b=>b.onclick=()=>{currentTab=b.dataset.tab;render();if(!S.settings.sidebarLocked){document.getElementById('sidebar').classList.remove('open');document.getElementById('main').className='main sidebar-closed'}})}
 function render(){
 if(currentTab!=='review'&&currentTab!=='pdfreader')document.onkeydown=null;
 if(currentTab!=='pdfreader')hideTransPopup();
@@ -723,7 +693,11 @@ if(!reviewSession.queue.length){startReview();if(!reviewSession.queue.length){c.
 const w=reviewSession.queue[reviewSession.idx];
 const prog=Math.round((reviewSession.idx/reviewSession.queue.length)*100);
 const tier=getFrequencyTier(w.word);
-c.innerHTML=`<div style="max-width:500px;margin:0 auto"><div class="flex" style="justify-content:space-between;margin-bottom:16px"><span style="color:var(--text2)">${reviewSession.idx+1} از ${reviewSession.queue.length}</span><div class="flex" style="gap:4px"><span class="badge badge-accent">${w.box>0?'جعبه '+w.box:'جدید'}</span>${tier?`<span class="badge tier-${tier}">${tierLabel(tier)}</span>`:''}</div></div><div class="progress-bar"><div class="progress-fill" style="width:${prog}%"></div></div><div class="review-card" id="rCard" tabindex="0" role="button" aria-label="کلیک برای نمایش پاسخ"><div class="review-inner"><div class="review-face"><div style="font-size:1.8rem;font-weight:700;margin-bottom:12px">${esc(w.word)} <button type="button" class="trans-audio-btn" id="reviewSpeakBtn" title="شنیدن تلفظ" style="vertical-align:middle;font-size:1rem">🔊</button></div>${w.ipa?`<div style="color:var(--text2);font-size:.9rem">${esc(w.ipa)}</div>`:''}<div style="color:var(--text2);font-size:.8rem;margin-top:16px">برای نمایش پاسخ کلیک کنید</div></div><div class="review-face review-back"><div style="font-size:1.5rem;font-weight:600;color:var(--accent);margin-bottom:12px">${esc(w.translation)}</div>${w.category&&w.category!=='پیش‌فرض'?`<span class="tag">${esc(w.category)}</span>`:''}${w.context?`<div class="context-sentence">${esc(w.context)}</div>`:''}<div style="margin-top:10px"><button type="button" class="btn btn-ghost btn-sm" id="reviewEditBtn" style="font-size:.75rem">✏️ ویرایش</button></div></div></div></div><div class="rating-bar" id="ratingBar" style="display:none"><button type="button" class="btn btn-danger btn-sm" data-rate="1">❌ نادرست <kbd style="font-size:.6rem;opacity:.6">۱</kbd></button><button type="button" class="btn btn-ghost btn-sm" data-rate="3">😐 سخت <kbd style="font-size:.6rem;opacity:.6">۲</kbd></button><button type="button" class="btn btn-primary btn-sm" data-rate="4">🙂 خوب <kbd style="font-size:.6rem;opacity:.6">۳</kbd></button><button type="button" class="btn btn-success btn-sm" data-rate="5">😄 عالی <kbd style="font-size:.6rem;opacity:.6">۴</kbd></button></div></div>`;
+let backHtml='';
+if(w.definitions&&w.definitions.length)backHtml+='<div style="margin-top:8px;text-align:right">'+w.definitions.slice(0,2).map(d=>'<div style="font-size:.8rem;color:var(--text2);margin-bottom:4px">• '+esc(d)+'</div>').join('')+'</div>';
+if(w.examples&&w.examples.length)backHtml+='<div style="margin-top:6px">'+w.examples.slice(0,2).map(ex=>'<div style="font-size:.78rem;color:var(--text2);font-style:italic;border-right:2px solid var(--accent);padding-right:8px;margin-bottom:4px">"'+esc(ex)+'"</div>').join('')+'</div>';
+if(w.synonyms&&w.synonyms.length)backHtml+='<div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:4px">'+w.synonyms.slice(0,4).map(s=>'<span style="font-size:.7rem;padding:2px 8px;border-radius:8px;background:var(--bg);color:var(--text2);border:1px solid var(--border)">'+esc(s)+'</span>').join('')+'</div>';
+c.innerHTML=`<div style="max-width:500px;margin:0 auto"><div class="flex" style="justify-content:space-between;margin-bottom:16px"><span style="color:var(--text2)">${reviewSession.idx+1} از ${reviewSession.queue.length}</span><div class="flex" style="gap:4px"><span class="badge badge-accent">${w.box>0?'جعبه '+w.box:'جدید'}</span>${tier?`<span class="badge tier-${tier}">${tierLabel(tier)}</span>`:''}</div></div><div class="progress-bar"><div class="progress-fill" style="width:${prog}%"></div></div><div class="review-card" id="rCard" tabindex="0" role="button" aria-label="کلیک برای نمایش پاسخ"><div class="review-inner"><div class="review-face"><div style="font-size:1.8rem;font-weight:700;margin-bottom:12px">${esc(w.word)} <button type="button" class="trans-audio-btn" id="reviewSpeakBtn" title="شنیدن تلفظ" style="vertical-align:middle;font-size:1rem">🔊</button></div>${w.ipa?`<div style="color:var(--text2);font-size:.9rem">${esc(w.ipa)}</div>`:''}<div style="color:var(--text2);font-size:.8rem;margin-top:16px">برای نمایش پاسخ کلیک کنید</div></div><div class="review-face review-back"><div style="font-size:1.5rem;font-weight:600;color:var(--accent);margin-bottom:12px">${esc(w.translation)}</div>${w.category&&w.category!=='پیش‌فرض'?`<span class="tag">${esc(w.category)}</span>`:''}${w.context?`<div class="context-sentence">${esc(w.context)}</div>`:''}${backHtml}<div style="margin-top:10px"><button type="button" class="btn btn-ghost btn-sm" id="reviewEditBtn" style="font-size:.75rem">✏️ ویرایش</button></div></div></div></div><div class="rating-bar" id="ratingBar" style="display:none"><button type="button" class="btn btn-danger btn-sm" data-rate="1">❌ نادرست <kbd style="font-size:.6rem;opacity:.6">۱</kbd></button><button type="button" class="btn btn-ghost btn-sm" data-rate="3">😐 سخت <kbd style="font-size:.6rem;opacity:.6">۲</kbd></button><button type="button" class="btn btn-primary btn-sm" data-rate="4">🙂 خوب <kbd style="font-size:.6rem;opacity:.6">۳</kbd></button><button type="button" class="btn btn-success btn-sm" data-rate="5">😄 عالی <kbd style="font-size:.6rem;opacity:.6">۴</kbd></button></div></div>`;
 const card=document.getElementById('rCard');
 const ratingBar=document.getElementById('ratingBar');
 card.onclick=()=>{if(reviewSession.flipped)return;reviewSession.flipped=true;card.classList.add('flipped');ratingBar.style.display='flex'};
@@ -781,9 +755,11 @@ const id=btn.dataset.edit||btn.dataset.del||btn.dataset.fav||btn.dataset.lt;
 if(btn.dataset.del){const w=S.words.find(x=>x.id===id);const name=w?w.word:'';if(!confirm(`حذف «${name}»؟`))return;S.words=S.words.filter(w=>w.id!==id);save();renderLibrary(c);toast('حذف شد','success')}
 if(btn.dataset.fav){const w=S.words.find(x=>x.id===id);if(w){w.favorite=!w.favorite;save();renderLibrary(c)}}
 if(btn.dataset.lt){const w=S.words.find(x=>x.id===id);if(w){S.words=S.words.filter(x=>x.id!==id);w.box=0;w.nextReviewDate=null;S.longTerm.push(w);save();renderLibrary(c);toast('به حافظه بلندمدت منتقل شد','success')}}
-if(btn.dataset.edit)editWord(id)}}
-function editWord(id,onClose){
-const w=S.words.find(x=>x.id===id);if(!w)return;
+if(btn.dataset.edit)editWord(id)}
+if(btn.dataset.ltedit)editWord(btn.dataset.ltedit,()=>renderLongterm(document.getElementById('content')),'longTerm')}
+function editWord(id,onClose,store){
+const storeArr=store==='longTerm'?S.longTerm:S.words;
+const w=storeArr.find(x=>x.id===id);if(!w)return;
 const ov=document.createElement('div');ov.className='modal-overlay';
 let detailsHtml='';
 if(w.definitions&&w.definitions.length){
@@ -799,7 +775,7 @@ const closeModal=()=>{ov.remove();if(onClose)onClose()};
 ov.onclick=e=>{if(e.target===ov)closeModal()};
 const onKey=e=>{if(e.key==='Escape'){document.removeEventListener('keydown',onKey);closeModal()}};
 document.addEventListener('keydown',onKey);
-ov.querySelector('#eSave').onclick=()=>{w.word=ov.querySelector('#eWord').value.trim();w.translation=ov.querySelector('#eTrans').value.trim();w.ipa=ov.querySelector('#eIpa').value.trim();w.category=ov.querySelector('#eCat').value;save();closeModal();if(!onClose)renderLibrary(document.getElementById('content'));toast('ذخیره شد','success')};
+ov.querySelector('#eSave').onclick=()=>{w.word=ov.querySelector('#eWord').value.trim();w.translation=ov.querySelector('#eTrans').value.trim();w.ipa=ov.querySelector('#eIpa').value.trim();w.category=ov.querySelector('#eCat').value;save();closeModal();if(!onClose)renderLibrary(document.getElementById('content'));else onClose();toast('ذخیره شد','success')};
 ov.querySelector('#eCancel').onclick=()=>{document.removeEventListener('keydown',onKey);closeModal()}}
 
 // ═══════════════════════════════════════════
@@ -808,7 +784,7 @@ ov.querySelector('#eCancel').onclick=()=>{document.removeEventListener('keydown'
 let ltFilter='';
 function renderLongterm(c){
 const items=S.longTerm.filter(w=>!ltFilter||w.word.toLowerCase().includes(ltFilter.toLowerCase())||w.translation.toLowerCase().includes(ltFilter.toLowerCase()));
-c.innerHTML=`<div class="filter-bar"><input class="input" placeholder="جستجو..." style="max-width:300px" value="${esc(ltFilter)}" id="ltSearch"><span style="color:var(--text2);font-size:.85rem">${items.length} کلمه</span></div><div class="table-wrap card"><table><thead><tr><th>کلمه</th><th>ترجمه</th><th>تاریخ اضافه</th><th>عملیات</th></tr></thead><tbody>${items.length?items.map(w=>`<tr><td><strong>${esc(w.word)}</strong>${w.ipa?`<br><small style="color:var(--text2)">${esc(w.ipa)}</small>`:''} <button type="button" class="btn btn-ghost btn-sm" data-speak="${esc(w.word)}" style="padding:2px 6px;font-size:.75rem" title="شنیدن تلفظ">🔊</button></td><td>${esc(w.translation)}</td><td>${fmtDate(w.addedDate)}</td><td><button type="button" class="btn btn-ghost btn-sm" data-back="${w.id}" aria-label="بازگشت به کتابخانه">↩️ بازگشت</button><button type="button" class="btn btn-ghost btn-sm" data-dlt="${w.id}" aria-label="حذف">🗑️</button></td></tr>`).join(''):'<tr><td colspan="4" class="empty">حافظه بلندمدت خالی است</td></tr>'}</tbody></table></div>`;
+c.innerHTML=`<div class="filter-bar"><input class="input" placeholder="جستجو..." style="max-width:300px" value="${esc(ltFilter)}" id="ltSearch"><span style="color:var(--text2);font-size:.85rem">${items.length} کلمه</span></div><div class="table-wrap card"><table><thead><tr><th>کلمه</th><th>ترجمه</th><th>تاریخ اضافه</th><th>عملیات</th></tr></thead><tbody>${items.length?items.map(w=>`<tr><td><strong>${esc(w.word)}</strong>${w.ipa?`<br><small style="color:var(--text2)">${esc(w.ipa)}</small>`:''} <button type="button" class="btn btn-ghost btn-sm" data-speak="${esc(w.word)}" style="padding:2px 6px;font-size:.75rem" title="شنیدن تلفظ">🔊</button></td><td>${esc(w.translation)}</td><td>${fmtDate(w.addedDate)}</td><td><button type="button" class="btn btn-ghost btn-sm" data-ltedit="${w.id}" aria-label="ویرایش">✏️</button><button type="button" class="btn btn-ghost btn-sm" data-back="${w.id}" aria-label="بازگشت به کتابخانه">↩️ بازگشت</button><button type="button" class="btn btn-ghost btn-sm" data-dlt="${w.id}" aria-label="حذف">🗑️</button></td></tr>`).join(''):'<tr><td colspan="4" class="empty">حافظه بلندمدت خالی است</td></tr>'}</tbody></table></div>`;
 document.getElementById('ltSearch').oninput=e=>{ltFilter=e.target.value;renderLongterm(c)};
 c.querySelector('tbody').onclick=e=>{
 const btn=e.target.closest('button');if(!btn)return;
@@ -819,7 +795,10 @@ if(btn.dataset.dlt){const w=S.longTerm.find(x=>x.id===btn.dataset.dlt);const nam
 // ═══════════════════════════════════════════
 // 4. IMPORT (with Anki + URL import)
 // ═══════════════════════════════════════════
-let importStep=0,importRawText='',importWords=[],importExisting=new Set(),importSelected=new Set(),importTranslations=[],importCategory='پیش‌فرض',importDest='words',importFilter='all',importTransProgress={done:0,total:0};
+let importStep=0,importRawText='',importWords=[],importExisting=new Set(),importSelected=new Set(),importTranslations=[],importCategory='پیش‌فرض',importFilter='all',importTransProgress={done:0,total:0};
+let textRenderedWords=[];
+let translatedItems=[];
+let selectedTextItems=[];
 
 function parseWords(t){return[...new Set(t.toLowerCase().replace(/[^\w\s'-]/g,' ').split(/\s+/).filter(w=>w.length>=2&&!/^\d+$/.test(w)&&!/^[^a-z]+$/.test(w)))]}
 
@@ -829,184 +808,192 @@ const newW=unique.filter(w=>!importExisting.has(w));
 return{total:importWords.length,unique:unique.length,existing:unique.length-newW.length,newCount:newW.length}}
 
 function renderImportSteps(){
-const labels=['ورود متن','انتخاب','ترجمه','بررسی','پایان'];
+const labels=['ورود متن','انتخاب کلمات','ترجمه','عملیات'];
 let h='<div class="import-steps">';
-for(let i=0;i<5;i++){
+for(let i=0;i<4;i++){
 const cls=i<importStep?'done':i===importStep?'active':'';
 h+=`<div style="text-align:center"><div class="import-step-dot ${cls}">${i<importStep?'✓':i+1}</div><div class="import-step-label">${labels[i]}</div></div>`;
-if(i<4)h+=`<div class="import-step-line${i<importStep?' done':''}"></div>`}
+if(i<3)h+=`<div class="import-step-line${i<importStep?' done':''}"></div>`}
 h+='</div>';return h}
 
 function renderImport(c){
 let h=renderImportSteps();
 if(importStep===0)h+=renderImportStep0();
-else if(importStep===1)h+=renderImportStep1();
+else if(importStep===1)h+=renderSelectableTextSection();
 else if(importStep===2)h+=renderImportStep2();
-else if(importStep===3)h+=renderImportStep3();
+else if(importStep===3)h+=renderTranslatedResults();
 else if(importStep===4)h+=renderImportStep4();
 c.innerHTML=h;bindImportEvents()}
 
 function renderImportStep0(){
-return`<div class="card" style="margin-bottom:16px"><h3 style="margin-bottom:12px">ورود متن</h3><textarea class="input" id="importText" rows="6" placeholder="متن انگلیسی را اینجا بچسبانید...">${esc(importRawText)}</textarea><div class="flex" style="margin-top:12px"><select class="input" style="max-width:200px" id="importCat">${S.categories.map(c=>`<option${c===importCategory?' selected':''}>${esc(c)}</option>`).join('')}</select><select class="input" style="max-width:200px" id="importDest"><option value="words"${importDest==='words'?' selected':''}>کتابخانه</option><option value="longTerm"${importDest==='longTerm'?' selected':''}>حافظه بلندمدت</option></select><button type="button" class="btn btn-primary" id="importParse">پردازش</button></div></div><div class="card" style="margin-bottom:16px"><h3 style="margin-bottom:12px">ورود فایل</h3><div class="flex"><input type="file" id="fileInput" accept=".txt,.pdf,.docx,.json,.apkg" style="display:none"><button type="button" class="btn btn-ghost" onclick="document.getElementById('fileInput').click()">انتخاب فایل</button><span style="color:var(--text2);font-size:.85rem">TXT, PDF, DOCX, JSON, Anki (.apkg)</span></div></div><div class="card"><h3 style="margin-bottom:12px">ورود از URL</h3><div class="flex"><input class="input" id="importUrl" placeholder="https://example.com/words.txt" style="max-width:400px"><button type="button" class="btn btn-ghost" id="importUrlBtn">دریافت</button></div></div>`}
+return`<div class="card" style="margin-bottom:16px"><h3 style="margin-bottom:12px">ورود متن</h3><textarea class="input" id="importText" rows="6" placeholder="متن انگلیسی را اینجا بچسبانید...">${esc(importRawText)}</textarea><div class="flex" style="margin-top:12px"><select class="input" style="max-width:200px" id="importCat">${S.categories.map(c=>`<option${c===importCategory?' selected':''}>${esc(c)}</option>`).join('')}</select><button type="button" class="btn btn-primary" id="importParse">نمایش متن</button></div></div><div class="card" style="margin-bottom:16px"><h3 style="margin-bottom:12px">ورود فایل</h3><div class="flex"><input type="file" id="fileInput" accept=".txt,.pdf,.docx,.json,.apkg" style="display:none"><button type="button" class="btn btn-ghost" onclick="document.getElementById('fileInput').click()">انتخاب فایل</button><span style="color:var(--text2);font-size:.85rem">TXT, PDF, DOCX, JSON, Anki (.apkg)</span></div></div><div class="card"><h3 style="margin-bottom:12px">ورود از URL</h3><div class="flex"><input class="input" id="importUrl" placeholder="https://example.com/words.txt" style="max-width:400px"><button type="button" class="btn btn-ghost" id="importUrlBtn">دریافت</button></div></div>`}
 
-function renderImportStep1(){
-const stats=calcImportStats();
-const filtered=getImportFiltered();
-let h=`<div class="import-stat-grid"><div class="import-stat"><div class="val">${stats.total}</div><div class="lbl">جمع</div></div><div class="import-stat"><div class="val">${stats.unique}</div><div class="lbl">یکتا</div></div><div class="import-stat"><div class="val" style="color:var(--warning)">${stats.existing}</div><div class="lbl">موجود</div></div><div class="import-stat"><div class="val" style="color:var(--success)">${stats.newCount}</div><div class="lbl">جدید</div></div></div>`;
-h+=`<div class="card"><div class="import-filter-bar"><label><input type="radio" name="impF" value="all"${importFilter==='all'?' checked':''}> همه</label><label><input type="radio" name="impF" value="new"${importFilter==='new'?' checked':''}> جدید</label><label><input type="radio" name="impF" value="existing"${importFilter==='existing'?' checked':''}> موجود</label><div style="flex:1"></div><button type="button" class="btn btn-ghost btn-sm" id="impSelAll">انتخاب همه</button><button type="button" class="btn btn-ghost btn-sm" id="impDeselAll">لغو انتخاب</button></div>`;
-h+=`<div class="import-word-grid" id="impWordGrid">`;
-filtered.forEach(({word,idx,isExisting})=>{
-const checked=importSelected.has(idx)?' checked':'';
-const dis=isExisting?' disabled':'';
-h+=`<label class="import-word-item${isExisting?' existing':''}"><input type="checkbox" data-ii="${idx}"${checked}${dis}><span style="flex:1">${esc(word)}</span>${isExisting?'<span class="badge badge-warning">موجود</span>':'<span class="badge badge-success">جدید</span>'}</label>`});
+function renderSelectableTextSection(){
+if(!textRenderedWords.length){
+  if(!importRawText.trim())return`<div class="card"><p style="color:var(--text2)">متنی وارد نشده است</p></div>`;
+  textRenderedWords=parseWords(importRawText).map((w,i)=>({id:i,word:w,selected:false}));
+}
+const selCount=textRenderedWords.filter(w=>w.selected).length;
+let h=`<div class="card" style="margin-bottom:16px"><h3 style="margin-bottom:12px">انتخاب کلمات</h3>`;
+h+=`<p style="color:var(--text2);font-size:.85rem;margin-bottom:12px">بر روی کلمات کلیک کنید تا انتخاب شوند</p>`;
+h+=`<div class="text-selectable">`;
+textRenderedWords.forEach(w=>{
+  h+=`<span class="text-word${w.selected?' selected':''}" data-wid="${w.id}">${esc(w.word)}</span> `;
+});
 h+=`</div>`;
-const selCount=importSelected.size;
-h+=`<div class="flex" style="justify-content:space-between"><button type="button" class="btn btn-ghost" id="impBack">بازگشت</button><button type="button" class="btn btn-primary" id="impTranslate"${selCount===0?' disabled':''}>ترجمه انتخاب شده (${selCount})</button></div></div>`;
+h+=`<div class="sel-actions">`;
+h+=`<button type="button" class="btn btn-ghost" id="tsBack">بازگشت</button>`;
+h+=`<button type="button" class="btn btn-ghost btn-sm" id="tsSelectAll">انتخاب همه</button>`;
+h+=`<button type="button" class="btn btn-ghost btn-sm" id="tsDeselectAll">لغو انتخاب</button>`;
+h+=`<button type="button" class="btn btn-primary" id="tsTranslate"${selCount===0?' disabled':''}>ترجمه انتخاب شده (${selCount})</button>`;
+h+=`</div></div>`;
 return h}
-
-function getImportFiltered(){
-const unique=[...new Set(importWords)];
-return unique.map((w,i)=>{
-const isExisting=importExisting.has(w);
-if(importFilter==='new'&&isExisting)return null;
-if(importFilter==='existing'&&!isExisting)return null;
-return{word:w,idx:importWords.indexOf(w),isExisting}}).filter(Boolean)}
 
 function renderImportStep2(){
 const pct=importTransProgress.total?Math.round(importTransProgress.done/importTransProgress.total*100):0;
 return`<div class="card import-progress-card"><div class="trans-spinner" style="width:40px;height:40px;margin:0 auto 16px;border-width:3px"></div><h3 style="margin-bottom:8px">در حال ترجمه</h3><p style="color:var(--text2)">${importTransProgress.done} از ${importTransProgress.total}</p><div class="progress-bar import-progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div></div>`}
 
-function renderImportStep3(){
-let h=`<div class="card"><div class="flex" style="justify-content:space-between;margin-bottom:12px"><div class="flex" style="gap:8px"><button type="button" class="btn btn-ghost btn-sm" id="impRevSelAll">انتخاب همه</button><button type="button" class="btn btn-ghost btn-sm" id="impRevDeselAll">لغو انتخاب</button></div><span style="color:var(--text2);font-size:.85rem">${importTranslations.filter(t=>t.selected).length} انتخاب شده</span></div>`;
-h+=`<div class="import-review-wrap"><table class="import-review-table"><thead><tr><th style="width:40px"><input type="checkbox" id="impRevCheckAll" checked></th><th style="width:120px">کلمه</th><th>ترجمه</th></tr></thead><tbody>`;
-importTranslations.forEach((t,i)=>{
-h+=`<tr><td><input type="checkbox" data-ri="${i}"${t.selected?' checked':''}></td><td><strong>${esc(t.word)}</strong></td><td><input type="text" data-rt="${i}" value="${esc(t.translation)}"></td></tr>`});
-h+=`</tbody></table></div>`;
-h+=`<div class="flex" style="justify-content:space-between;margin-top:16px"><button type="button" class="btn btn-ghost" id="impBack2">بازگشت</button><div class="flex" style="gap:6px;flex-wrap:wrap"><button type="button" class="btn btn-danger btn-sm" id="impDeleteSelected">حذف انتخاب شده</button><button type="button" class="btn btn-ghost" id="impAddKnown">افزودن به عنوان شناخته شده</button><button type="button" class="btn btn-success" id="impAdd">افزودن به لایتنر (${importTranslations.filter(t=>t.selected).length})</button></div></div></div>`;
+function renderTranslatedResults(){
+let h=`<div class="card" style="margin-bottom:16px">`;
+h+=`<h3 style="margin-bottom:12px">نتایج ترجمه</h3>`;
+if(!translatedItems.length){
+  h+=`<p style="color:var(--text2)">هیچ انتخاب ترجمه شده‌ای وجود ندارد</p>`;
+  h+=`</div>`;return h;
+}
+const activeItems=translatedItems.filter(t=>!t.moved);
+const selCount=activeItems.filter(t=>t.selected).length;
+h+=`<div class="flex" style="justify-content:space-between;margin-bottom:10px"><div class="flex" style="gap:6px">`;
+h+=`<button type="button" class="btn btn-ghost btn-sm" id="trSelAll">انتخاب همه</button>`;
+h+=`<button type="button" class="btn btn-ghost btn-sm" id="trDeselAll">لغو انتخاب</button>`;
+h+=`</div><span style="color:var(--text2);font-size:.85rem">${selCount} انتخاب شده</span></div>`;
+translatedItems.forEach(t=>{
+  h+=`<div class="translated-item${t.moved?' moved':''}" style="flex-direction:column;align-items:stretch;gap:6px">`;
+  h+=`<div style="display:flex;align-items:center;gap:10px"><input type="checkbox" data-tid="${t.id}"${t.selected?' checked':''}${t.moved?' disabled':''}>`;
+  h+=`<span class="tw">${esc(t.text)}</span>`;
+  h+=`<input type="text" class="input" data-tid-trans="${t.id}" value="${esc(t.translation||'')}" style="flex:1;padding:6px 10px;font-size:.85rem;direction:rtl" placeholder="ترجمه را ویرایش کنید...">`;
+  h+=`</div>`;
+  if(t.definitions&&t.definitions.length){h+=`<div style="font-size:.78rem;color:var(--text2);padding-right:20px">${t.definitions.slice(0,2).map(d=>'• '+esc(d)).join(' ')}</div>`}
+  if(t.examples&&t.examples.length){h+=`<div style="font-size:.75rem;color:var(--text2);font-style:italic;padding-right:20px;border-right:2px solid var(--accent);padding-left:8px;margin-top:2px">${t.examples.slice(0,1).map(ex=>'"'+esc(ex)+'"').join(' ')}</div>`}
+  h+=`</div>`;
+});
+h+=`<div class="sel-actions">`;
+h+=`<button type="button" class="btn btn-ghost" id="trNewText">متن جدید</button>`;
+h+=`<button type="button" class="btn btn-danger btn-sm" id="trRemove"${selCount===0?' disabled':''}>حذف انتخاب شده</button>`;
+h+=`<button type="button" class="btn btn-success" id="trAddLTM"${selCount===0?' disabled':''}>افزودن به حافظه بلندمدت (${selCount})</button>`;
+h+=`<button type="button" class="btn btn-primary" id="trAddLeitner"${selCount===0?' disabled':''}>افزودن به لایتنر (${selCount})</button>`;
+h+=`</div></div>`;
 return h}
 
 function renderImportStep4(){
 const added=importTransProgress.added||0,skipped=importTransProgress.skipped||0,failed=importTransProgress.failed||0;
 return`<div class="card import-done-card"><div style="font-size:3rem;margin-bottom:16px">✅</div><h2 style="margin-bottom:16px">ورود کامل شد</h2><div class="import-stat-grid" style="margin-bottom:20px"><div class="import-stat"><div class="val" style="color:var(--success)">${added}</div><div class="lbl">اضافه شد</div></div><div class="import-stat"><div class="val" style="color:var(--warning)">${skipped}</div><div class="lbl">تکراری رد شد</div></div>${failed?`<div class="import-stat"><div class="val" style="color:var(--danger)">${failed}</div><div class="lbl">ناموفق</div></div>`:''}</div><button type="button" class="btn btn-primary" id="impAgain">ورود مجدد</button></div>`}
 
+async function translateSelectedItems(){
+const toTranslate=textRenderedWords.filter(w=>w.selected);
+if(!toTranslate.length)return;
+importStep=2;importTransProgress={done:0,total:toTranslate.length};
+renderImport(document.getElementById('content'));
+translatedItems=[];
+for(let i=0;i<toTranslate.length;i+=5){
+const batch=toTranslate.slice(i,i+5);
+const results=await Promise.all(batch.map(async w=>{try{
+const arr=await Promise.all([fetchTranslation(w.word),fetchDictionary(w.word)]);
+const transResult=arr[0],dictResult=arr[1];
+const allDefs=dictResult?dictResult.meanings.flatMap(m=>m.definitions):[];
+const allExamples=dictResult?dictResult.meanings.flatMap(m=>m.examples):[];
+const allSynonyms=dictResult?dictResult.meanings.flatMap(m=>m.synonyms):[];
+const pos=dictResult&&dictResult.meanings[0]?dictResult.meanings[0].partOfSpeech:'';
+return{id:uid(),text:w.word,translation:transResult||'',ipa:dictResult?(dictResult.phoneticBr||dictResult.phoneticUs||dictResult.phonetic||''):'',definitions:allDefs,examples:allExamples,synonyms:allSynonyms,partOfSpeech:pos,audioUs:dictResult?dictResult.audioUs||'':'',audioBr:dictResult?dictResult.audioBr||'':'',selected:true,moved:false,createdAt:new Date().toISOString()};
+}catch(e){return{id:uid(),text:w.word,translation:'',selected:true,moved:false,createdAt:new Date().toISOString()}}}));
+translatedItems.push(...results);
+importTransProgress.done=Math.min(i+5,toTranslate.length);
+renderImport(document.getElementById('content'))}
+importStep=3;textRenderedWords.forEach(w=>w.selected=false);
+renderImport(document.getElementById('content'));
+toast(translatedItems.filter(t=>t.translation).length+' کلمه ترجمه شد','success')}
+
+function moveSelectedToLeitner(){
+const toAdd=translatedItems.filter(t=>t.selected&&t.translation&&!t.moved);
+let added=0,skipped=0;
+toAdd.forEach(t=>{
+const exists=S.words.some(w=>w.word.toLowerCase()===t.text.toLowerCase())||S.longTerm.some(w=>w.word.toLowerCase()===t.text.toLowerCase());
+if(exists){skipped++;t.moved=true;return}
+S.words.push({id:uid(),word:t.text,translation:t.translation,ipa:t.ipa||'',category:importCategory,favorite:false,context:'',box:0,repetitions:0,interval:1,easeFactor:2.5,addedDate:new Date().toISOString(),nextReviewDate:null,lastReviewedAt:null,stability:0,difficulty:0,elapsedDays:0,scheduledDays:0,reps:0,lapses:0,fsrsState:'new',definitions:t.definitions||[],examples:t.examples||[],synonyms:t.synonyms||[],partOfSpeech:t.partOfSpeech||'',audioUs:t.audioUs||'',audioBr:t.audioBr||''});
+t.moved=true;added++});
+save();
+renderImport(document.getElementById('content'));
+if(added)toast(added+' کلمه به لایتنر ضمیمه شد','success');
+if(skipped)toast(skipped+' کلمه تکراری بود','info')}
+
+function moveSelectedToLongTermMemory(){
+const toAdd=translatedItems.filter(t=>t.selected&&t.translation&&!t.moved);
+let added=0,skipped=0;
+toAdd.forEach(t=>{
+const exists=S.words.some(w=>w.word.toLowerCase()===t.text.toLowerCase())||S.longTerm.some(w=>w.word.toLowerCase()===t.text.toLowerCase());
+if(exists){skipped++;t.moved=true;return}
+S.longTerm.push({id:uid(),word:t.text,translation:t.translation,ipa:t.ipa||'',category:importCategory,favorite:false,context:'',box:0,repetitions:0,interval:1,easeFactor:2.5,addedDate:new Date().toISOString(),nextReviewDate:null,lastReviewedAt:null,stability:0,difficulty:0,elapsedDays:0,scheduledDays:0,reps:0,lapses:0,fsrsState:'new',definitions:t.definitions||[],examples:t.examples||[],synonyms:t.synonyms||[],partOfSpeech:t.partOfSpeech||'',audioUs:t.audioUs||'',audioBr:t.audioBr||''});
+t.moved=true;added++});
+save();
+renderImport(document.getElementById('content'));
+if(added)toast(added+' کلمه به حافظه بلندمدت ضمیمه شد','success');
+if(skipped)toast(skipped+' کلمه تکراری بود','info')}
+
+function removeSelectedItems(){
+translatedItems=translatedItems.filter(t=>!t.selected||t.moved);
+if(!translatedItems.filter(t=>!t.moved).length){translatedItems=[];importStep=1;textRenderedWords.forEach(w=>w.selected=false)}
+renderImport(document.getElementById('content'));
+toast('حذف شد','success')}
+
+function refreshSelectionActions(){
+const activeItems=translatedItems.filter(t=>!t.moved);
+const selCount=activeItems.filter(t=>t.selected).length;
+['trAddLeitner','trAddLTM','trRemove'].forEach(id=>{const el=document.getElementById(id);if(el)el.disabled=selCount===0})}
+
 function bindImportEvents(){
 if(importStep===0){
 const ta=document.getElementById('importText');
 if(ta)ta.oninput=()=>{importRawText=ta.value};
 const btn=document.getElementById('importParse');
-if(btn)btn.onclick=()=>{const txt=document.getElementById('importText').value;if(!txt.trim()){toast('متنی وارد نشده','error');return}importRawText=txt;importWords=parseWords(txt);importCategory=document.getElementById('importCat').value;importDest=document.getElementById('importDest').value;
-importExisting=new Set([...S.words,...S.longTerm].map(w=>w.word.toLowerCase()));
-importSelected=new Set(importWords.map((w,i)=>i).filter(i=>!importExisting.has(importWords[i])));
-importStep=1;renderImport(document.getElementById('content'))};
+if(btn)btn.onclick=()=>{const txt=document.getElementById('importText').value;if(!txt.trim()){toast('متنی وارد نشده','error');return}importRawText=txt;importCategory=document.getElementById('importCat').value;textRenderedWords=parseWords(txt).map((w,i)=>({id:i,word:w,selected:false}));importStep=1;renderImport(document.getElementById('content'))};
 const fi=document.getElementById('fileInput');
 if(fi)fi.onchange=handleFileImport;
-// URL import
 const urlBtn=document.getElementById('importUrlBtn');
-if(urlBtn)urlBtn.onclick=async()=>{const url=document.getElementById('importUrl')?.value?.trim();if(!url){toast('URL وارد نشده','error');return}try{toast('در حال دریافت...','info');const r=await fetch(url);if(!r.ok)throw new Error(r.status);const txt=await r.text();importRawText=txt;document.getElementById('importText').value=txt;importWords=parseWords(txt);importExisting=new Set([...S.words,...S.longTerm].map(w=>w.word.toLowerCase()));importSelected=new Set(importWords.map((_,i)=>i).filter(i=>!importExisting.has(importWords[i])));importStep=1;renderImport(document.getElementById('content'));toast('متن دریافت شد','success')}catch(e){toast('خطا در دریافت URL','error')}}}
-
+if(urlBtn)urlBtn.onclick=async()=>{const url=document.getElementById('importUrl')?.value?.trim();if(!url){toast('URL وارد نشده','error');return}try{toast('در حال دریافت...','info');const r=await fetch(url);if(!r.ok)throw new Error(r.status);const txt=await r.text();importRawText=txt;document.getElementById('importText').value=txt;textRenderedWords=parseWords(txt).map((w,i)=>({id:i,word:w,selected:false}));importStep=1;renderImport(document.getElementById('content'));toast('متن دریافت شد','success')}catch(e){toast('خطا در دریافت URL','error')}}}
 else if(importStep===1){
-document.querySelectorAll('input[name="impF"]').forEach(r=>{r.onchange=()=>{importFilter=r.value;renderImport(document.getElementById('content'))}});
-document.querySelectorAll('[data-ii]').forEach(cb=>{cb.onchange=()=>{
-  // Save scroll position before re-render
-  const scrollEl=document.querySelector('.import-word-grid');
-  const scrollPos=scrollEl?scrollEl.scrollTop:0;
-  const idx=parseInt(cb.dataset.ii);if(cb.checked)importSelected.add(idx);else importSelected.delete(idx);
-  renderImport(document.getElementById('content'));
-  // Restore scroll position after re-render
-  const newScrollEl=document.querySelector('.import-word-grid');
-  if(newScrollEl)newScrollEl.scrollTop=scrollPos;
-}});
-const sa=document.getElementById('impSelAll');
-if(sa)sa.onclick=()=>{getImportFiltered().forEach(({idx})=>importSelected.add(idx));renderImport(document.getElementById('content'))};
-const da=document.getElementById('impDeselAll');
-if(da)da.onclick=()=>{importSelected.clear();renderImport(document.getElementById('content'))};
-const back=document.getElementById('impBack');
+document.querySelectorAll('.text-word').forEach(el=>{
+el.onclick=()=>{const wid=parseInt(el.dataset.wid);const w=textRenderedWords.find(x=>x.id===wid);if(w){w.selected=!w.selected;el.classList.toggle('selected');const selCount=textRenderedWords.filter(x=>x.selected).length;const btn=document.getElementById('tsTranslate');if(btn){btn.disabled=selCount===0;btn.textContent='ترجمه انتخاب شده ('+selCount+')'}}};
+});
+const back=document.getElementById('tsBack');
 if(back)back.onclick=()=>{importStep=0;renderImport(document.getElementById('content'))};
-const trans=document.getElementById('impTranslate');
-if(trans)trans.onclick=()=>{importStep=2;renderImport(document.getElementById('content'));startTranslation()}}
-
+const selAll=document.getElementById('tsSelectAll');
+if(selAll)selAll.onclick=()=>{textRenderedWords.forEach(w=>w.selected=true);renderImport(document.getElementById('content'))};
+const deselAll=document.getElementById('tsDeselectAll');
+if(deselAll)deselAll.onclick=()=>{textRenderedWords.forEach(w=>w.selected=false);renderImport(document.getElementById('content'))};
+const trans=document.getElementById('tsTranslate');
+if(trans)trans.onclick=()=>{translateSelectedItems()}}
 else if(importStep===3){
-document.querySelectorAll('[data-ri]').forEach(cb=>{cb.onchange=()=>{
-  const scrollEl=document.querySelector('.import-review-wrap');
-  const scrollPos=scrollEl?scrollEl.scrollTop:0;
-  importTranslations[parseInt(cb.dataset.ri)].selected=cb.checked;
-  renderImport(document.getElementById('content'));
-  const newScrollEl=document.querySelector('.import-review-wrap');
-  if(newScrollEl)newScrollEl.scrollTop=scrollPos;
-}});
-document.querySelectorAll('[data-rt]').forEach(inp=>{inp.oninput=()=>{importTranslations[parseInt(inp.dataset.rt)].translation=inp.value}});
-const ca=document.getElementById('impRevCheckAll');
-if(ca)ca.onchange=()=>{importTranslations.forEach(t=>t.selected=ca.checked);renderImport(document.getElementById('content'))};
-const sa=document.getElementById('impRevSelAll');
-if(sa)sa.onclick=()=>{importTranslations.forEach(t=>t.selected=true);renderImport(document.getElementById('content'))};
-const da=document.getElementById('impRevDeselAll');
-if(da)da.onclick=()=>{importTranslations.forEach(t=>t.selected=false);renderImport(document.getElementById('content'))};
-const back=document.getElementById('impBack2');
-if(back)back.onclick=()=>{importStep=1;renderImport(document.getElementById('content'))};
-const add=document.getElementById('impAdd');
-if(add)add.onclick=addSelectedToLeitner;
-const addKnown=document.getElementById('impAddKnown');
-if(addKnown)addKnown.onclick=addSelectedAsKnown;
-const delSel=document.getElementById('impDeleteSelected');
-if(delSel)delSel.onclick=()=>{
-  importTranslations=importTranslations.filter(t=>!t.selected);
-  if(!importTranslations.length){importStep=4;importTransProgress={added:0,skipped:0,failed:0}}
-  renderImport(document.getElementById('content'));
-  toast('انتخاب شده‌ها حذف شدند','success');
-}}
-
+document.querySelectorAll('[data-tid]').forEach(cb=>{
+cb.onchange=()=>{const tid=cb.dataset.tid;const item=translatedItems.find(t=>t.id===tid);if(item){item.selected=cb.checked;refreshSelectionActions()}};
+});
+// Translation edit inputs
+document.querySelectorAll('[data-tid-trans]').forEach(inp=>{
+inp.oninput=()=>{const tid=inp.dataset.tidTrans;const item=translatedItems.find(t=>t.id===tid);if(item){item.translation=inp.value}};
+});
+const sa=document.getElementById('trSelAll');
+if(sa)sa.onclick=()=>{translatedItems.filter(t=>!t.moved).forEach(t=>t.selected=true);renderImport(document.getElementById('content'))};
+const da=document.getElementById('trDeselAll');
+if(da)da.onclick=()=>{translatedItems.forEach(t=>t.selected=false);renderImport(document.getElementById('content'))};
+const back=document.getElementById('trNewText');
+if(back)back.onclick=()=>{importStep=0;importRawText='';textRenderedWords=[];translatedItems=[];selectedTextItems=[];renderImport(document.getElementById('content'))};
+const addLeitner=document.getElementById('trAddLeitner');
+if(addLeitner)addLeitner.onclick=()=>{moveSelectedToLeitner()};
+const addLTM=document.getElementById('trAddLTM');
+if(addLTM)addLTM.onclick=()=>{moveSelectedToLongTermMemory()};
+const removeBtn=document.getElementById('trRemove');
+if(removeBtn)removeBtn.onclick=()=>{removeSelectedItems()}}
 else if(importStep===4){
 const again=document.getElementById('impAgain');
-if(again)again.onclick=()=>{importStep=0;importWords=[];importSelected.clear();importTranslations=[];importRawText='';renderImport(document.getElementById('content'))}}
-
-else if(importStep===2){}}
-
-async function startTranslation(){
-const selectedWords=[...importSelected].map(i=>importWords[i]).filter(Boolean);
-importTranslations=[];importTransProgress={done:0,total:selectedWords.length};
-renderImport(document.getElementById('content'));
-for(let i=0;i<selectedWords.length;i+=5){
-const batch=selectedWords.slice(i,i+5);
-const results=await Promise.all(batch.map(async w=>{try{
-  const [transResult,dictResult]=await Promise.all([fetchTranslation(w),fetchDictionary(w)]);
-  const allDefs=dictResult?dictResult.meanings.flatMap(m=>m.definitions):[];
-  const allExamples=dictResult?dictResult.meanings.flatMap(m=>m.examples):[];
-  const allSynonyms=dictResult?dictResult.meanings.flatMap(m=>m.synonyms):[];
-  const pos=dictResult&&dictResult.meanings[0]?dictResult.meanings[0].partOfSpeech:'';
-  return{word:w,translation:transResult||'',ipa:dictResult?(dictResult.phoneticBr||dictResult.phoneticUs||dictResult.phonetic||''):'',definitions:allDefs,examples:allExamples,synonyms:allSynonyms,partOfSpeech:pos,audioUs:dictResult?dictResult.audioUs||'':'',audioBr:dictResult?dictResult.audioBr||'':'',selected:true};
-}catch(e){return{word:w,translation:'',selected:true}}}));
-importTranslations.push(...results);
-importTransProgress.done=Math.min(i+5,selectedWords.length);
-renderImport(document.getElementById('content'))}
-importStep=3;renderImport(document.getElementById('content'))}
-
-async function addSelectedToLeitner(){
-const toAdd=importTranslations.filter(t=>t.selected&&t.translation);
-const target=importDest==='longTerm'?S.longTerm:S.words;
-let added=0,skipped=0,failed=0;
-toAdd.forEach(t=>{
-const exists=target.some(w=>w.word.toLowerCase()===t.word.toLowerCase())||S.words.some(w=>w.word.toLowerCase()===t.word.toLowerCase())||S.longTerm.some(w=>w.word.toLowerCase()===t.word.toLowerCase());
-if(exists){skipped++;return}
-target.push({id:uid(),word:t.word,translation:t.translation,ipa:t.ipa||'',category:importCategory,favorite:false,context:'',box:0,repetitions:0,interval:1,easeFactor:2.5,addedDate:new Date().toISOString(),nextReviewDate:null,lastReviewedAt:null,stability:0,difficulty:0,elapsedDays:0,scheduledDays:0,reps:0,lapses:0,fsrsState:'new',definitions:t.definitions||[],examples:t.examples||[],synonyms:t.synonyms||[],partOfSpeech:t.partOfSpeech||'',audioUs:t.audioUs||'',audioBr:t.audioBr||''});
-added++});
-failed=importTranslations.filter(t=>t.selected&&!t.translation).length;
-save();importTransProgress={added,skipped,failed};
-importStep=4;renderImport(document.getElementById('content'));
-toast(`${added} کلمه اضافه شد`,'success')}
-
-function addSelectedAsKnown(){
-const toAdd=importTranslations.filter(t=>t.selected&&t.translation);
-let added=0,skipped=0;
-toAdd.forEach(t=>{
-const exists=S.words.some(w=>w.word.toLowerCase()===t.word.toLowerCase())||S.longTerm.some(w=>w.word.toLowerCase()===t.word.toLowerCase());
-if(exists){skipped++;return}
-S.longTerm.push({id:uid(),word:t.word,translation:t.translation,ipa:t.ipa||'',category:importCategory,favorite:false,context:'',box:0,repetitions:0,interval:1,easeFactor:2.5,addedDate:new Date().toISOString(),nextReviewDate:null,lastReviewedAt:null,stability:0,difficulty:0,elapsedDays:0,scheduledDays:0,reps:0,lapses:0,fsrsState:'new',definitions:t.definitions||[],examples:t.examples||[],synonyms:t.synonyms||[],partOfSpeech:t.partOfSpeech||'',audioUs:t.audioUs||'',audioBr:t.audioBr||''});
-added++});
-save();
-importTranslations=importTranslations.filter(t=>!t.selected||!t.translation);
-if(!importTranslations.length){importStep=4;importTransProgress={added,skipped,failed:0}}
-renderImport(document.getElementById('content'));
-toast(`${added} کلمه به عنوان شناخته شده اضافه شد`,'success')}
+if(again)again.onclick=()=>{importStep=0;importWords=[];importSelected.clear();importTranslations=[];translatedItems=[];textRenderedWords=[];importRawText='';renderImport(document.getElementById('content'))}}}
 
 // Anki .apkg import
 async function handleFileImport(e){
@@ -1020,352 +1007,165 @@ else if(ext==='apkg'){try{toast('در حال پردازش فایل Anki...','inf
 e.target.value=''}
 
 // ═══════════════════════════════════════════
-// 5. PDF READER (fixed rendering & text layer)
+// 5. PDF READER (native iframe rendering)
 // ═══════════════════════════════════════════
-let pdfDoc=null,pdfPage=1,pdfScale=PDF_DEFAULT_SCALE,pdfFileName='',pdfSelectedText='',pdfCurrentPageObj=null;
-let pdfThumbObserver=null;
-let pdfZoomMode='custom';// custom|fitWidth|fitPage
-let pdfMouseUpTimer=null;let pdfDblClickPending=false;
+let pdfBlobUrl=null,pdfFileName='';
+
+// PDF persistence helpers
+const PDF_STORAGE_KEY='leitner_pdf_state';
+function savePdfState(){
+try{const state={fileName:pdfFileName,page:pdfCurrentPage,scale:pdfScale};localStorage.setItem(PDF_STORAGE_KEY,JSON.stringify(state))}catch(e){}}
+function loadPdfState(){try{return JSON.parse(localStorage.getItem(PDF_STORAGE_KEY))}catch(e){return null}}
+function clearPdfState(){try{localStorage.removeItem(PDF_STORAGE_KEY)}catch(e){}}
 
 function renderPDFReader(c){
-if(!pdfDoc){
+if(!pdfBlobUrl){
 c.innerHTML=`<div class="card" style="text-align:center;padding:60px"><div class="empty"><div class="icon">📄</div><p>فایل PDF را باز کنید تا شروع به خواندن کنید</p><p style="color:var(--text2);font-size:.8rem;margin-top:8px">روی هر کلمه دابل‌کلیک کنید تا ترجمه و تلفظ آن را ببینید</p><div style="margin-top:16px"><input type="file" id="pdfFileInput" accept=".pdf" style="display:none"><button type="button" class="btn btn-primary" id="pdfOpen">📂 انتخاب فایل PDF</button></div></div></div>`;
 document.getElementById('pdfOpen').onclick=()=>document.getElementById('pdfFileInput').click();
 document.getElementById('pdfFileInput').onchange=async e=>{const f=e.target.files[0];if(f)await openPDF(f)};return}
 const truncName=pdfFileName.length>35?pdfFileName.slice(0,32)+'...':pdfFileName;
-c.innerHTML=`<div class="pdf-toolbar" id="pdfToolbar"><button type="button" class="btn btn-ghost btn-sm" id="pdfOpen2" title="فایل جدید">📂</button><input type="file" id="pdfFileInput2" accept=".pdf" style="display:none"><div class="pdf-sep"></div><button type="button" class="btn btn-ghost btn-sm" id="pdfPrev" title="صفحه قبل">→</button><span class="pdf-page-info" id="pdfPageInfo">${pdfPage} / ${pdfDoc.numPages}</span><button type="button" class="btn btn-ghost btn-sm" id="pdfNext" title="صفحه بعد">←</button><div class="pdf-sep"></div><button type="button" class="btn btn-ghost btn-sm" id="pdfZoomOut" title="کوچک‌تر">−</button><span class="pdf-zoom-info" id="pdfZoomLevel">${Math.round(pdfScale*100)}%</span><button type="button" class="btn btn-ghost btn-sm" id="pdfZoomIn" title="بزرگ‌تر">+</button><div class="pdf-sep"></div><button type="button" class="btn btn-ghost btn-sm" id="pdfFitWidth" title="عرض صفحه">↔</button><button type="button" class="btn btn-ghost btn-sm" id="pdfFitPage" title="کل صفحه">↕</button><span style="color:var(--text2);font-size:.75rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:180px;margin-right:auto" title="${esc(pdfFileName)}">${esc(truncName)}</span></div><div class="pdf-body"><div class="pdf-sidebar" id="pdfThumbs"></div><div class="pdf-main" id="pdfMain"><div class="pdf-page-wrap" id="pdfPageWrap"><canvas id="pdfCanvas"></canvas><div id="pdfTextLayer" class="textLayer"></div></div></div></div>`;
+c.innerHTML=`<div class="pdf-toolbar" id="pdfToolbar"><button type="button" class="btn btn-ghost btn-sm" id="pdfOpen2" title="فایل جدید">📂</button><input type="file" id="pdfFileInput2" accept=".pdf" style="display:none"><button type="button" class="btn btn-ghost btn-sm" id="pdfCloseBtn" title="بستن PDF" style="color:var(--danger)">✕ بستن</button><div class="pdf-sep"></div><span style="color:var(--text2);font-size:.75rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:250px" title="${esc(pdfFileName)}">${esc(truncName)}</span><div style="flex:1"></div><button type="button" class="btn btn-primary btn-sm" id="pdfTranslateBtn">🔍 ترجمه</button></div><div style="width:100%;height:calc(100vh - 140px);min-height:500px;position:relative" id="pdfViewerWrap"><embed id="pdfEmbed" src="${pdfBlobUrl}" type="application/pdf" style="width:100%;height:100%;border:none;border-radius:var(--radius)"></div>`;
 document.getElementById('pdfOpen2').onclick=()=>document.getElementById('pdfFileInput2').click();
 document.getElementById('pdfFileInput2').onchange=async e=>{const f=e.target.files[0];if(f)await openPDF(f)};
-document.getElementById('pdfPrev').onclick=()=>{if(pdfPage>1){pdfPage--;pdfZoomMode='custom';renderPDFPage();renderPDFThumbs()}};
-document.getElementById('pdfNext').onclick=()=>{if(pdfPage<pdfDoc.numPages){pdfPage++;pdfZoomMode='custom';renderPDFPage();renderPDFThumbs()}};
-document.getElementById('pdfZoomIn').onclick=()=>{pdfZoomMode='custom';pdfScale=Math.min(6,pdfScale*1.25);renderPDFPage()};
-document.getElementById('pdfZoomOut').onclick=()=>{pdfZoomMode='custom';pdfScale=Math.max(0.25,pdfScale/1.25);renderPDFPage()};
-document.getElementById('pdfFitWidth').onclick=()=>{pdfZoomMode='fitWidth';renderPDFPage()};
-document.getElementById('pdfFitPage').onclick=()=>{pdfZoomMode='fitPage';renderPDFPage()};
-document.onkeydown=pdfKeyHandler;
-const main=document.getElementById('pdfMain');
-main.addEventListener('mouseup',pdfHandleMouseUp);
-main.addEventListener('touchend',pdfHandleMouseUp);
-main.addEventListener('dblclick',pdfHandleDblClick);
-main.addEventListener('mousedown',()=>{pdfDblClickPending=false;clearTimeout(pdfMouseUpTimer)});
-// Double-tap: select word on Android (no zoom — use toolbar buttons instead)
-let lastTap=0;let lastTapX=0;let lastTapY=0;
-main.addEventListener('touchend',e=>{
-  if(currentTab!=='pdfreader')return;
-  const now=Date.now();
-  const t=e.changedTouches?e.changedTouches[0]:null;
-  const tx=t?t.clientX:0;const ty=t?t.clientY:0;
-  if(now-lastTap<350&&Math.abs(tx-lastTapX)<30&&Math.abs(ty-lastTapY)<30){
-    // Double-tap detected — suppress action popup and show translation only
-    clearTimeout(pdfMouseUpTimer);pdfDblClickPending=true;
-    pdfCloseSelectionPopup();
-    const trySelect=(attempt)=>{
-      setTimeout(()=>{
-        const sel=window.getSelection();
-        const txt=sel?sel.toString().trim():'';
-        if(txt&&txt.length>=1&&/[a-zA-Z]/.test(txt)){
-          const word=normalizeWordLookup(txt);
-          if(word&&word.length>=2){
-            let rect={left:tx,top:ty,bottom:ty+20};
-            if(sel.rangeCount>0){try{rect=sel.getRangeAt(0).getBoundingClientRect()}catch(x){}}
-            renderTransPopup(word,rect);
-            sel.removeAllRanges();
-            return;
-          }
-        }
-        if(attempt<2)trySelect(attempt+1);
-      },attempt===0?200:400);
-    };
-    trySelect(0);
-    lastTap=0;return}
-  lastTap=now;lastTapX=tx;lastTapY=ty});
-// Long-press: select word on Android (backup for double-tap)
-let longPressTimer=null;
-main.addEventListener('touchstart',e=>{
-  if(currentTab!=='pdfreader')return;
-  const t=e.changedTouches?e.changedTouches[0]:null;
-  if(!t)return;
-  longPressTimer=setTimeout(()=>{
-    try{
-      const range=document.caretRangeFromPoint(t.clientX,t.clientY);
-      if(!range)return;
-      const node=range.startContainer;
-      const offset=range.startOffset;
-      if(node.nodeType===Node.TEXT_NODE){
-        const text=node.textContent;
-        let start=offset,end=offset;
-        while(start>0&&/\w/.test(text[start-1]))start--;
-        while(end<text.length&&/\w/.test(text[end]))end++;
-        if(start<end){
-          const range2=document.createRange();
-          range2.setStart(node,start);
-          range2.setEnd(node,end);
-          const sel=window.getSelection();
-          sel.removeAllRanges();
-          sel.addRange(range2);
-          const word=normalizeWordLookup(text.substring(start,end));
-          if(word&&word.length>=2&&/[a-zA-Z]/.test(word)){
-            const rect=range2.getBoundingClientRect();
-            renderTransPopup(word,rect);
-          }
-        }
-      }
-    }catch(x){}
-  },500);
-},{passive:true});
-main.addEventListener('touchend',()=>{clearTimeout(longPressTimer)});
-main.addEventListener('touchmove',()=>{clearTimeout(longPressTimer)});
-renderPDFThumbs();renderPDFPage()}
+document.getElementById('pdfCloseBtn').onclick=()=>{pdfBlobUrl=null;pdfFileName='';clearPdfState();renderPDFReader(document.getElementById('content'));toast('PDF بسته شد','info')};
+// Translate button always works
+document.getElementById('pdfTranslateBtn').onclick=function(){
+  var btn=document.getElementById('pdfTranslateBtn');
+  var rect=btn.getBoundingClientRect();
+  showPdfTranslateInput(rect.left,rect.bottom+8);
+};
+// Manual double-click detection (PDF viewer captures native dblclick)
+var pdfClickTimer=null;var pdfLastClick=0;
+var pdfViewerWrap=document.getElementById('pdfViewerWrap');
+pdfViewerWrap.addEventListener('click',function(e){
+  var now=Date.now();
+  if(now-pdfLastClick<350){
+    // Double-click detected
+    showPdfTranslateInput(e.clientX,e.clientY);
+    pdfLastClick=0;clearTimeout(pdfClickTimer);return;
+  }
+  pdfLastClick=now;
+});
+// Also try dblclick event as backup
+var pdfEmbed=document.getElementById('pdfEmbed');
+if(pdfEmbed){pdfEmbed.addEventListener('dblclick',function(e){showPdfTranslateInput(e.clientX,e.clientY)})}
+document.onkeydown=null;
+}
+
+function showPdfTranslateInput(x,y){
+  hidePdfTranslateInput();
+  var popup=document.createElement('div');
+  popup.id='pdfTranslatePopup';
+  popup.style.cssText='position:fixed;z-index:320;background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 12px 48px rgba(0,0,0,.5);backdrop-filter:blur(12px);width:340px;max-height:70vh;overflow:hidden;display:flex;flex-direction:column;font-family:var(--font)';
+  popup.style.left=Math.min(x,window.innerWidth-360)+'px';
+  popup.style.top=Math.min(y,window.innerHeight-100)+'px';
+  // Header with input
+  popup.innerHTML='<div style="padding:12px 14px;border-bottom:1px solid var(--border);display:flex;gap:8px;align-items:center"><input type="text" id="pdfTranslateInput" class="input" placeholder="کلمه را تایپ یا پیست کنید..." style="flex:1;padding:10px 14px;font-size:.9rem;direction:ltr;text-align:left;margin:0" autocomplete="off" spellcheck="false"><button type="button" class="btn btn-primary btn-sm" id="pdfTranslateGo" style="padding:10px 14px">🔍</button><button type="button" class="btn btn-ghost btn-sm" id="pdfTranslateClose" style="padding:8px 10px;font-size:.9rem">✕</button></div><div id="pdfTranslateResult" style="padding:14px;overflow-y:auto;max-height:calc(70vh - 56px)"><div style="text-align:center;color:var(--text2);font-size:.85rem;padding:20px 0">کلمه‌ای را جستجو کنید یا از متن کپی کنید</div></div>';
+  document.body.appendChild(popup);
+  var input=document.getElementById('pdfTranslateInput');
+  input.focus();
+  // Auto-translate with debounce
+  var translateTimer=null;
+  input.oninput=function(){
+    clearTimeout(translateTimer);
+    var word=normalizeWordLookup(input.value);
+    if(word&&word.length>=2){
+      translateTimer=setTimeout(function(){doPdfTranslate(word)},400);
+    }else{
+      document.getElementById('pdfTranslateResult').innerHTML='<div style="text-align:center;color:var(--text2);font-size:.85rem;padding:20px 0">کلمه‌ای را جستجو کنید یا از متن کپی کنید</div>';
+    }
+  };
+  input.onkeydown=function(e){
+    if(e.key==='Enter'){
+      clearTimeout(translateTimer);
+      var word=normalizeWordLookup(input.value);
+      if(word&&word.length>=2)doPdfTranslate(word);
+    }
+    if(e.key==='Escape')hidePdfTranslateInput();
+  };
+  document.getElementById('pdfTranslateGo').onclick=function(){
+    var word=normalizeWordLookup(input.value);
+    if(word&&word.length>=2)doPdfTranslate(word);
+  };
+  document.getElementById('pdfTranslateClose').onclick=hidePdfTranslateInput;
+  // Close on outside click
+  setTimeout(function(){
+    document.addEventListener('mousedown',function closeHandler(e){
+      if(!popup.contains(e.target)){hidePdfTranslateInput();document.removeEventListener('mousedown',closeHandler)}
+    });
+  },100);
+}
+
+async function doPdfTranslate(word){
+  var resultDiv=document.getElementById('pdfTranslateResult');
+  if(!resultDiv)return;
+  resultDiv.innerHTML='<div class="trans-loading"><div class="trans-spinner"></div>در حال جستجو...</div>';
+  try{
+    var [dictResult,persianResult]=await Promise.all([fetchDictionary(word),fetchTranslation(word)]);
+    var html='';
+    var displayWord=dictResult?dictResult.headword:word;
+    var ipaText=dictResult?(dictResult.phoneticBr||dictResult.phoneticUs||dictResult.phonetic||''):'';
+    // Word header with audio
+    html+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap">';
+    html+='<span style="font-size:1.2rem;font-weight:700;color:var(--text)">'+esc(displayWord)+'</span>';
+    if(ipaText)html+='<span style="font-size:.85rem;color:var(--text2)">'+esc(ipaText)+'</span>';
+    if(dictResult&&dictResult.audioUs)html+='<button type="button" class="trans-audio-btn" data-audio="'+esc(dictResult.audioUs)+'" title="American English">🇺🇸</button>';
+    if(dictResult&&dictResult.audioBr)html+='<button type="button" class="trans-audio-btn" data-audio="'+esc(dictResult.audioBr)+'" title="British English">🇬🇧</button>';
+    html+='<button type="button" class="trans-audio-btn" data-speak="'+esc(displayWord)+'" title="Listen">🔊</button>';
+    html+='</div>';
+    // Persian translation
+    if(persianResult)html+='<div class="trans-persian">'+esc(persianResult)+'</div>';
+    html+='<div class="trans-divider"></div>';
+    // Definitions, examples, synonyms
+    if(dictResult&&dictResult.meanings.length){
+      dictResult.meanings.forEach(function(m){
+        if(m.partOfSpeech)html+='<span class="trans-pos">'+esc(m.partOfSpeech)+'</span> ';
+        if(m.definitions.length){html+='<div class="trans-defs">';m.definitions.forEach(function(d){html+='<div class="trans-def-item">'+esc(d)+'</div>'});html+='</div>'}
+        if(m.examples.length){html+='<div class="trans-examples">';m.examples.forEach(function(ex){html+='<div class="trans-example">"'+esc(ex)+'"</div>'});html+='</div>'}
+        if(m.synonyms.length){html+='<div class="trans-synonyms">';m.synonyms.forEach(function(s){html+='<span class="trans-syn-tag">'+esc(s)+'</span>'});html+='</div>'}
+      });
+    }else if(!persianResult)html+='<div style="text-align:center;color:var(--danger);font-size:.85rem;padding:10px">نتیجه‌ای یافت نشد</div>';
+    // Add to Leitner button
+    var cleanWord=displayWord.toLowerCase();
+    var alreadyExists=S.words.some(function(w){return w.word.toLowerCase()===cleanWord})||S.longTerm.some(function(w){return w.word.toLowerCase()===cleanWord});
+    html+='<button type="button" class="trans-add-btn" id="pdfTransAddBtn"'+(alreadyExists?' disabled':'')+'>';
+    if(alreadyExists)html+='✅ در کتابخانه موجود است';
+    else html+='＋ اضافه به لایتنر';
+    html+='</button>';
+    resultDiv.innerHTML=html;
+    // Bind audio buttons
+    resultDiv.querySelectorAll('[data-audio]').forEach(function(btn){btn.onclick=function(){playAudioUrl(btn.dataset.audio)}});
+    resultDiv.querySelectorAll('[data-speak]').forEach(function(btn){btn.onclick=function(){speakWord(btn.dataset.speak)}});
+    // Bind add to leitner
+    var addBtn=document.getElementById('pdfTransAddBtn');
+    if(addBtn&&!alreadyExists){
+      addBtn.onclick=function(){
+        var allDefs=dictResult?dictResult.meanings.flatMap(function(m){return m.definitions}):[];
+        var allExamples=dictResult?dictResult.meanings.flatMap(function(m){return m.examples}):[];
+        var allSynonyms=dictResult?dictResult.meanings.flatMap(function(m){return m.synonyms}):[];
+        var pos=dictResult&&dictResult.meanings[0]?dictResult.meanings[0].partOfSpeech:'';
+        S.words.push({id:uid(),word:displayWord,translation:persianResult||'',ipa:ipaText,category:'پیش‌فرض',favorite:false,context:'',box:0,repetitions:0,interval:1,easeFactor:2.5,addedDate:new Date().toISOString(),nextReviewDate:null,lastReviewedAt:null,stability:0,difficulty:0,elapsedDays:0,scheduledDays:0,reps:0,lapses:0,fsrsState:'new',definitions:allDefs,examples:allExamples,synonyms:allSynonyms,partOfSpeech:pos,audioUs:dictResult?dictResult.audioUs||'':'',audioBr:dictResult?dictResult.audioBr||'':''});
+        save();
+        addBtn.disabled=true;
+        addBtn.textContent='✅ در کتابخانه موجود است';
+        toast(displayWord+' به لایتنر اضافه شد','success');
+      };
+    }
+  }catch(e){
+    resultDiv.innerHTML='<div style="text-align:center;color:var(--danger);font-size:.85rem;padding:10px">خطا در جستجو</div>';
+  }
+}
+
+function hidePdfTranslateInput(){var p=document.getElementById('pdfTranslatePopup');if(p)p.remove()}
 
 async function openPDF(file){
 try{
-// Use Blob URL worker to avoid CDN loading issues in WebView
-if(!pdfjsLib.GlobalWorkerOptions.workerSrc||pdfjsLib.GlobalWorkerOptions.workerSrc.includes('cdnjs')){
-  try{
-    const wkResp=await fetch('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js');
-    const wkBlob=await wkResp.blob();
-    pdfjsLib.GlobalWorkerOptions.workerSrc=URL.createObjectURL(wkBlob);
-  }catch(wkErr){
-    // Fallback: disable worker entirely
-    pdfjsLib.GlobalWorkerOptions.workerSrc='';
-  }
-}
-const buf=await file.arrayBuffer();pdfDoc=await pdfjsLib.getDocument({data:buf,disableFontFace:false,useSystemFonts:true,cMapUrl:'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/cmaps/',cMapPacked:true}).promise;
-pdfPage=1;pdfFileName=file.name;pdfScale=PDF_DEFAULT_SCALE;pdfSelectedText='';pdfCurrentPageObj=null;pdfZoomMode='fitWidth';
-renderPDFReader(document.getElementById('content'));toast(`${pdfDoc.numPages} صفحه بارگذاری شد`,'success')}
-catch(e){toast('خطا در باز کردن فایل PDF','error');pdfDoc=null}}
-
-async function renderPDFPage(){
-if(!pdfDoc)return;
-const page=await pdfDoc.getPage(pdfPage);pdfCurrentPageObj=page;
-
-// Calculate scale based on zoom mode
-const unscaledVp=page.getViewport({scale:1});
-const mainEl=document.getElementById('pdfMain');
-const mainWidth=mainEl?mainEl.clientWidth-24:800;
-const mainHeight=mainEl?mainEl.clientHeight-24:600;
-if(pdfZoomMode==='fitWidth')pdfScale=mainWidth/unscaledVp.width;
-else if(pdfZoomMode==='fitPage')pdfScale=Math.min(mainWidth/unscaledVp.width,mainHeight/unscaledVp.height);
-pdfScale=Math.max(0.25,Math.min(6,pdfScale));
-
-const vp=page.getViewport({scale:pdfScale});
-
-// Canvas rendering - let PDF.js handle dimensions directly
-const canvas=document.getElementById('pdfCanvas');if(!canvas)return;
-const ctx=canvas.getContext('2d');
-canvas.width=Math.floor(vp.width);
-canvas.height=Math.floor(vp.height);
-canvas.style.width=vp.width+'px';
-canvas.style.height=vp.height+'px';
-await page.render({canvasContext:ctx,viewport:vp}).promise;
-
-// Sync page wrapper
-const wrap=document.getElementById('pdfPageWrap');
-if(wrap){wrap.style.width=vp.width+'px';wrap.style.height=vp.height+'px'}
-
-// Text layer - uses the EXACT SAME viewport as canvas
-const tl=document.getElementById('pdfTextLayer');
-if(tl){
-tl.innerHTML='';
-tl.style.width=vp.width+'px';
-tl.style.height=vp.height+'px';
-try{
-const tc=await page.getTextContent();
-if(typeof pdfjsLib.TextLayer==='function'){
-// Official PDF.js TextLayer (preferred)
-const tr=new pdfjsLib.TextLayer({textContentSource:tc,container:tl,viewport:vp});
-await tr.render();
-}else{
-// Fallback: group adjacent character spans into words using actual font metrics
-const txItems=[];
-tc.items.forEach(item=>{
-  if(!item.str)return;
-  const tx=pdfjsLib.Util.transform(vp.transform,item.transform);
-  const fontHeight=Math.hypot(tx[2],tx[3]);
-  // Calculate actual character width from the transform matrix
-  const scaleX=Math.hypot(tx[0],tx[1]);
-  const charWidth=scaleX>0?scaleX:fontHeight*0.5;
-  // Split into individual characters for precise positioning
-  for(let i=0;i<item.str.length;i++){
-    txItems.push({
-      ch:item.str[i],
-      x:tx[4]+i*charWidth,
-      y:tx[5],
-      endX:tx[4]+(i+1)*charWidth,
-      fontHeight,scaleX,fontName:item.fontName,tx
-    });
-  }
-});
-// Sort by Y then X
-txItems.sort((a,b)=>Math.abs(a.y-b.y)<a.fontHeight*0.5?a.x-b.x:a.y-b.y);
-// Merge characters that belong to the same word
-const groups=[];
-let cur=null;
-const SPACE_WIDTH=fontHeight=>fontHeight*0.25;
-txItems.forEach(item=>{
-  if(!cur){cur={chars:[item.ch],x:item.x,y:item.y,endX:item.endX,fontHeight:item.fontHeight,fontName:item.fontName,tx:item.tx};return}
-  const gap=item.x-cur.endX;
-  const yClose=Math.abs(item.y-cur.y)<cur.fontHeight*0.5;
-  // Merge if on same line and close together (gap < space width)
-  if(yClose&&gap>=-cur.fontHeight*0.1&&gap<SPACE_WIDTH(cur.fontHeight)){
-    cur.chars.push(item.ch);cur.endX=item.endX;
-  }else{
-    groups.push(cur);
-    cur={chars:[item.ch],x:item.x,y:item.y,endX:item.endX,fontHeight:item.fontHeight,fontName:item.fontName,tx:item.tx};
-  }
-});
-if(cur)groups.push(cur);
-// Render each word group as a single span
-groups.forEach(g=>{
-  const text=g.chars.join('');
-  if(!text.trim())return;
-  const span=document.createElement('span');
-  span.textContent=text;
-  span.style.position='absolute';
-  span.style.left=g.x+'px';
-  span.style.top=(g.y-g.fontHeight)+'px';
-  span.style.fontSize=g.fontHeight+'px';
-  span.style.fontFamily=g.fontName||'sans-serif';
-  span.style.transformOrigin='left bottom';
-  const angle=Math.atan2(g.tx[1],g.tx[0]);
-  if(Math.abs(angle)>0.001)span.style.transform=`rotate(${angle}rad)`;
-  span.style.whiteSpace='pre';
-  tl.appendChild(span)});
-}
-}catch(e){}}
-
-// Update page info
-const info=document.getElementById('pdfPageInfo');
-if(info)info.textContent=`صفحه ${pdfPage} از ${pdfDoc.numPages}`;
-const zl=document.getElementById('pdfZoomLevel');
-if(zl)zl.textContent=Math.round(pdfScale*100)+'%'}
-
-// Lazy thumbnail rendering with IntersectionObserver
-async function renderPDFThumbs(){
-if(!pdfDoc)return;
-const container=document.getElementById('pdfThumbs');if(!container)return;
-if(pdfThumbObserver){pdfThumbObserver.disconnect();pdfThumbObserver=null}
-container.innerHTML='';
-
-for(let i=1;i<=pdfDoc.numPages;i++){
-const div=document.createElement('div');
-div.className='pdf-thumb'+(i===pdfPage?' active':'');
-div.dataset.page=i;
-const lbl=document.createElement('div');
-lbl.className='pdf-thumb-label';lbl.textContent=i;
-div.appendChild(lbl);
-div.onclick=()=>{pdfPage=i;pdfZoomMode='custom';renderPDFPage();renderPDFThumbs()};
-container.appendChild(div)}
-
-pdfThumbObserver=new IntersectionObserver((entries)=>{
-entries.forEach(async entry=>{
-if(entry.isIntersecting){
-const div=entry.target;
-const pageNum=parseInt(div.dataset.page);
-if(div.querySelector('canvas')){pdfThumbObserver.unobserve(div);return}
-try{
-const cvs=document.createElement('canvas');
-const page=await pdfDoc.getPage(pageNum);
-const vp=page.getViewport({scale:PDF_THUMB_SCALE});
-cvs.width=vp.width;cvs.height=vp.height;
-await page.render({canvasContext:cvs.getContext('2d'),viewport:vp}).promise;
-div.insertBefore(cvs,div.firstChild);
-}catch(e){}
-pdfThumbObserver.unobserve(div)}});
-},{root:container,rootMargin:'100px'});
-
-container.querySelectorAll('.pdf-thumb').forEach(div=>pdfThumbObserver.observe(div))}
-
-function pdfExtractWords(){
-if(!pdfSelectedText)return;
-const words=parseWords(pdfSelectedText);
-if(!words.length){toast('کلمه انگلیسی یافت نشد','error');return}
-const existingWords=new Set(S.words.map(w=>w.word.toLowerCase()));
-const existingLT=new Set(S.longTerm.map(w=>w.word.toLowerCase()));
-const fresh=words.filter(w=>!existingWords.has(w.toLowerCase())&&!existingLT.has(w.toLowerCase()));
-if(!fresh.length){toast('تمام کلمات تکراری هستند','info');return}
-function extractContext(text,word){
-  const regex=new RegExp('([^.!?\n]*\\b'+word.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\b[^.!?\n]*[.!?])','i');
-  const m=text.match(regex);
-  return m?m[1].trim():''}
-// Fetch dictionary details for each word (non-blocking, saves in background)
-fresh.forEach(async w=>{
-  const context=extractContext(pdfSelectedText,w);
-  let defs=[],exs=[],syns=[],pos='',au='',ab='',ipa='';
-  try{
-    const [dictResult,persianResult]=await Promise.all([fetchDictionary(w),fetchTranslation(w)]);
-    if(dictResult){
-      defs=dictResult.meanings.flatMap(m=>m.definitions);exs=dictResult.meanings.flatMap(m=>m.examples);syns=dictResult.meanings.flatMap(m=>m.synonyms);
-      pos=dictResult.meanings[0]?dictResult.meanings[0].partOfSpeech:'';au=dictResult.audioUs||'';ab=dictResult.audioBr||'';
-      ipa=dictResult.phoneticBr||dictResult.phoneticUs||dictResult.phonetic||'';
-    }
-    const existingIdx=S.words.findIndex(x=>x.word.toLowerCase()===w.toLowerCase());
-    if(existingIdx>=0){S.words[existingIdx].definitions=defs;S.words[existingIdx].examples=exs;S.words[existingIdx].synonyms=syns;S.words[existingIdx].partOfSpeech=pos;S.words[existingIdx].audioUs=au;S.words[existingIdx].audioBr=ab;S.words[existingIdx].ipa=ipa;if(persianResult&&!S.words[existingIdx].translation)S.words[existingIdx].translation=persianResult;}
-    else S.words.push({id:uid(),word:w,translation:persianResult||'',ipa,category:'پیش‌فرض',favorite:false,context,box:0,repetitions:0,interval:1,easeFactor:2.5,addedDate:new Date().toISOString(),nextReviewDate:null,lastReviewedAt:null,stability:0,difficulty:0,elapsedDays:0,scheduledDays:0,reps:0,lapses:0,fsrsState:'new',definitions:defs,examples:exs,synonyms:syns,partOfSpeech:pos,audioUs:au,audioBr:ab});
-  }catch(e){
-    S.words.push({id:uid(),word:w,translation:'',ipa:'',category:'پیش‌فرض',favorite:false,context,box:0,repetitions:0,interval:1,easeFactor:2.5,addedDate:new Date().toISOString(),nextReviewDate:null,lastReviewedAt:null,stability:0,difficulty:0,elapsedDays:0,scheduledDays:0,reps:0,lapses:0,fsrsState:'new',definitions:[],examples:[],synonyms:[],partOfSpeech:'',audioUs:'',audioBr:''});
-  }
-  save()});
-toast(`${fresh.length} کلمه اضافه شد (ترجمه و جزئیات در حال دریافت...)`,'success');
-pdfCloseSelectionPopup()}
-
-function pdfCloseSelectionPopup(){const p=document.getElementById('pdfPopup');if(p)p.classList.remove('visible');pdfSelectedText=''}
-
-// Selection action menu — delayed to avoid conflict with dblclick
-function pdfHandleMouseUp(e){
-  if(currentTab!=='pdfreader')return;
-  clearTimeout(pdfMouseUpTimer);
-  pdfMouseUpTimer=setTimeout(()=>{
-    if(pdfDblClickPending)return;
-    const sel=window.getSelection();
-    const txt=sel?sel.toString().trim():'';
-    const popup=document.getElementById('pdfPopup');
-    if(!txt||txt.length<1){if(popup)popup.classList.remove('visible');pdfSelectedText='';return}
-    if(!/[a-zA-Z]/.test(txt)){if(popup)popup.classList.remove('visible');return}
-    pdfSelectedText=txt;
-    let popupEl=document.getElementById('pdfPopup');
-    if(!popupEl){popupEl=document.createElement('div');popupEl.id='pdfPopup';popupEl.className='pdf-popup visible';
-    popupEl.innerHTML=`<div style="display:flex;gap:4px;flex-wrap:wrap"><button type="button" class="btn btn-primary btn-sm" id="pdfActionTranslate">ترجمه</button><button type="button" class="btn btn-ghost btn-sm" id="pdfActionCopy">کپی</button><button type="button" class="btn btn-ghost btn-sm" id="pdfActionSearch">جستجو</button><button type="button" class="btn btn-ghost btn-sm" id="pdfActionHighlight">هایلایت</button><button type="button" class="btn btn-primary btn-sm" id="pdfExtract">استخراج کلمات</button><button type="button" class="btn btn-ghost btn-sm" id="pdfClosePopup">بستن</button></div>`;
-    document.body.appendChild(popupEl);
-    document.getElementById('pdfExtract').onclick=pdfExtractWords;
-    document.getElementById('pdfActionCopy').onclick=()=>{navigator.clipboard.writeText(pdfSelectedText).then(()=>toast('کپی شد','success')).catch(()=>toast('خطا در کپی','error'))};
-    document.getElementById('pdfActionTranslate').onclick=()=>{const word=normalizeWordLookup(pdfSelectedText);if(word&&word.length>=2){let rect={left:100,bottom:100,top:100};if(sel.rangeCount>0){const range=sel.getRangeAt(0);rect=range.getBoundingClientRect()}renderTransPopup(word,rect)}pdfCloseSelectionPopup()};
-    document.getElementById('pdfActionSearch').onclick=()=>{window.open('https://www.google.com/search?q='+encodeURIComponent(pdfSelectedText),'_blank')};
-    document.getElementById('pdfActionHighlight').onclick=()=>{toast('هایلایت ذخیره شد','success');pdfCloseSelectionPopup()};
-    document.getElementById('pdfClosePopup').onclick=()=>pdfCloseSelectionPopup()}
-    popupEl.classList.add('visible');
-    let top=100,left=100;
-    if(sel.rangeCount>0){const range=sel.getRangeAt(0);const rect=range.getBoundingClientRect();
-    top=Math.min(rect.bottom+10,window.innerHeight-220);left=Math.min(rect.left,window.innerWidth-320);
-    if(left<10)left=10;if(top<10)top=rect.top-220}
-    popupEl.style.top=top+'px';popupEl.style.left=left+'px'},200)}
-
-function pdfHandleDblClick(e){
-  if(currentTab!=='pdfreader')return;
-  clearTimeout(pdfMouseUpTimer);pdfDblClickPending=true;
-  pdfCloseSelectionPopup();
-  hideTransPopup();
-  setTimeout(()=>{
-    const sel=window.getSelection();
-    const txt=sel?sel.toString().trim():'';
-    if(!txt||txt.length<1)return;
-    if(!/[a-zA-Z]/.test(txt))return;
-    const word=normalizeWordLookup(txt);
-    if(!word||word.length<2)return;
-    let rect={left:100,bottom:100,top:100};
-    if(sel.rangeCount>0){try{const range=sel.getRangeAt(0);rect=range.getBoundingClientRect()}catch(x){}}
-    renderTransPopup(word,rect);
-    sel.removeAllRanges()},80)}
-
-function pdfKeyHandler(e){
-if(currentTab!=='pdfreader')return;
-if(e.key==='ArrowLeft'&&pdfDoc&&pdfPage>1){pdfPage--;pdfZoomMode='custom';renderPDFPage();renderPDFThumbs()}
-if(e.key==='ArrowRight'&&pdfDoc&&pdfPage<pdfDoc.numPages){pdfPage++;pdfZoomMode='custom';renderPDFPage();renderPDFThumbs()}
-if(e.key==='+'||e.key==='='){pdfZoomMode='custom';pdfScale=Math.min(6,pdfScale*1.25);renderPDFPage()}
-if(e.key==='-'){pdfZoomMode='custom';pdfScale=Math.max(0.25,pdfScale/1.25);renderPDFPage()}
-if(e.key==='Escape'){pdfCloseSelectionPopup();hideTransPopup()}}
-
-// ═══════════════════════════════════════════
+pdfBlobUrl=URL.createObjectURL(file);
+pdfFileName=file.name;
+savePdfState();
+renderPDFReader(document.getElementById('content'));
+toast('PDF بارگذاری شد','success')}
+catch(e){toast('خطا در باز کردن فایل PDF','error');pdfBlobUrl=null}}
 // 6. EXPORT (with IndexedDB backup)
 // ═══════════════════════════════════════════
 function renderExport(c){
@@ -1583,7 +1383,7 @@ c.innerHTML=`<div style="max-width:700px;margin:0 auto">
   <div style="text-align:center;background:linear-gradient(135deg,var(--accent),#764ba2);color:#fff;padding:48px 32px;border-radius:20px;margin-bottom:28px;box-shadow:0 16px 48px rgba(108,92,231,.35)">
     <div style="font-size:3.5rem;margin-bottom:14px">📚</div>
     <h2 style="font-size:2rem;margin-bottom:10px;font-weight:800">برنامه مرور هوشمند واژگان لایتنر</h2>
-    <p style="opacity:.95;font-size:1.05rem;font-weight:500">نسخه 3.2 - Leitner Pro</p>
+    <p style="opacity:.95;font-size:1.05rem;font-weight:500">نسخه 3.3 - Leitner Pro</p>
     <p style="opacity:.8;font-size:.9rem;margin-top:6px">الگوریتم: FSRS (Free Spaced Repetition Scheduler)</p>
   </div>
 
@@ -1591,25 +1391,51 @@ c.innerHTML=`<div style="max-width:700px;margin:0 auto">
     <h3 style="margin-bottom:12px;color:var(--accent)">✨ ویژگی‌های اصلی</h3>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
       <div style="padding:8px 12px;background:var(--bg);border-radius:8px;font-size:.85rem">🧠 مرور هوشمند با الگوریتم FSRS</div>
-      <div style="padding:8px 12px;background:var(--bg);border-radius:8px;font-size:.85rem">📖 کتابخانه واژگان با جستجو و فیلتر</div>
-      <div style="padding:8px 12px;background:var(--bg);border-radius:8px;font-size:.85rem">💾 حافظه بلندمدت برای کلمات تثبیت شده</div>
-      <div style="padding:8px 12px;background:var(--bg);border-radius:8px;font-size:.85rem">📥 ورود متن، PDF، DOCX، JSON و Anki</div>
-      <div style="padding:8px 12px;background:var(--bg);border-radius:8px;font-size:.85rem">🌐 ترجمه خودکار با ۱۳ زبان</div>
+      <div style="padding:8px 12px;background:var(--bg);border-radius:8px;font-size:.85rem">📖 کتابخانه واژگان با جستجو، فیلتر و ویرایش</div>
+      <div style="padding:8px 12px;background:var(--bg);border-radius:8px;font-size:.85rem">💾 حافظه بلندمدت با ویرایش و بازگشت به کتابخانه</div>
+      <div style="padding:8px 12px;background:var(--bg);border-radius:8px;font-size:.85rem">📥 ورود متن هوشمند با انتخاب کلمات و ترجمه</div>
+      <div style="padding:8px 12px;background:var(--bg);border-radius:8px;font-size:.85rem">📄 خواننده PDF با پاپ‌آپ ترجمه خودکار</div>
+      <div style="padding:8px 12px;background:var(--bg);border-radius:8px;font-size:.85rem">🌐 ترجمه خودکار با ۱۳ زبان و فرهنگ لغت</div>
       <div style="padding:8px 12px;background:var(--bg);border-radius:8px;font-size:.85rem">🎮 آزمون داخلی ۴ حالتی (چندگزینه‌ای، تکمیلی، معکوس، شنیداری)</div>
       <div style="padding:8px 12px;background:var(--bg);border-radius:8px;font-size:.85rem">🎯 آزمون انگلیسی خارجی (واژگان و گرامر)</div>
       <div style="padding:8px 12px;background:var(--bg);border-radius:8px;font-size:.85rem">📊 آمار و نمودار با تقویم مرور و پیش‌بینی</div>
-      <div style="padding:8px 12px;background:var(--bg);border-radius:8px;font-size:.85rem">📄 خواننده PDF با ترجمه آنی و استخراج کلمات</div>
       <div style="padding:8px 12px;background:var(--bg);border-radius:8px;font-size:.85rem">🔊 تلفظ صوتی آمریکایی و بریتیشی</div>
       <div style="padding:8px 12px;background:var(--bg);border-radius:8px;font-size:.85rem">📱 PWA قابل نصب و آفلاین</div>
       <div style="padding:8px 12px;background:var(--bg);border-radius:8px;font-size:.85rem">🌙 حالت تاریک و روشن</div>
-      <div style="padding:8px 12px;background:var(--bg);border-radius:8px;font-size:.85rem">⚡ یادآوری روزانه</div>
-      <div style="padding:8px 12px;background:var(--bg);border-radius:8px;font-size:.85rem">⭐ رتبه‌بندی فراوانی واژگان (پرکاربرد، رایج، مفید، پیشرفته)</div>
+      <div style="padding:8px 12px;background:var(--bg);border-radius:8px;font-size:.85rem">⭐ رتبه‌بندی فراوانی واژگان</div>
+      <div style="padding:8px 12px;background:var(--bg);border-radius:8px;font-size:.85rem">📌 قفل سایدبار برای دسترسی سریع</div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:16px">
+    <h3 style="margin-bottom:12px;color:var(--accent)">🆕 ویژگی‌های جدید نسخه ۳.۳</h3>
+    <div style="display:grid;gap:8px">
+      <div style="padding:10px 14px;background:var(--bg);border-radius:8px;border-right:3px solid var(--accent)">
+        <strong style="font-size:.9rem">ورود متن هوشمند</strong>
+        <p style="color:var(--text2);font-size:.8rem;margin-top:4px">متن را وارد کنید، کلمات مورد نظر را انتخاب کنید، ترجمه کنید و سپس به لایتنر یا حافظه بلندمدت اضافه کنید. قابلیت ویرایش ترجمه و مشاهده تعاریف و مثال‌ها.</p>
+      </div>
+      <div style="padding:10px 14px;background:var(--bg);border-radius:8px;border-right:3px solid var(--success)">
+        <strong style="font-size:.9rem">پاپ‌آپ ترجمه PDF</strong>
+        <p style="color:var(--text2);font-size:.8rem;margin-top:4px">ترجمه خودکار هنگام تایپ، تلفظ صوتی، اضافه مستقیم به لایتنر. ذخیره وضعیت PDF برای بازیابی.</p>
+      </div>
+      <div style="padding:10px 14px;background:var(--bg);border-radius:8px;border-right:3px solid var(--warning)">
+        <strong style="font-size:.9rem">کارت‌های مرور بهبود یافته</strong>
+        <p style="color:var(--text2);font-size:.8rem;margin-top:4px">نمایش IPA و تلفظ در صورت جلو، تعاریف، مثال‌ها و مترادف‌ها در صورت پشت کارت.</p>
+      </div>
+      <div style="padding:10px 14px;background:var(--bg);border-radius:8px;border-right:3px solid var(--danger)">
+        <strong style="font-size:.9rem">قفل سایدبار</strong>
+        <p style="color:var(--text2);font-size:.8rem;margin-top:4px">قابلیت قفل کردن سایدبار برای دسترسی سریع به بخش‌ها بدون نیاز به باز کردن مجدد.</p>
+      </div>
+      <div style="padding:10px 14px;background:var(--bg);border-radius:8px;border-right:3px solid var(--accent2)">
+        <strong style="font-size:.9rem">ویرایش حافظه بلندمدت</strong>
+        <p style="color:var(--text2);font-size:.8rem;margin-top:4px">امکان ویرایش کلمات در بخش حافظه بلندمدت مانند بخش کتابخانه.</p>
+      </div>
     </div>
   </div>
 
   <div class="card" style="margin-bottom:16px">
     <h3 style="margin-bottom:8px;color:var(--accent)">💾 ذخیره‌سازی و امنیت</h3>
-    <p style="color:var(--text2);font-size:.9rem;line-height:1.8">تمام داده‌های شما در مرورگر ذخیره می‌شوند و هرگز به سرور ارسال نمی‌شوند. پشتیبان خودکار در IndexedDB نگهداری می‌شود. حریم خصوصی شما کاملاً حفظ می‌شود.</p>
+    <p style="color:var(--text2);font-size:.9rem;line-height:1.8">تمام داده‌های شما در مرورگر ذخیره می‌شوند و هرگز به سرور ارسال نمی‌شوند. پشتیبان خودکار در IndexedDB نگهداری می‌شود. وضعیت PDF و سایدبار در localStorage ذخیره می‌شود. حریم خصوصی شما کاملاً حفظ می‌شود.</p>
   </div>
 
   <div class="card" style="text-align:center;border:2px solid var(--accent);margin-bottom:16px">
@@ -1668,7 +1494,19 @@ if(!navigator.onLine)document.getElementById('offlineBanner').classList.add('vis
 // ═══════════════════════════════════════════
 function applyTheme(){document.documentElement.setAttribute('data-theme',S.settings.theme);document.getElementById('themeBtn').textContent=S.settings.theme==='dark'?'🌙':'☀️'}
 document.getElementById('themeBtn').onclick=()=>{S.settings.theme=S.settings.theme==='dark'?'light':'dark';save();applyTheme();render()};
-document.getElementById('hamBtn').onclick=()=>document.getElementById('sidebar').classList.toggle('open');
+document.getElementById('hamBtn').onclick=()=>{const sb=document.getElementById('sidebar');const mn=document.getElementById('main');sb.classList.toggle('open');mn.className=sb.classList.contains('open')?'main sidebar-open':'main sidebar-closed'};
+// Initialize sidebar state
+const sbInit=document.getElementById('sidebar');
+const mnInit=document.getElementById('main');
+if(S.settings.sidebarLocked){sbInit.classList.add('open');mnInit.className='main sidebar-open'}else{sbInit.classList.remove('open');mnInit.className='main sidebar-closed'}
+// Lock button
+const lockBtn=document.getElementById('sidebarLockBtn');
+function updateLockBtn(){lockBtn.textContent=S.settings.sidebarLocked?'🔒':'🔓';lockBtn.title=S.settings.sidebarLocked?'قفل سایدبار (فعال)':'قفل سایدبار (غیرفعال)'}
+updateLockBtn();
+lockBtn.onclick=()=>{S.settings.sidebarLocked=!S.settings.sidebarLocked;save();updateLockBtn();const sb=document.getElementById('sidebar');const mn=document.getElementById('main');if(S.settings.sidebarLocked){sb.classList.add('open');mn.className='main sidebar-open'}else{sb.classList.remove('open');mn.className='main sidebar-closed'}};
+// Restore PDF state if available - show on PDF reader tab
+const savedPdf=loadPdfState();
+if(savedPdf&&savedPdf.fileName)pdfFileName=savedPdf.fileName;
 applyTheme();render();
 // Re-init quiz delegation after each render
 const origRender=render;
