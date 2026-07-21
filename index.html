@@ -237,6 +237,46 @@ tr:hover td{background:var(--card-hover)}
 .translated-item.moved{opacity:.5;border-color:var(--success)}
 .translated-item.moved .tw{text-decoration:line-through}
 .sel-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;justify-content:flex-end}
+
+/* ═══════════════════════════════════════════
+   RICH BACK CARD SECTIONS
+   ═══════════════════════════════════════════ */
+.rb-header{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.rb-word{font-size:1.6rem;font-weight:800;color:var(--text)}
+.rb-ipa{font-size:.85rem;color:var(--text2)}
+.rb-pos{display:inline-block;padding:3px 10px;border-radius:12px;font-size:.7rem;font-weight:600;background:rgba(108,92,231,.15);color:var(--accent);border:1px solid rgba(108,92,231,.2)}
+.rb-translation{font-size:1.35rem;font-weight:700;color:var(--success);text-align:center;margin-bottom:16px;line-height:1.6}
+.rb-core-meaning{font-size:.9rem;color:var(--text);text-align:center;margin-bottom:14px;padding:8px 14px;background:var(--bg);border-radius:10px;border:1px solid var(--border)}
+.rb-section{margin-bottom:12px;text-align:right}
+.rb-section-label{font-size:.7rem;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;display:flex;align-items:center;gap:4px}
+.rb-section-label .icon{font-size:.8rem}
+.rb-section-content{font-size:.83rem;color:var(--text);line-height:1.7}
+.rb-chips{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px}
+.rb-chip{display:inline-block;padding:3px 10px;border-radius:10px;font-size:.72rem;background:var(--bg);color:var(--text2);border:1px solid var(--border);transition:all .2s}
+.rb-chip:hover{border-color:var(--accent);color:var(--text)}
+.rb-chip.antonym{background:rgba(225,112,85,.1);color:var(--danger);border-color:rgba(225,112,85,.2)}
+.rb-chip.word-family{background:rgba(108,92,231,.1);color:var(--accent2);border-color:rgba(108,92,231,.2)}
+.rb-example{font-size:.8rem;color:var(--text2);font-style:italic;padding:6px 10px;margin-bottom:6px;background:var(--bg);border-radius:8px;border-right:3px solid var(--accent);line-height:1.6}
+.rb-context{font-size:.82rem;color:var(--text2);padding:8px 12px;background:var(--bg);border-radius:10px;border-right:3px solid var(--warning);line-height:1.6;margin-bottom:12px}
+.rb-note-box{font-size:.8rem;padding:8px 12px;background:rgba(0,184,148,.08);border:1px solid rgba(0,184,148,.2);border-radius:10px;color:var(--text);line-height:1.6;margin-bottom:12px;border-right:3px solid var(--success)}
+.rb-trap-box{font-size:.8rem;padding:8px 12px;background:rgba(253,203,110,.1);border:1px solid rgba(253,203,110,.25);border-radius:10px;color:var(--text);line-height:1.6;margin-bottom:12px;border-right:3px solid var(--warning)}
+.rb-footer{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:14px;padding-top:12px;border-top:1px solid var(--border)}
+.rb-footer .tag{font-size:.65rem}
+.rb-source{font-size:.65rem;color:var(--text2);padding:2px 8px;background:var(--bg);border-radius:8px;border:1px solid var(--border)}
+@media(max-width:768px){.rb-word{font-size:1.3rem}.rb-translation{font-size:1.15rem}.rb-chip{font-size:.68rem;padding:2px 8px}}
+
+/* ═══════════════════════════════════════════
+   EDIT MODAL ADVANCED SECTION
+   ═══════════════════════════════════════════ */
+.edit-advanced-toggle{width:100%;padding:10px;background:var(--bg);border:1px solid var(--border);border-radius:10px;color:var(--text2);font:inherit;font-size:.85rem;cursor:pointer;text-align:right;transition:all .2s;display:flex;align-items:center;justify-content:space-between}
+.edit-advanced-toggle:hover{border-color:var(--accent);color:var(--text)}
+.edit-advanced-toggle .arrow{transition:transform .3s}
+.edit-advanced-toggle.open .arrow{transform:rotate(180deg)}
+.edit-advanced-fields{display:grid;gap:10px;margin-top:10px;max-height:0;overflow:hidden;transition:max-height .4s ease}
+.edit-advanced-fields.open{max-height:2000px}
+.edit-advanced-fields label{font-size:.8rem;color:var(--text2);margin-bottom:2px;display:block}
+.edit-advanced-fields textarea{width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:10px;background:var(--bg);color:var(--text);font:inherit;font-size:.83rem;resize:vertical;min-height:60px;transition:all .25s}
+.edit-advanced-fields textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow)}
 </style>
 </head>
 <body>
@@ -277,7 +317,9 @@ function sanitizeCard(c){
   // FSRS fields
   stability:Number(c.stability)||0,difficulty:Number(c.difficulty)||0,elapsedDays:Number(c.elapsedDays)||0,scheduledDays:Number(c.scheduledDays)||0,reps:Number(c.reps)||0,lapses:Number(c.lapses)||0,fsrsState:String(c.fsrsState||'new'),
   // Dictionary details
-  definitions:Array.isArray(c.definitions)?c.definitions:[],examples:Array.isArray(c.examples)?c.examples:[],synonyms:Array.isArray(c.synonyms)?c.synonyms:[],partOfSpeech:String(c.partOfSpeech||'').trim(),audioUs:String(c.audioUs||'').trim(),audioBr:String(c.audioBr||'').trim()}
+  definitions:Array.isArray(c.definitions)?c.definitions:[],examples:Array.isArray(c.examples)?c.examples:[],synonyms:Array.isArray(c.synonyms)?c.synonyms:[],partOfSpeech:String(c.partOfSpeech||'').trim(),audioUs:String(c.audioUs||'').trim(),audioBr:String(c.audioBr||'').trim(),
+  // Rich vocabulary fields
+  coreMeaning:String(c.coreMeaning||'').trim(),collocations:Array.isArray(c.collocations)?c.collocations:[],antonyms:Array.isArray(c.antonyms)?c.antonyms:[],wordFamily:Array.isArray(c.wordFamily)?c.wordFamily:[],note:String(c.note||'').trim(),trap:String(c.trap||'').trim(),tags:Array.isArray(c.tags)?c.tags:[],source:String(c.source||'').trim()}
 }
 
 function loadState(){try{const d=localStorage.getItem(LS_KEY);if(!d)return defaultState();const p=JSON.parse(d);const s={...defaultState(),...p};s.words=(p.words||[]).map(sanitizeCard).filter(w=>w.word);s.longTerm=(p.longTerm||[]).map(sanitizeCard).filter(w=>w.word);s.stats={...defaultState().stats,...(p.stats||{})};if(Array.isArray(s.stats.history))s.stats.history={};s.settings={...defaultState().settings,...(p.settings||{})};return s}catch(e){return defaultState()}}
@@ -286,6 +328,81 @@ function esc(s){const d=document.createElement('div');d.textContent=s;return d.i
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,8)}
 function fmtDate(d){if(!d)return'-';return new Date(d).toLocaleDateString('fa-IR')}
 function todayKey(){return new Date().toISOString().slice(0,10)}
+
+// ═══════════════════════════════════════════
+// STATE SNAPSHOT IMPORT/EXPORT HELPERS
+// ═══════════════════════════════════════════
+function sanitizeStateSnapshot(raw){
+  if(!raw||typeof raw!=='object')return null;
+  const s={...defaultState()};
+  // Detect format
+  const isFullSnapshot=raw.schema==='leitner-full-backup'||(Array.isArray(raw.words)&&(Array.isArray(raw.longTerm)||raw.longTerm===undefined));
+  if(isFullSnapshot){
+    s.words=(raw.words||[]).map(sanitizeCard).filter(w=>w.word);
+    s.longTerm=(raw.longTerm||[]).map(sanitizeCard).filter(w=>w.word);
+    if(raw.stats&&typeof raw.stats==='object'&&!Array.isArray(raw.stats)){
+      s.stats={...defaultState().stats,...raw.stats};
+      if(Array.isArray(s.stats.history))s.stats.history={};
+    }
+    if(Array.isArray(raw.categories))s.categories=raw.categories.filter(c=>typeof c==='string'&&c.trim());
+    if(raw.settings&&typeof raw.settings==='object')s.settings={...defaultState().settings,...raw.settings};
+    if(raw._version||raw.version)s._version=raw._version||raw.version;
+    return{s,isFull:true};
+  }
+  // Legacy format: just words array or {words:[...]}
+  let cards=[];
+  if(Array.isArray(raw))cards=raw.filter(w=>w&&typeof w.word==='string'&&w.word.trim());
+  else if(Array.isArray(raw.words))cards=raw.words.filter(w=>w&&typeof w.word==='string'&&w.word.trim());
+  if(!cards.length)return null;
+  return{cards,isFull:false};
+}
+
+function exportStateSnapshot(){
+  return JSON.stringify({
+    schema:'leitner-full-backup',
+    version:SCHEMA_VERSION,
+    exportedAt:new Date().toISOString(),
+    words:S.words,
+    longTerm:S.longTerm,
+    stats:S.stats,
+    categories:S.categories,
+    settings:S.settings
+  },null,2);
+}
+
+function importStateSnapshot(data){
+  const result=sanitizeStateSnapshot(data);
+  if(!result)return{ok:false,msg:'ساختار فایل معتبر نیست'};
+  if(result.isFull){
+    const existingWordIds=new Set(S.words.map(w=>w.id));
+    const existingLTIds=new Set(S.longTerm.map(w=>w.id));
+    const existingWordWords=new Set(S.words.map(w=>w.word.toLowerCase()));
+    const existingLTWords=new Set(S.longTerm.map(w=>w.word.toLowerCase()));
+    let addedWords=0,skippedWords=0;
+    let addedLT=0,skippedLT=0;
+    result.s.words.forEach(w=>{
+      if(existingWordIds.has(w.id)||existingWordWords.has(w.word.toLowerCase())){skippedWords++;return}
+      S.words.push(w);existingWordIds.add(w.id);existingWordWords.add(w.word.toLowerCase());addedWords++;
+    });
+    result.s.longTerm.forEach(w=>{
+      if(existingLTIds.has(w.id)||existingLTWords.has(w.word.toLowerCase())){skippedLT++;return}
+      S.longTerm.push(w);existingLTIds.add(w.id);existingLTWords.add(w.word.toLowerCase());addedLT++;
+    });
+    if(result.s.stats)S.stats={...result.s.stats,...S.stats,reviewed:(result.s.stats.reviewed||0)+0,correct:(result.s.stats.correct||0)+0,wrong:(result.s.stats.wrong||0)+0};
+    if(result.s.categories&&result.s.categories.length){result.s.categories.forEach(c=>{if(!S.categories.includes(c))S.categories.push(c)})}
+    if(result.s.settings)S.settings={...S.settings,...result.s.settings};
+    save();
+    const totalAdded=addedWords+addedLT;
+    const totalSkipped=skippedWords+skippedLT;
+    return{ok:true,msg:`${totalAdded} کلمه بازیابی شد (${addedWords} لایتنر، ${addedLT} حافظه بلندمدت)${totalSkipped?` — ${totalSkipped} تکراری رد شد`:''}`};
+  }
+  // Legacy import
+  const existingWords=new Set(S.words.map(w=>w.word.toLowerCase()));
+  const existingLT=new Set(S.longTerm.map(w=>w.word.toLowerCase()));
+  const fresh=result.cards.filter(w=>!existingWords.has(w.word.toLowerCase())&&!existingLT.has(w.word.toLowerCase())).map(sanitizeCard);
+  S.words.push(...fresh);save();
+  return{ok:true,msg:`${fresh.length} کلمه وارد شد (${result.cards.length-fresh.length} تکراری رد شد)`};
+}
 
 // ═══════════════════════════════════════════
 // FSRS ALGORITHM (self-contained)
@@ -694,10 +811,34 @@ const w=reviewSession.queue[reviewSession.idx];
 const prog=Math.round((reviewSession.idx/reviewSession.queue.length)*100);
 const tier=getFrequencyTier(w.word);
 let backHtml='';
-if(w.definitions&&w.definitions.length)backHtml+='<div style="margin-top:8px;text-align:right">'+w.definitions.slice(0,2).map(d=>'<div style="font-size:.8rem;color:var(--text2);margin-bottom:4px">• '+esc(d)+'</div>').join('')+'</div>';
-if(w.examples&&w.examples.length)backHtml+='<div style="margin-top:6px">'+w.examples.slice(0,2).map(ex=>'<div style="font-size:.78rem;color:var(--text2);font-style:italic;border-right:2px solid var(--accent);padding-right:8px;margin-bottom:4px">"'+esc(ex)+'"</div>').join('')+'</div>';
-if(w.synonyms&&w.synonyms.length)backHtml+='<div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:4px">'+w.synonyms.slice(0,4).map(s=>'<span style="font-size:.7rem;padding:2px 8px;border-radius:8px;background:var(--bg);color:var(--text2);border:1px solid var(--border)">'+esc(s)+'</span>').join('')+'</div>';
-c.innerHTML=`<div style="max-width:500px;margin:0 auto"><div class="flex" style="justify-content:space-between;margin-bottom:16px"><span style="color:var(--text2)">${reviewSession.idx+1} از ${reviewSession.queue.length}</span><div class="flex" style="gap:4px"><span class="badge badge-accent">${w.box>0?'جعبه '+w.box:'جدید'}</span>${tier?`<span class="badge tier-${tier}">${tierLabel(tier)}</span>`:''}</div></div><div class="progress-bar"><div class="progress-fill" style="width:${prog}%"></div></div><div class="review-card" id="rCard" tabindex="0" role="button" aria-label="کلیک برای نمایش پاسخ"><div class="review-inner"><div class="review-face"><div style="font-size:1.8rem;font-weight:700;margin-bottom:12px">${esc(w.word)} <button type="button" class="trans-audio-btn" id="reviewSpeakBtn" title="شنیدن تلفظ" style="vertical-align:middle;font-size:1rem">🔊</button></div>${w.ipa?`<div style="color:var(--text2);font-size:.9rem">${esc(w.ipa)}</div>`:''}<div style="color:var(--text2);font-size:.8rem;margin-top:16px">برای نمایش پاسخ کلیک کنید</div></div><div class="review-face review-back"><div style="font-size:1.5rem;font-weight:600;color:var(--accent);margin-bottom:12px">${esc(w.translation)}</div>${w.category&&w.category!=='پیش‌فرض'?`<span class="tag">${esc(w.category)}</span>`:''}${w.context?`<div class="context-sentence">${esc(w.context)}</div>`:''}${backHtml}<div style="margin-top:10px"><button type="button" class="btn btn-ghost btn-sm" id="reviewEditBtn" style="font-size:.75rem">✏️ ویرایش</button></div></div></div></div><div class="rating-bar" id="ratingBar" style="display:none"><button type="button" class="btn btn-danger btn-sm" data-rate="1">❌ نادرست <kbd style="font-size:.6rem;opacity:.6">۱</kbd></button><button type="button" class="btn btn-ghost btn-sm" data-rate="3">😐 سخت <kbd style="font-size:.6rem;opacity:.6">۲</kbd></button><button type="button" class="btn btn-primary btn-sm" data-rate="4">🙂 خوب <kbd style="font-size:.6rem;opacity:.6">۳</kbd></button><button type="button" class="btn btn-success btn-sm" data-rate="5">😄 عالی <kbd style="font-size:.6rem;opacity:.6">۴</kbd></button></div></div>`;
+// Rich back card rendering
+const rbSections=[];
+// Core Meaning
+if(w.coreMeaning)rbSections.push('<div class="rb-core-meaning">'+esc(w.coreMeaning)+'</div>');
+// Definitions
+if(w.definitions&&w.definitions.length){const defs=w.definitions.slice(0,4);rbSections.push('<div class="rb-section"><div class="rb-section-label"><span class="icon">📖</span> تعاریف</div><div class="rb-section-content">'+defs.map(d=>'<div style="margin-bottom:4px">• '+esc(d)+'</div>').join('')+'</div></div>')}
+// Examples
+if(w.examples&&w.examples.length){const exs=w.examples.slice(0,3);rbSections.push('<div class="rb-section"><div class="rb-section-label"><span class="icon">💬</span> مثال</div>'+exs.map(ex=>'<div class="rb-example">"'+esc(ex)+'"</div>').join('')+'</div>')}
+// Context/Collocation
+if(w.context||w.collocations&&w.collocations.length){let ctxHtml='<div class="rb-section"><div class="rb-section-label"><span class="icon">🔗</span> بافت و همنشینی</div><div class="rb-context">';if(w.context)ctxHtml+=esc(w.context);if(w.collocations&&w.collocations.length){if(w.context)ctxHtml+='<br>';ctxHtml+=w.collocations.slice(0,5).map(c=>'<span class="rb-chip">'+esc(c)+'</span>').join(' ')}ctxHtml+='</div></div>';rbSections.push(ctxHtml)}
+// Synonyms
+if(w.synonyms&&w.synonyms.length){rbSections.push('<div class="rb-section"><div class="rb-section-label"><span class="icon">🔄</span> مترادف</div><div class="rb-chips">'+w.synonyms.slice(0,6).map(s=>'<span class="rb-chip">'+esc(s)+'</span>').join('')+'</div></div>')}
+// Antonyms
+if(w.antonyms&&w.antonyms.length){rbSections.push('<div class="rb-section"><div class="rb-section-label"><span class="icon">⚡</span> متضاد</div><div class="rb-chips">'+w.antonyms.slice(0,6).map(a=>'<span class="rb-chip antonym">'+esc(a)+'</span>').join('')+'</div></div>')}
+// Word Family
+if(w.wordFamily&&w.wordFamily.length){rbSections.push('<div class="rb-section"><div class="rb-section-label"><span class="icon">🌳</span> خانواده واژگانی</div><div class="rb-chips">'+w.wordFamily.slice(0,5).map(f=>'<span class="rb-chip word-family">'+esc(f)+'</span>').join('')+'</div></div>')}
+// Note
+if(w.note)rbSections.push('<div class="rb-note-box"><div class="rb-section-label"><span class="icon">💡</span> یادداشت</div>'+esc(w.note)+'</div>');
+// Trap
+if(w.trap)rbSections.push('<div class="rb-trap-box"><div class="rb-section-label"><span class="icon">⚠️</span> نکته مهم</div>'+esc(w.trap)+'</div>');
+// Footer: tags, source
+let footerHtml='';
+const footerItems=[];
+if(w.tags&&w.tags.length)footerItems.push(...w.tags.map(t=>'<span class="tag">'+esc(t)+'</span>'));
+if(w.source)footerItems.push('<span class="rb-source">'+esc(w.source)+'</span>');
+if(footerItems.length)footerHtml='<div class="rb-footer">'+footerItems.join('')+'</div>';
+backHtml=rbSections.join('')+footerHtml;
+c.innerHTML=`<div style="max-width:500px;margin:0 auto"><div class="flex" style="justify-content:space-between;margin-bottom:16px"><span style="color:var(--text2)">${reviewSession.idx+1} از ${reviewSession.queue.length}</span><div class="flex" style="gap:4px"><span class="badge badge-accent">${w.box>0?'جعبه '+w.box:'جدید'}</span>${tier?`<span class="badge tier-${tier}">${tierLabel(tier)}</span>`:''}</div></div><div class="progress-bar"><div class="progress-fill" style="width:${prog}%"></div></div><div class="review-card" id="rCard" tabindex="0" role="button" aria-label="کلیک برای نمایش پاسخ"><div class="review-inner"><div class="review-face"><div style="font-size:1.8rem;font-weight:700;margin-bottom:12px">${esc(w.word)} <button type="button" class="trans-audio-btn" id="reviewSpeakBtn" title="شنیدن تلفظ" style="vertical-align:middle;font-size:1rem">🔊</button></div>${w.ipa?`<div style="color:var(--text2);font-size:.9rem">${esc(w.ipa)}</div>`:''}<div style="color:var(--text2);font-size:.8rem;margin-top:16px">برای نمایش پاسخ کلیک کنید</div></div><div class="review-face review-back" style="justify-content:flex-start;padding-top:20px;overflow-y:auto;max-height:100%"><div class="rb-header"><span class="rb-word">${esc(w.word)}</span>${w.ipa?`<span class="rb-ipa">${esc(w.ipa)}</span>`:''}${w.partOfSpeech?`<span class="rb-pos">${esc(w.partOfSpeech)}</span>`:''}${tier?`<span class="badge tier-${tier}" style="font-size:.6rem">${tierLabel(tier)}</span>`:''}</div><div class="rb-translation">${esc(w.translation)}</div>${w.category&&w.category!=='پیش‌فرض'?`<div style="text-align:center;margin-bottom:12px"><span class="tag">${esc(w.category)}</span></div>`:''}${backHtml}<div style="margin-top:12px;text-align:center"><button type="button" class="btn btn-ghost btn-sm" id="reviewEditBtn" style="font-size:.75rem">✏️ ویرایش</button></div></div></div></div></div><div class="rating-bar" id="ratingBar" style="display:none"><button type="button" class="btn btn-danger btn-sm" data-rate="1">❌ نادرست <kbd style="font-size:.6rem;opacity:.6">۱</kbd></button><button type="button" class="btn btn-ghost btn-sm" data-rate="3">😐 سخت <kbd style="font-size:.6rem;opacity:.6">۲</kbd></button><button type="button" class="btn btn-primary btn-sm" data-rate="4">🙂 خوب <kbd style="font-size:.6rem;opacity:.6">۳</kbd></button><button type="button" class="btn btn-success btn-sm" data-rate="5">😄 عالی <kbd style="font-size:.6rem;opacity:.6">۴</kbd></button></div></div>`;
 const card=document.getElementById('rCard');
 const ratingBar=document.getElementById('ratingBar');
 card.onclick=()=>{if(reviewSession.flipped)return;reviewSession.flipped=true;card.classList.add('flipped');ratingBar.style.display='flex'};
@@ -761,31 +902,79 @@ function editWord(id,onClose,store){
 const storeArr=store==='longTerm'?S.longTerm:S.words;
 const w=storeArr.find(x=>x.id===id);if(!w)return;
 const ov=document.createElement('div');ov.className='modal-overlay';
-let detailsHtml='';
-if(w.definitions&&w.definitions.length){
-  detailsHtml+='<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">';
-  if(w.partOfSpeech)detailsHtml+='<span class="trans-pos" style="margin-bottom:6px">'+esc(w.partOfSpeech)+'</span> ';
-  if(w.definitions.length){detailsHtml+='<div style="margin-bottom:6px"><strong style="font-size:.8rem;color:var(--text2)">تعریف:</strong>';w.definitions.slice(0,3).forEach(d=>{detailsHtml+='<div class="trans-def-item">'+esc(d)+'</div>'});detailsHtml+='</div>'}
-  if(w.examples&&w.examples.length){detailsHtml+='<div style="margin-bottom:6px"><strong style="font-size:.8rem;color:var(--text2)">مثال:</strong>';w.examples.slice(0,2).forEach(ex=>{detailsHtml+='<div class="trans-example">"'+esc(ex)+'"</div>'});detailsHtml+='</div>'}
-  if(w.synonyms&&w.synonyms.length){detailsHtml+='<div><strong style="font-size:.8rem;color:var(--text2)">مترادف:</strong> <span style="font-size:.8rem">'+w.synonyms.map(s=>esc(s)).join(', ')+'</span></div>'}
-  detailsHtml+='</div>'}
-ov.innerHTML=`<div class="modal"><h3>ویرایش کلمه</h3><div style="display:grid;gap:12px"><label>کلمه</label><input class="input" id="eWord" value="${esc(w.word)}"><label>ترجمه</label><input class="input" id="eTrans" value="${esc(w.translation)}"><label>IPA</label><input class="input" id="eIpa" value="${esc(w.ipa||'')}"><label>دسته</label><select class="input" id="eCat">${S.categories.map(c=>`<option${c===w.category?' selected':''}>${esc(c)}</option>`).join('')}</select>${detailsHtml}<div class="flex"><button type="button" class="btn btn-primary" id="eSave">ذخیره</button><button type="button" class="btn btn-ghost" id="eCancel">لغو</button></div></div></div>`;
+ov.innerHTML=`<div class="modal" style="max-width:560px"><h3>ویرایش کلمه</h3><div style="display:grid;gap:12px">
+<label>کلمه</label><input class="input" id="eWord" value="${esc(w.word)}">
+<label>ترجمه</label><input class="input" id="eTrans" value="${esc(w.translation)}">
+<label>IPA</label><input class="input" id="eIpa" value="${esc(w.ipa||'')}">
+<label>دسته</label><select class="input" id="eCat">${S.categories.map(c=>`<option${c===w.category?' selected':''}>${esc(c)}</option>`).join('')}</select>
+<label>معنی اصلی</label><input class="input" id="eCoreMeaning" value="${esc(w.coreMeaning||'')}" placeholder="تعریف کوتاه / معنی محوری">
+<label>بخش کلام</label><input class="input" id="ePartOfSpeech" value="${esc(w.partOfSpeech||'')}" placeholder="verb, noun, adj, ...">
+<button type="button" class="edit-advanced-toggle" id="eAdvToggle"><span>جزئیات پیشرفته ▼</span><span class="arrow">▼</span></button>
+<div class="edit-advanced-fields" id="eAdvFields">
+<div><label>تعاریف (هر خط یک تعریف)</label><textarea id="eDefinitions" rows="3">${(w.definitions||[]).join('\n')}</textarea></div>
+<div><label>مثال‌ها (هر خط یک مثال)</label><textarea id="eExamples" rows="3">${(w.examples||[]).join('\n')}</textarea></div>
+<div><label>بافت / همنشینی</label><textarea id="eContext" rows="2">${esc(w.context||'')}</textarea></div>
+<div><label>همنشینی‌ها (با کاما جدا کنید)</label><input class="input" id="eCollocations" value="${(w.collocations||[]).join(', ')}"></div>
+<div><label>مترادف‌ها (با کاما جدا کنید)</label><input class="input" id="eSynonyms" value="${(w.synonyms||[]).join(', ')}"></div>
+<div><label>متضادها (با کاما جدا کنید)</label><input class="input" id="eAntonyms" value="${(w.antonyms||[]).join(', ')}"></div>
+<div><label>خانواده واژگانی (با کاما جدا کنید)</label><input class="input" id="eWordFamily" value="${(w.wordFamily||[]).join(', ')}"></div>
+<div><label>یادداشت</label><textarea id="eNote" rows="2">${esc(w.note||'')}</textarea></div>
+<div><label>نکته / هشدار</label><textarea id="eTrap" rows="2">${esc(w.trap||'')}</textarea></div>
+<div><label>برچسب‌ها (با کاما جدا کنید)</label><input class="input" id="eTags" value="${(w.tags||[]).join(', ')}"></div>
+<div><label>منبع</label><input class="input" id="eSource" value="${esc(w.source||'')}"></div>
+</div>
+<div class="flex"><button type="button" class="btn btn-primary" id="eSave">ذخیره</button><button type="button" class="btn btn-ghost" id="eCancel">لغو</button></div></div></div>`;
 document.body.appendChild(ov);
 const closeModal=()=>{ov.remove();if(onClose)onClose()};
 ov.onclick=e=>{if(e.target===ov)closeModal()};
 const onKey=e=>{if(e.key==='Escape'){document.removeEventListener('keydown',onKey);closeModal()}};
 document.addEventListener('keydown',onKey);
-ov.querySelector('#eSave').onclick=()=>{w.word=ov.querySelector('#eWord').value.trim();w.translation=ov.querySelector('#eTrans').value.trim();w.ipa=ov.querySelector('#eIpa').value.trim();w.category=ov.querySelector('#eCat').value;save();closeModal();if(!onClose)renderLibrary(document.getElementById('content'));else onClose();toast('ذخیره شد','success')};
+// Advanced toggle
+const advToggle=ov.querySelector('#eAdvToggle');
+const advFields=ov.querySelector('#eAdvFields');
+advToggle.onclick=()=>{advToggle.classList.toggle('open');advFields.classList.toggle('open')};
+// Save handler
+ov.querySelector('#eSave').onclick=()=>{
+w.word=ov.querySelector('#eWord').value.trim();
+w.translation=ov.querySelector('#eTrans').value.trim();
+w.ipa=ov.querySelector('#eIpa').value.trim();
+w.category=ov.querySelector('#eCat').value;
+w.coreMeaning=ov.querySelector('#eCoreMeaning').value.trim();
+w.partOfSpeech=ov.querySelector('#ePartOfSpeech').value.trim();
+w.definitions=ov.querySelector('#eDefinitions').value.split('\n').map(s=>s.trim()).filter(Boolean);
+w.examples=ov.querySelector('#eExamples').value.split('\n').map(s=>s.trim()).filter(Boolean);
+w.context=ov.querySelector('#eContext').value.trim();
+w.collocations=ov.querySelector('#eCollocations').value.split(',').map(s=>s.trim()).filter(Boolean);
+w.synonyms=ov.querySelector('#eSynonyms').value.split(',').map(s=>s.trim()).filter(Boolean);
+w.antonyms=ov.querySelector('#eAntonyms').value.split(',').map(s=>s.trim()).filter(Boolean);
+w.wordFamily=ov.querySelector('#eWordFamily').value.split(',').map(s=>s.trim()).filter(Boolean);
+w.note=ov.querySelector('#eNote').value.trim();
+w.trap=ov.querySelector('#eTrap').value.trim();
+w.tags=ov.querySelector('#eTags').value.split(',').map(s=>s.trim()).filter(Boolean);
+w.source=ov.querySelector('#eSource').value.trim();
+save();closeModal();if(!onClose)renderLibrary(document.getElementById('content'));else onClose();toast('ذخیره شد','success')};
 ov.querySelector('#eCancel').onclick=()=>{document.removeEventListener('keydown',onKey);closeModal()}}
 
 // ═══════════════════════════════════════════
 // 3. LONG-TERM MEMORY
 // ═══════════════════════════════════════════
-let ltFilter='';
+let ltFilter='',ltTagFilter='',ltSourceFilter='';
 function renderLongterm(c){
-const items=S.longTerm.filter(w=>!ltFilter||w.word.toLowerCase().includes(ltFilter.toLowerCase())||w.translation.toLowerCase().includes(ltFilter.toLowerCase()));
-c.innerHTML=`<div class="filter-bar"><input class="input" placeholder="جستجو..." style="max-width:300px" value="${esc(ltFilter)}" id="ltSearch"><span style="color:var(--text2);font-size:.85rem">${items.length} کلمه</span></div><div class="table-wrap card"><table><thead><tr><th>کلمه</th><th>ترجمه</th><th>تاریخ اضافه</th><th>عملیات</th></tr></thead><tbody>${items.length?items.map(w=>`<tr><td><strong>${esc(w.word)}</strong>${w.ipa?`<br><small style="color:var(--text2)">${esc(w.ipa)}</small>`:''} <button type="button" class="btn btn-ghost btn-sm" data-speak="${esc(w.word)}" style="padding:2px 6px;font-size:.75rem" title="شنیدن تلفظ">🔊</button></td><td>${esc(w.translation)}</td><td>${fmtDate(w.addedDate)}</td><td><button type="button" class="btn btn-ghost btn-sm" data-ltedit="${w.id}" aria-label="ویرایش">✏️</button><button type="button" class="btn btn-ghost btn-sm" data-back="${w.id}" aria-label="بازگشت به کتابخانه">↩️ بازگشت</button><button type="button" class="btn btn-ghost btn-sm" data-dlt="${w.id}" aria-label="حذف">🗑️</button></td></tr>`).join(''):'<tr><td colspan="4" class="empty">حافظه بلندمدت خالی است</td></tr>'}</tbody></table></div>`;
+// Get unique tags and sources for filters
+const allTags=new Set();const allSources=new Set();
+S.longTerm.forEach(w=>{(w.tags||[]).forEach(t=>allTags.add(t));if(w.source)allSources.add(w.source)});
+const items=S.longTerm.filter(w=>{
+  if(ltFilter&&!w.word.toLowerCase().includes(ltFilter.toLowerCase())&&!w.translation.toLowerCase().includes(ltFilter.toLowerCase()))return false;
+  if(ltTagFilter&&!(w.tags||[]).includes(ltTagFilter))return false;
+  if(ltSourceFilter&&w.source!==ltSourceFilter)return false;
+  return true;
+});
+const tagOpts=[...allTags].sort().map(t=>`<option value="${esc(t)}"${t===ltTagFilter?' selected':''}>${esc(t)}</option>`).join('');
+const srcOpts=[...allSources].sort().map(s=>`<option value="${esc(s)}"${s===ltSourceFilter?' selected':''}>${esc(s)}</option>`).join('');
+c.innerHTML=`<div class="filter-bar"><input class="input" placeholder="جستجو..." style="max-width:250px" value="${esc(ltFilter)}" id="ltSearch"><select class="input" style="max-width:160px" id="ltTagFilter"><option value="">همه برچسب‌ها</option>${tagOpts}</select><select class="input" style="max-width:180px" id="ltSourceFilter"><option value="">همه منابع</option>${srcOpts}</select><span style="color:var(--text2);font-size:.85rem">${items.length} کلمه</span></div><div class="table-wrap card"><table><thead><tr><th>کلمه</th><th>ترجمه</th><th>برچسب‌ها</th><th>عملیات</th></tr></thead><tbody>${items.length?items.map(w=>`<tr><td><strong>${esc(w.word)}</strong>${w.ipa?`<br><small style="color:var(--text2)">${esc(w.ipa)}</small>`:''} <button type="button" class="btn btn-ghost btn-sm" data-speak="${esc(w.word)}" style="padding:2px 6px;font-size:.75rem" title="شنیدن تلفظ">🔊</button></td><td>${esc(w.translation)}</td><td>${(w.tags||[]).map(t=>'<span class="tag" style="font-size:.6rem">'+esc(t)+'</span>').join(' ')}${w.source?`<br><small style="color:var(--text2);font-size:.65rem">${esc(w.source)}</small>`:''}</td><td><button type="button" class="btn btn-ghost btn-sm" data-ltedit="${w.id}" aria-label="ویرایش">✏️</button><button type="button" class="btn btn-ghost btn-sm" data-back="${w.id}" aria-label="بازگشت به کتابخانه">↩️ بازگشت</button><button type="button" class="btn btn-ghost btn-sm" data-dlt="${w.id}" aria-label="حذف">🗑️</button></td></tr>`).join(''):'<tr><td colspan="4" class="empty">حافظه بلندمدت خالی است</td></tr>'}</tbody></table></div>`;
 document.getElementById('ltSearch').oninput=e=>{ltFilter=e.target.value;renderLongterm(c)};
+document.getElementById('ltTagFilter').onchange=e=>{ltTagFilter=e.target.value;renderLongterm(c)};
+document.getElementById('ltSourceFilter').onchange=e=>{ltSourceFilter=e.target.value;renderLongterm(c)};
 c.querySelector('tbody').onclick=e=>{
 const btn=e.target.closest('button');if(!btn)return;
 if(btn.dataset.speak){speakWord(btn.dataset.speak);return}
@@ -826,7 +1015,7 @@ else if(importStep===4)h+=renderImportStep4();
 c.innerHTML=h;bindImportEvents()}
 
 function renderImportStep0(){
-return`<div class="card" style="margin-bottom:16px"><h3 style="margin-bottom:12px">ورود متن</h3><textarea class="input" id="importText" rows="6" placeholder="متن انگلیسی را اینجا بچسبانید...">${esc(importRawText)}</textarea><div class="flex" style="margin-top:12px"><select class="input" style="max-width:200px" id="importCat">${S.categories.map(c=>`<option${c===importCategory?' selected':''}>${esc(c)}</option>`).join('')}</select><button type="button" class="btn btn-primary" id="importParse">نمایش متن</button></div></div><div class="card" style="margin-bottom:16px"><h3 style="margin-bottom:12px">ورود فایل</h3><div class="flex"><input type="file" id="fileInput" accept=".txt,.pdf,.docx,.json,.apkg" style="display:none"><button type="button" class="btn btn-ghost" onclick="document.getElementById('fileInput').click()">انتخاب فایل</button><span style="color:var(--text2);font-size:.85rem">TXT, PDF, DOCX, JSON, Anki (.apkg)</span></div></div><div class="card"><h3 style="margin-bottom:12px">ورود از URL</h3><div class="flex"><input class="input" id="importUrl" placeholder="https://example.com/words.txt" style="max-width:400px"><button type="button" class="btn btn-ghost" id="importUrlBtn">دریافت</button></div></div>`}
+return`<div class="card" style="margin-bottom:16px"><h3 style="margin-bottom:12px">ورود متن</h3><textarea class="input" id="importText" rows="6" placeholder="متن انگلیسی را اینجا بچسبانید...">${esc(importRawText)}</textarea><div class="flex" style="margin-top:12px"><select class="input" style="max-width:200px" id="importCat">${S.categories.map(c=>`<option${c===importCategory?' selected':''}>${esc(c)}</option>`).join('')}</select><button type="button" class="btn btn-primary" id="importParse">نمایش متن</button></div></div><div class="card" style="margin-bottom:16px"><h3 style="margin-bottom:12px">ورود فایل</h3><div class="flex"><input type="file" id="fileInput" accept=".txt,.pdf,.docx,.json,.apkg" style="display:none"><button type="button" class="btn btn-ghost" onclick="document.getElementById('fileInput').click()">انتخاب فایل</button><span style="color:var(--text2);font-size:.85rem">TXT, PDF, DOCX, JSON, Anki (.apkg)</span></div></div><div class="card" style="margin-bottom:16px;border:1px solid var(--accent)"><h3 style="margin-bottom:12px;color:var(--accent)">📥 ورود هوشمند DOCX واژگان</h3><p style="color:var(--text2);font-size:.85rem;margin-bottom:12px">فایل DOCX حاوی واژگان با ساختار غنی را وارد کنید. تعاریف، مثال‌ها، مترادف‌ها و متضادها به‌صورت خودکار استخراج می‌شوند.</p><div class="flex"><input type="file" id="richDocxInput" accept=".docx" style="display:none"><button type="button" class="btn btn-primary" onclick="document.getElementById('richDocxInput').click()">📂 انتخاب فایل DOCX</button><span style="color:var(--text2);font-size:.8rem">مانند Manhattan 500</span></div></div><div class="card"><h3 style="margin-bottom:12px">ورود از URL</h3><div class="flex"><input class="input" id="importUrl" placeholder="https://example.com/words.txt" style="max-width:400px"><button type="button" class="btn btn-ghost" id="importUrlBtn">دریافت</button></div></div>`}
 
 function renderSelectableTextSection(){
 if(!textRenderedWords.length){
@@ -957,6 +1146,9 @@ const btn=document.getElementById('importParse');
 if(btn)btn.onclick=()=>{const txt=document.getElementById('importText').value;if(!txt.trim()){toast('متنی وارد نشده','error');return}importRawText=txt;importCategory=document.getElementById('importCat').value;textRenderedWords=parseWords(txt).map((w,i)=>({id:i,word:w,selected:false}));importStep=1;renderImport(document.getElementById('content'))};
 const fi=document.getElementById('fileInput');
 if(fi)fi.onchange=handleFileImport;
+// Rich DOCX import handler
+const richDocx=document.getElementById('richDocxInput');
+if(richDocx)richDocx.onchange=async e=>{const file=e.target.files[0];if(!file)return;try{toast('در حال پردازش فایل DOCX...','info');const buf=await file.arrayBuffer();const zip=await JSZip.loadAsync(buf);const xml=await zip.file('word/document.xml').async('text');const parser=new DOMParser();const doc=parser.parseFromString(xml,'text/xml');const texts=doc.getElementsByTagName('w:t');let txt='';for(let i=0;i<texts.length;i++)txt+=texts[i].textContent+' ';const cards=parseDocxToVocabJSON(txt);if(!cards.length){toast('هیچ واژه‌ای از فایل استخراج نشد','error');return}toast(cards.length+' واژه استخراج شد','success');const existingWords=new Set(S.words.map(w=>w.word.toLowerCase()));const existingLT=new Set(S.longTerm.map(w=>w.word.toLowerCase()));const fresh=cards.filter(w=>!existingWords.has(w.word.toLowerCase())&&!existingLT.has(w.word.toLowerCase())).map(sanitizeCard);S.words.push(...fresh);save();toast(`${fresh.length} کلمه وارد شد (${cards.length-fresh.length} تکراری رد شد)`,'success');importStep=0;renderImport(document.getElementById('content'))}catch(e){toast('خطا در پردازش فایل DOCX: '+e.message,'error')};e.target.value=''};
 const urlBtn=document.getElementById('importUrlBtn');
 if(urlBtn)urlBtn.onclick=async()=>{const url=document.getElementById('importUrl')?.value?.trim();if(!url){toast('URL وارد نشده','error');return}try{toast('در حال دریافت...','info');const r=await fetch(url);if(!r.ok)throw new Error(r.status);const txt=await r.text();importRawText=txt;document.getElementById('importText').value=txt;textRenderedWords=parseWords(txt).map((w,i)=>({id:i,word:w,selected:false}));importStep=1;renderImport(document.getElementById('content'));toast('متن دریافت شد','success')}catch(e){toast('خطا در دریافت URL','error')}}}
 else if(importStep===1){
@@ -995,11 +1187,143 @@ else if(importStep===4){
 const again=document.getElementById('impAgain');
 if(again)again.onclick=()=>{importStep=0;importWords=[];importSelected.clear();importTranslations=[];translatedItems=[];textRenderedWords=[];importRawText='';renderImport(document.getElementById('content'))}}}
 
+// ═══════════════════════════════════════════
+// DOCX-TO-JSON VOCABULARY PARSER
+// ═══════════════════════════════════════════
+function parseDocxToVocabJSON(rawText){
+  // Step 1: Clean raw text
+  let text=rawText.replace(/\s+/g,' ').trim();
+  text=text.replace(/[-=]{3,}/g,' ').replace(/\|+/g,' ');
+  // Step 2: Split into entries by word + POS pattern
+  const entryRegex=/\b([a-z]+)\s*\((verb|noun|adj|adv|adjective|noun,\s*verb|verb,\s*noun)\)\s*/gi;
+  const entries=[];
+  const matches=[...text.matchAll(entryRegex)];
+  for(let i=0;i<matches.length;i++){
+    const start=matches[i].index;
+    const end=i<matches.length-1?matches[i+1].index:text.length;
+    entries.push(text.slice(start,end));
+  }
+  // Step 3: Parse each entry
+  const results=[];
+  for(const body of entries){
+    const card=parseVocabEntry(body);
+    if(card&&card.word)results.push(card);
+  }
+  return results;
+}
+function parseVocabEntry(body){
+  // Extract word and POS
+  const wordMatch=body.match(/^([a-z]+)\s*\((verb|noun|adj|adv|adjective|noun,\s*verb|verb,\s*noun)\)/i);
+  if(!wordMatch)return null;
+  const word=wordMatch[1].toLowerCase();
+  const pos=wordMatch[2].toLowerCase().replace(/,\s*\w+/g,'');
+  // Split body into sections using labeled markers
+  const secParts=body.split(/(Example\s*\/\s*Usage|Context\s*\/\s*Collocation|Note\s*\/\s*Trap)/);
+  const before=secParts[0]||'';
+  const sections={};
+  for(let i=1;i<secParts.length;i+=2){
+    const label=secParts[i];
+    const content=(secParts[i+1]||'').trim();
+    if(label==='Example / Usage')sections.example=content;
+    else if(label==='Context / Collocation')sections.context=content;
+    else if(label==='Note / Trap')sections.note=content;
+  }
+  // Extract pronunciation (phonetic text after POS, before Also:)
+  const pronMatch=before.match(/\)\s*([A-Z][A-Za-z\- ]+?)(?:\s*Also:)/);
+  const pronunciation=pronMatch?pronMatch[1].trim():'';
+  // Extract "Also:" derived forms
+  const alsoMatch=before.match(/Also:\s*(.+?)(?=\s*Example|\s*Context|\s*Note|$)/i);
+  const wordFamilyRaw=alsoMatch?alsoMatch[1]:'';
+  const wordFamily=wordFamilyRaw.split(/,\s*|also/i).map(s=>s.trim()).filter(s=>s.length>1&&s.length<60&&/^[a-z]/i.test(s));
+  // Extract Persian translation (Persian/Arabic characters)
+  const persianMatch=before.match(/([\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF][\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF\u0020\u060C\u061B\u061F\u0640\u064B-\u065F\u0670\u06D6-\u06DC\u06DF-\u06E4\u06E7\u06E8\u06EA-\u06ED\u200C\u200D\u200E\u200F\uFEFF\u0610-\u061A\u064D\u0671-\u0677\u0679-\u0685\u0687-\u0691\u0693-\u0695\u0697-\u06A8\u06AA-\u06BF\u06C1-\u06CF\u06D1-\u06D5\u06D7-\u06ED\u06F0-\u06F9\u06FA-\u06FF]+[\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF]*)/);
+  const translation=persianMatch?persianMatch[1].trim():'';
+  // Extract core definition (English text between Also: section end and Persian, or after Persian before Example)
+  let coreMeaning='';
+  const persIdx=persianMatch?before.indexOf(persianMatch[0]):-1;
+  const alsoIdx=alsoMatch?before.indexOf(alsoMatch[0])+alsoMatch[0].length:-1;
+  if(persIdx>alsoIdx&&alsoIdx>0){
+    coreMeaning=before.slice(alsoIdx,persIdx).replace(/[\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF]+/g,'').trim();
+  }
+  // Extract Example/Usage
+  let examples=[];
+  if(sections.example){
+    examples=sections.example.split(/(?:\.?\s*\/\s*(?=[A-Z])|(?<=[.!?])\s+(?=[A-Z]))/).map(s=>s.trim()).filter(s=>s.length>10&&s.length<300);
+    if(!examples.length&&sections.example.length>10)examples=[sections.example.trim()];
+  }
+  // Extract Context/Collocation
+  let context='';
+  let collocations=[];
+  if(sections.context){
+    context=sections.context.trim();
+    collocations=context.split(/[;,]/).map(s=>s.trim()).filter(s=>s.length>2&&s.length<80);
+  }
+  // Extract Note/Trap
+  let note='';let trap='';
+  if(sections.note){
+    const noteText=sections.note.trim();
+    const trapMatch=noteText.match(/Trap\s*:?\s*(.+)/i);
+    if(trapMatch){trap=trapMatch[1].trim();note=noteText.replace(/Trap\s*:?\s*.*/i,'').replace(/Note\s*:?\s*/i,'').trim()}
+    else{note=noteText.replace(/Note\s*:?\s*/i,'').trim()}
+  }
+  // Extract synonyms and antonyms from the tone/synonym section
+  let synonyms=[];
+  let antonyms=[];
+  // Look for pattern: English words after tone description, before Example
+  const toneAndSyn=before.split(/Example\s*\/\s*Usage/i)[0]||'';
+  // Find the last Persian sentence end (period after tone description)
+  const lastPersianEnd=toneAndSyn.lastIndexOf('.');
+  if(lastPersianEnd>0){
+    const afterTone=toneAndSyn.slice(lastPersianEnd+1).trim();
+    const engList=afterTone.match(/^[a-z][\w\s,.-]+$/i);
+    if(engList){
+      // Split by comma or semicolon
+      const words=engList[0].split(/,\s*/).map(s=>s.trim()).filter(s=>s.length>1&&s.length<30&&/^[a-z]/i.test(s));
+      // The list typically has: synonyms, antonyms, IELTS-eq
+      // Try to split into 3 groups
+      if(words.length>=6){
+        synonyms=words.slice(0,Math.ceil(words.length/3));
+        antonyms=words.slice(Math.ceil(words.length/3),Math.ceil(words.length*2/3));
+      }else if(words.length>=3){
+        synonyms=words.slice(0,Math.ceil(words.length/2));
+        antonyms=words.slice(Math.ceil(words.length/2));
+      }else{
+        synonyms=words;
+      }
+    }
+  }
+  // Build card
+  return{
+    id:uid()+'_'+word.replace(/[^a-z0-9]/g,''),
+    word:word,
+    translation:translation,
+    ipa:pronunciation,
+    partOfSpeech:pos,
+    coreMeaning:coreMeaning,
+    definitions:coreMeaning?[coreMeaning]:[],
+    examples:examples.slice(0,3),
+    context:context.slice(0,300),
+    collocations:collocations.slice(0,5),
+    synonyms:synonyms.slice(0,6),
+    antonyms:antonyms.slice(0,6),
+    wordFamily:wordFamily.slice(0,5),
+    note:note.slice(0,500),
+    trap:trap.slice(0,500),
+    category:'پیش‌فرض',
+    tags:['gre','manhattan-500'],
+    source:'manhattan-500',
+    box:0,repetitions:0,interval:1,easeFactor:2.5,
+    addedDate:new Date().toISOString(),nextReviewDate:null,lastReviewedAt:null,
+    stability:0,difficulty:0,elapsedDays:0,scheduledDays:0,
+    reps:0,lapses:0,fsrsState:'new',favorite:false
+  };
+}
+
 // Anki .apkg import
 async function handleFileImport(e){
 const file=e.target.files[0];if(!file)return;
 const ext=file.name.split('.').pop().toLowerCase();
-if(ext==='json'){const txt=await file.text();try{const d=JSON.parse(txt);if(Array.isArray(d.words)){const valid=d.words.filter(w=>w&&typeof w.word==='string'&&w.word.trim());if(!valid.length){toast('فایل JSON کلمه معتبری ندارد','error');return}const existingWords=new Set(S.words.map(w=>w.word.toLowerCase()));const existingLT=new Set(S.longTerm.map(w=>w.word.toLowerCase()));const fresh=valid.filter(w=>!existingWords.has(w.word.toLowerCase())&&!existingLT.has(w.word.toLowerCase())).map(sanitizeCard);S.words.push(...fresh);save();toast(`${fresh.length} کلمه وارد شد (${valid.length-fresh.length} تکراری رد شد)`,'success');importStep=0;renderImport(document.getElementById('content'))}else{toast('ساختار JSON معتبر نیست','error')}}catch(e){toast('خطا در خواندن JSON','error')}}
+if(ext==='json'){const txt=await file.text();try{const d=JSON.parse(txt);const result=importStateSnapshot(d);toast(result.msg,result.ok?'success':'error');if(result.ok){importStep=0;renderImport(document.getElementById('content'))}}catch(e){toast('خطا در خواندن JSON','error')}}
 else if(ext==='txt'){const txt=await file.text();importRawText=txt;document.getElementById('importText').value=txt;importWords=parseWords(txt);importExisting=new Set([...S.words,...S.longTerm].map(w=>w.word.toLowerCase()));importSelected=new Set(importWords.map((_,i)=>i).filter(i=>!importExisting.has(importWords[i])));importStep=1;renderImport(document.getElementById('content'))}
 else if(ext==='pdf'){try{if(!pdfjsLib.GlobalWorkerOptions.workerSrc||pdfjsLib.GlobalWorkerOptions.workerSrc.includes('cdnjs')){try{const wr=await fetch('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js');const wb=await wr.blob();pdfjsLib.GlobalWorkerOptions.workerSrc=URL.createObjectURL(wb)}catch(x){pdfjsLib.GlobalWorkerOptions.workerSrc=''}}const buf=await file.arrayBuffer();const pdf=await pdfjsLib.getDocument({data:buf,disableFontFace:false,useSystemFonts:true,cMapUrl:'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/cmaps/',cMapPacked:true}).promise;let txt='';for(let i=1;i<=pdf.numPages;i++){const p=await pdf.getPage(i);const c=await p.getTextContent();txt+=c.items.map(x=>x.str).join(' ')+' '}importRawText=txt;importWords=parseWords(txt);importExisting=new Set([...S.words,...S.longTerm].map(w=>w.word.toLowerCase()));importSelected=new Set(importWords.map((_,i)=>i).filter(i=>!importExisting.has(importWords[i])));importStep=1;renderImport(document.getElementById('content'))}catch(e){toast('خطا در خواندن فایل PDF','error')}}
 else if(ext==='docx'){try{const buf=await file.arrayBuffer();const zip=await JSZip.loadAsync(buf);const xml=await zip.file('word/document.xml').async('text');const parser=new DOMParser();const doc=parser.parseFromString(xml,'text/xml');const texts=doc.getElementsByTagName('w:t');let txt='';for(let i=0;i<texts.length;i++)txt+=texts[i].textContent+' ';importRawText=txt;importWords=parseWords(txt);importExisting=new Set([...S.words,...S.longTerm].map(w=>w.word.toLowerCase()));importSelected=new Set(importWords.map((_,i)=>i).filter(i=>!importExisting.has(importWords[i])));importStep=1;renderImport(document.getElementById('content'))}catch(e){toast('خطا در خواندن فایل DOCX','error')}}
@@ -1170,7 +1494,7 @@ catch(e){toast('خطا در باز کردن فایل PDF','error');pdfBlobUrl=nu
 // ═══════════════════════════════════════════
 function renderExport(c){
 c.innerHTML=`<div class="card" style="margin-bottom:16px"><h3 style="margin-bottom:12px">پشتیبان‌گیری JSON</h3><p style="color:var(--text2);margin-bottom:16px;font-size:.9rem">تمام کلمات، آمار و تنظیمات در یک فایل JSON ذخیره می‌شود.</p><div class="flex"><button type="button" class="btn btn-primary" id="exportBtn">دانلود پشتیبان</button><button type="button" class="btn btn-ghost" id="exportBackupBtn">بازیابی از پشتیبان خودکار</button></div></div><div class="card" style="margin-bottom:16px;border:1px solid var(--warning)"><p style="color:var(--warning);font-size:.85rem">توصیه: به‌صورت دوره‌ای از داده‌ها پشتیبان‌گیری کنید تا در صورت پاک شدن مرورگر اطلاعات از بین نرود. پشتیبان خودکار در IndexedDB ذخیره می‌شود.</p></div><div class="card" style="border:2px solid var(--danger)"><h3 style="margin-bottom:12px;color:var(--danger)">⚠️ پاکسازی کامل</h3><p style="color:var(--text2);margin-bottom:16px;font-size:.9rem">تمام داده‌ها شامل کلمات، حافظه بلندمدت و آمار پاک می‌شود. این عمل غیرقابل بازگشت است.</p><button type="button" class="btn btn-danger" id="resetBtn">پاکسازی کامل</button></div>`;
-document.getElementById('exportBtn').onclick=()=>{const blob=new Blob([JSON.stringify(S,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`leitner-backup-${todayKey()}.json`;a.click();URL.revokeObjectURL(url);toast('پشتیبان دانلود شد','success')};
+document.getElementById('exportBtn').onclick=()=>{const blob=new Blob([exportStateSnapshot()],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`leitner-backup-${todayKey()}.json`;a.click();URL.revokeObjectURL(url);toast('پشتیبان دانلود شد','success')};
 document.getElementById('exportBackupBtn').onclick=async()=>{const data=await exportBackup();if(data){const blob=new Blob([data],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`leitner-auto-backup-${todayKey()}.json`;a.click();URL.revokeObjectURL(url);toast('پشتیبان خودکار دانلود شد','success')}else{toast('پشتیبان خودکاری یافت نشد','info')}};
 document.getElementById('resetBtn').onclick=()=>{if(confirm('آیا مطمئن هستید؟ تمام داده‌ها پاک خواهد شد!')){S=defaultState();save();toast('تمام داده‌ها پاک شد','success');render()}}}
 
@@ -1383,7 +1707,7 @@ c.innerHTML=`<div style="max-width:700px;margin:0 auto">
   <div style="text-align:center;background:linear-gradient(135deg,var(--accent),#764ba2);color:#fff;padding:48px 32px;border-radius:20px;margin-bottom:28px;box-shadow:0 16px 48px rgba(108,92,231,.35)">
     <div style="font-size:3.5rem;margin-bottom:14px">📚</div>
     <h2 style="font-size:2rem;margin-bottom:10px;font-weight:800">برنامه مرور هوشمند واژگان لایتنر</h2>
-    <p style="opacity:.95;font-size:1.05rem;font-weight:500">نسخه 3.3 - Leitner Pro</p>
+    <p style="opacity:.95;font-size:1.05rem;font-weight:500">نسخه 3.4 - Leitner Pro</p>
     <p style="opacity:.8;font-size:.9rem;margin-top:6px">الگوریتم: FSRS (Free Spaced Repetition Scheduler)</p>
   </div>
 
@@ -1404,38 +1728,58 @@ c.innerHTML=`<div style="max-width:700px;margin:0 auto">
       <div style="padding:8px 12px;background:var(--bg);border-radius:8px;font-size:.85rem">🌙 حالت تاریک و روشن</div>
       <div style="padding:8px 12px;background:var(--bg);border-radius:8px;font-size:.85rem">⭐ رتبه‌بندی فراوانی واژگان</div>
       <div style="padding:8px 12px;background:var(--bg);border-radius:8px;font-size:.85rem">📌 قفل سایدبار برای دسترسی سریع</div>
+      <div style="padding:8px 12px;background:var(--bg);border-radius:8px;font-size:.85rem">🗂️ ورود هوشمند DOCX واژگان</div>
+      <div style="padding:8px 12px;background:var(--bg);border-radius:8px;font-size:.85rem">🔄 پشتیبان‌گیری کامل (لایتنر + حافظه بلندمدت)</div>
     </div>
   </div>
 
   <div class="card" style="margin-bottom:16px">
-    <h3 style="margin-bottom:12px;color:var(--accent)">🆕 ویژگی‌های جدید نسخه ۳.۳</h3>
+    <h3 style="margin-bottom:12px;color:var(--accent)">🆕 ویژگی‌های جدید نسخه ۳.۴</h3>
+    <div style="display:grid;gap:8px">
+      <div style="padding:10px 14px;background:var(--bg);border-radius:8px;border-right:3px solid var(--accent)">
+        <strong style="font-size:.9rem">پشت کارت غنی (Rich Back Card)</strong>
+        <p style="color:var(--text2);font-size:.8rem;margin-top:4px">طراحی مجدد پشت کارت مرور با بخش‌های ساختاریافته: ترجمه، تعریف، مثال‌ها، بافت و همنشینی، مترادف‌ها، متضادها، خانواده واژگانی، یادداشت و هشدار.</p>
+      </div>
+      <div style="padding:10px 14px;background:var(--bg);border-radius:8px;border-right:3px solid var(--success)">
+        <strong style="font-size:.9rem">ورود هوشمند DOCX واژگان</strong>
+        <p style="color:var(--text2);font-size:.8rem;margin-top:4px">تبدیل خودکار فایل‌های DOCX واژگان (مانند Manhattan 500) به JSON غنی. استخراج خودکار تعاریف، مثال‌ها، مترادف‌ها، متضادها، یادداشت‌ها و هشدارها.</p>
+      </div>
+      <div style="padding:10px 14px;background:var(--bg);border-radius:8px;border-right:3px solid var(--warning)">
+        <strong style="font-size:.9rem">فیلدهای غنی واژگانی</strong>
+        <p style="color:var(--text2);font-size:.8rem;margin-top:4px">افزودن فیلدهای جدید: معنی اصلی، همنشینی‌ها، متضادها، خانواده واژگانی، یادداشت، هشدار، برچسب‌ها و منبع.</p>
+      </div>
+      <div style="padding:10px 14px;background:var(--bg);border-radius:8px;border-right:3px solid var(--danger)">
+        <strong style="font-size:.9rem">پشتیبان‌گیری کامل</strong>
+        <p style="color:var(--text2);font-size:.8rem;margin-top:4px">خروجی JSON شامل کارت‌های لایتنر، حافظه بلندمدت، آمار، دسته‌بندی‌ها و تنظیمات. بازیابی هوشمند با تشخیص فرمت قدیمی و جدید.</p>
+      </div>
+      <div style="padding:10px 14px;background:var(--bg);border-radius:8px;border-right:3px solid var(--accent2)">
+        <strong style="font-size:.9rem">ویرایش پیشرفته</strong>
+        <p style="color:var(--text2);font-size:.8rem;margin-top:4px">مodal ویرایش با بخش پیشرفته قابل جمع شدن. ویرایش تمام فیلدهای غنی شامل تعاریف، مثال‌ها، مترادف‌ها، متضادها و یادداشت‌ها.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:16px">
+    <h3 style="margin-bottom:12px;color:var(--accent)">🔄 ویژگی‌های نسخه ۳.۳</h3>
     <div style="display:grid;gap:8px">
       <div style="padding:10px 14px;background:var(--bg);border-radius:8px;border-right:3px solid var(--accent)">
         <strong style="font-size:.9rem">ورود متن هوشمند</strong>
-        <p style="color:var(--text2);font-size:.8rem;margin-top:4px">متن را وارد کنید، کلمات مورد نظر را انتخاب کنید، ترجمه کنید و سپس به لایتنر یا حافظه بلندمدت اضافه کنید. قابلیت ویرایش ترجمه و مشاهده تعاریف و مثال‌ها.</p>
+        <p style="color:var(--text2);font-size:.8rem;margin-top:4px">متن را وارد کنید، کلمات مورد نظر را انتخاب کنید، ترجمه کنید و سپس به لایتنر یا حافظه بلندمدت اضافه کنید.</p>
       </div>
       <div style="padding:10px 14px;background:var(--bg);border-radius:8px;border-right:3px solid var(--success)">
         <strong style="font-size:.9rem">پاپ‌آپ ترجمه PDF</strong>
-        <p style="color:var(--text2);font-size:.8rem;margin-top:4px">ترجمه خودکار هنگام تایپ، تلفظ صوتی، اضافه مستقیم به لایتنر. ذخیره وضعیت PDF برای بازیابی.</p>
+        <p style="color:var(--text2);font-size:.8rem;margin-top:4px">ترجمه خودکار هنگام تایپ، تلفظ صوتی، اضافه مستقیم به لایتنر.</p>
       </div>
       <div style="padding:10px 14px;background:var(--bg);border-radius:8px;border-right:3px solid var(--warning)">
-        <strong style="font-size:.9rem">کارت‌های مرور بهبود یافته</strong>
-        <p style="color:var(--text2);font-size:.8rem;margin-top:4px">نمایش IPA و تلفظ در صورت جلو، تعاریف، مثال‌ها و مترادف‌ها در صورت پشت کارت.</p>
-      </div>
-      <div style="padding:10px 14px;background:var(--bg);border-radius:8px;border-right:3px solid var(--danger)">
-        <strong style="font-size:.9rem">قفل سایدبار</strong>
-        <p style="color:var(--text2);font-size:.8rem;margin-top:4px">قابلیت قفل کردن سایدبار برای دسترسی سریع به بخش‌ها بدون نیاز به باز کردن مجدد.</p>
-      </div>
-      <div style="padding:10px 14px;background:var(--bg);border-radius:8px;border-right:3px solid var(--accent2)">
-        <strong style="font-size:.9rem">ویرایش حافظه بلندمدت</strong>
-        <p style="color:var(--text2);font-size:.8rem;margin-top:4px">امکان ویرایش کلمات در بخش حافظه بلندمدت مانند بخش کتابخانه.</p>
+        <strong style="font-size:.9rem">قفل سایدبار و ویرایش حافظه بلندمدت</strong>
+        <p style="color:var(--text2);font-size:.8rem;margin-top:4px">قابلیت قفل کردن سایدبار و امکان ویرایش کلمات در بخش حافظه بلندمدت.</p>
       </div>
     </div>
   </div>
 
   <div class="card" style="margin-bottom:16px">
     <h3 style="margin-bottom:8px;color:var(--accent)">💾 ذخیره‌سازی و امنیت</h3>
-    <p style="color:var(--text2);font-size:.9rem;line-height:1.8">تمام داده‌های شما در مرورگر ذخیره می‌شوند و هرگز به سرور ارسال نمی‌شوند. پشتیبان خودکار در IndexedDB نگهداری می‌شود. وضعیت PDF و سایدبار در localStorage ذخیره می‌شود. حریم خصوصی شما کاملاً حفظ می‌شود.</p>
+    <p style="color:var(--text2);font-size:.9rem;line-height:1.8">تمام داده‌های شما در مرورگر ذخیره می‌شوند و هرگز به سرور ارسال نمی‌شوند. پشتیبان خودکار در IndexedDB نگهداری می‌شود. خروجی JSON شامل کامل وضعیت برنامه است. حریم خصوصی شما کاملاً حفظ می‌شود.</p>
   </div>
 
   <div class="card" style="text-align:center;border:2px solid var(--accent);margin-bottom:16px">
