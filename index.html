@@ -239,6 +239,69 @@ tr:hover td{background:var(--card-hover)}
 .sel-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;justify-content:flex-end}
 
 /* ═══════════════════════════════════════════
+   READING MODE - UPGRADED
+   ═══════════════════════════════════════════ */
+.reading-upload-zone{border:2px dashed var(--border);border-radius:var(--radius);padding:48px 24px;text-align:center;cursor:pointer;transition:all .3s;background:var(--bg)}
+.reading-upload-zone:hover,.reading-upload-zone.dragover{border-color:var(--accent);background:var(--accent-glow)}
+.reading-upload-zone .icon{font-size:2.5rem;margin-bottom:12px;opacity:.6}
+.reading-upload-zone p{color:var(--text2);font-size:.85rem;margin-top:8px}
+.reading-toolbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:14px;background:var(--card);border-radius:var(--radius);margin-bottom:18px;border:1px solid var(--border);position:sticky;top:0;z-index:50;backdrop-filter:blur(8px)}
+.reading-toolbar .btn{padding:8px 14px;font-size:.8rem;border-radius:10px}
+.reading-toolbar .btn.active{background:linear-gradient(135deg,var(--accent),#7c6cf0);color:#fff}
+.reading-toolbar .sep{width:1px;height:24px;background:var(--border);flex-shrink:0}
+.reading-toolbar .search-box{padding:7px 12px;border:1px solid var(--border);border-radius:10px;background:var(--bg);color:var(--text);font:inherit;font-size:.8rem;width:160px;transition:all .25s}
+.reading-toolbar .search-box:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow)}
+.reading-page-info{color:var(--text2);font-size:.82rem;min-width:60px;text-align:center}
+.reading-progress-bar{width:100%;height:4px;background:var(--border);border-radius:3px;overflow:hidden;margin-bottom:4px}
+.reading-progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:3px;transition:width .4s}
+.reading-dashboard{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:20px}
+.reading-doc-card{text-align:center;padding:16px;border:1px solid var(--border);border-radius:var(--radius);background:var(--card);transition:all .3s}
+.reading-doc-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-sm)}
+.reading-doc-card .val{font-size:1.6rem;font-weight:800;color:var(--accent);line-height:1.2}
+.reading-doc-card .lbl{font-size:.7rem;color:var(--text2);margin-top:4px}
+.reading-content-area{line-height:2.2;font-size:1.05rem;direction:ltr;text-align:left;padding:20px;background:var(--card);border-radius:var(--radius);border:1px solid var(--border);min-height:200px;max-height:70vh;overflow-y:auto;scroll-behavior:smooth}
+.reading-content-area .reading-word{display:inline;padding:1px 3px;border-radius:4px;cursor:pointer;transition:all .2s;border-bottom:2px solid var(--accent)}
+.reading-content-area .reading-word:hover{background:var(--accent-glow)}
+.reading-content-area .reading-word.known{border-bottom-color:var(--success)}
+.reading-content-area .reading-word.repeated{border-bottom-color:var(--warning)}
+.reading-content-area .reading-word.search-match{background:rgba(253,203,110,.25);border-radius:3px}
+.reading-content-area .reading-word.selected-word{background:linear-gradient(135deg,var(--accent),#7c6cf0);color:#fff;border-radius:4px;padding:1px 5px}
+.reading-page-marker{display:flex;align-items:center;gap:8px;margin:16px 0 10px;padding:8px 14px;background:var(--bg);border-radius:10px;font-size:.82rem;color:var(--text2);border-right:3px solid var(--accent)}
+.reading-page-marker strong{color:var(--accent);font-size:.9rem}
+.reading-page-summary{padding:14px;background:var(--bg);border-radius:12px;border:1px solid var(--border);margin-bottom:12px}
+.reading-page-summary h4{font-size:.85rem;font-weight:700;color:var(--accent);margin-bottom:8px}
+.reading-page-summary .stats-row{display:flex;gap:12px;flex-wrap:wrap;font-size:.78rem;color:var(--text2)}
+.reading-page-summary .stats-row span{display:flex;align-items:center;gap:3px}
+.reading-page-summary .top-words{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.reading-page-summary .top-word-tag{display:inline-block;padding:2px 8px;border-radius:8px;font-size:.7rem;background:rgba(108,92,231,.12);color:var(--accent);border:1px solid rgba(108,92,231,.2)}
+.reading-vocab-panel{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);padding:18px;max-height:70vh;overflow-y:auto}
+.reading-vocab-panel h3{font-size:.95rem;font-weight:700;color:var(--accent);margin-bottom:12px}
+.reading-vocab-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;cursor:pointer;transition:all .2s;border:1px solid transparent}
+.reading-vocab-item:hover{background:var(--accent-glow);border-color:var(--accent)}
+.reading-vocab-item .word{font-weight:600;min-width:80px;font-size:.88rem}
+.reading-vocab-item .count{font-size:.75rem;color:var(--text2);min-width:30px;text-align:center}
+.reading-vocab-item .badge-sm{font-size:.65rem;padding:2px 6px;border-radius:6px}
+.reading-word-detail{position:fixed;z-index:310;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px;box-shadow:0 12px 48px rgba(0,0,0,.5);display:none;max-width:380px;width:auto;max-height:70vh;overflow-y:auto;backdrop-filter:blur(12px);font-family:var(--font);direction:ltr;text-align:left}
+.reading-word-detail.visible{display:block}
+.reading-word-detail .wd-header{display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+.reading-word-detail .wd-word{font-size:1.3rem;font-weight:700}
+.reading-word-detail .wd-ipa{font-size:.85rem;color:var(--text2)}
+.reading-word-detail .wd-occ{font-size:.75rem;padding:2px 8px;border-radius:8px;background:rgba(108,92,231,.12);color:var(--accent)}
+.reading-word-detail .wd-persian{font-size:1.05rem;font-weight:600;color:var(--success);margin-bottom:6px;font-family:var(--font);direction:rtl;text-align:right}
+.reading-word-detail .wd-defs{margin-bottom:8px}
+.reading-word-detail .wd-def{font-size:.83rem;color:var(--text);margin-bottom:4px;line-height:1.5}
+.reading-word-detail .wd-def::before{content:'• ';color:var(--accent)}
+.reading-word-detail .wd-pages{font-size:.78rem;color:var(--text2);margin-bottom:8px}
+.reading-word-detail .wd-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.reading-heatmap{display:grid;grid-template-columns:repeat(auto-fill,minmax(28px,1fr));gap:4px;margin:12px 0}
+.reading-heatmap-cell{aspect-ratio:1;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:.6rem;color:var(--text2);cursor:default;transition:all .2s;border:1px solid var(--border)}
+.reading-heatmap-cell:hover{transform:scale(1.15);z-index:2}
+.reading-filter-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:center}
+.reading-filter-bar .btn{font-size:.75rem;padding:6px 10px}
+.reading-export-bar{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;justify-content:flex-end}
+@media(max-width:768px){.reading-toolbar{gap:3px;padding:8px}.reading-toolbar .btn{padding:6px 10px;font-size:.75rem;min-width:36px;min-height:36px}.reading-toolbar .search-box{width:120px;font-size:.75rem}.reading-dashboard{grid-template-columns:repeat(2,1fr)}.reading-content-area{font-size:.95rem;padding:14px;max-height:60vh}.reading-vocab-panel{max-height:50vh}}
+
+/* ═══════════════════════════════════════════
    RICH BACK CARD SECTIONS
    ═══════════════════════════════════════════ */
 .rb-header{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}
@@ -1691,169 +1754,535 @@ function renderQuickImport(c){
   };
   document.getElementById('quickImportClearBtn').onclick=()=>{document.getElementById('quickImportText').value='';document.getElementById('quickImportResult').innerHTML=''};
 }
-
 // ═══════════════════════════════════════════
-// READING MODE (inline translation)
+// READING MODE (upgraded)
 // ═══════════════════════════════════════════
 let readingText='';
-let readingTranslated=false;
-function renderReading(c){
-  c.innerHTML=`<div style="max-width:700px;margin:0 auto">
-  <div class="card" style="margin-bottom:16px">
-    <h3 style="margin-bottom:12px;color:var(--accent)">📰 خواندن با ترجمه آنی</h3>
-    <p style="color:var(--text2);font-size:.85rem;margin-bottom:12px">متن انگلیسی را وارد کنید یا بچسبانید. روی هر کلمه کلیک کنید تا ترجمه آن نمایش داده شود.</p>
-    <textarea id="readingInput" class="input" rows="8" placeholder="متن انگلیسی را اینجا بچسبانید...&#10;&#10;مثال: The quick brown fox jumps over the lazy dog." style="width:100%;resize:vertical">${esc(readingText)}</textarea>
-    <div style="display:flex;gap:8px;margin-top:12px">
-      <button type="button" class="btn btn-primary" id="readingStartBtn">شروع خواندن</button>
-      <button type="button" class="btn btn-ghost" id="readingClearBtn">پاک کردن</button>
-    </div>
-  </div>
-  <div id="readingContent" style="display:${readingText?'block':'none'}">
-    <div class="card" style="margin-bottom:16px">
-      <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
-        <button type="button" class="btn btn-sm btn-ghost" id="readingAutoBtn">ترجمه خودکار همه</button>
-        <button type="button" class="btn btn-sm btn-ghost" id="readingAddAllBtn">افزودن کلمات ناشناخته به لایتنر</button>
-        <div style="flex:1"></div>
-        <span style="font-size:.8rem;color:var(--text2);align-self:center" id="readingWordCount"></span>
-      </div>
-      <div id="readingDisplay" style="line-height:2.2;font-size:1.05rem;direction:ltr;text-align:left"></div>
-    </div>
-    <div id="readingPopup" style="display:none;position:fixed;background:var(--card);border:1px solid var(--accent);border-radius:12px;padding:16px;box-shadow:0 8px 32px rgba(0,0,0,.4);z-index:200;width:320px;max-width:90vw;max-height:60vh;overflow-y:auto"></div>
-  </div>
-</div>`;
+let readingDoc=null;
+let readingViewMode='raw';
+let readingCurrentPage=0;
+let readingSearchQuery='';
+let readingFilterMode='all';
+let readingSelectedWords=new Set();
+let readingTransCache={};
 
-  document.getElementById('readingStartBtn').onclick=()=>{
-    readingText=document.getElementById('readingInput').value.trim();
-    if(!readingText){toast('متنی وارد نشده','error');return}
-    renderReading(c);
-  };
-  document.getElementById('readingClearBtn').onclick=()=>{
-    readingText='';readingTranslated=false;
-    document.getElementById('readingInput').value='';
-    document.getElementById('readingContent').style.display='none';
-  };
-
-  if(readingText){
-    const display=document.getElementById('readingDisplay');
-    const words=readingText.split(/(\s+)/);
-    const uniqueWords=[...new Set(words.filter(w=>w.trim()&&/^[a-zA-Z]+$/.test(w)))];
-    document.getElementById('readingWordCount').textContent=uniqueWords.length+' کلمه منحصربفرد';
-
-    display.innerHTML=words.map(w=>{
-      if(!w.trim()||!/^[a-zA-Z]+$/.test(w))return w;
-      const exists=S.words.some(x=>x.word.toLowerCase()===w.toLowerCase());
-      return`<span class="reading-word" data-word="${esc(w)}" style="cursor:pointer;border-bottom:2px solid ${exists?'var(--success)':'var(--accent)'};padding:0 2px;border-radius:3px;transition:all .2s" onmouseover="this.style.background='var(--accent-glow)'" onmouseout="this.style.background='transparent'">${esc(w)}</span>`;
-    }).join('');
-
-    // Word click handler
-    display.onclick=async function(e){
-      const span=e.target.closest('.reading-word');
-      if(!span)return;
-      const word=span.dataset.word;
-      const popup=document.getElementById('readingPopup');
-      const rect=span.getBoundingClientRect();
-      popup.style.display='block';
-      popup.style.top=rect.bottom+8+'px';
-      popup.style.left=rect.left+'px';
-      popup.innerHTML='<div style="text-align:center;color:var(--text2);font-size:.85rem">در حال ترجمه...</div>';
-
-      let persian='';
-      let definitions=[];
+// ── Translation Cache ──────────────────────
+function getCachedTrans(word){
+  const key=normalizeWordLookup(word);
+  return readingTransCache[key]||null;
+}
+function cacheTrans(word,data){
+  const key=normalizeWordLookup(word);
+  readingTransCache[key]=data;
+}
+async function translateBatch(words){
+  const unique=[...new Set(words.map(w=>normalizeWordLookup(w)).filter(w=>w&&w.length>=2))];
+  const toTranslate=unique.filter(w=>!readingTransCache[w]);
+  for(let i=0;i<toTranslate.length;i+=5){
+    const batch=toTranslate.slice(i,i+5);
+    const results=await Promise.all(batch.map(async w=>{
       try{
-        const resp=await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(word)}&langpair=en|fa`);
-        const data=await resp.json();
-        if(data.responseStatus===200&&data.responseData)persian=data.responseData.translatedText;
-      }catch(e){}
-      try{
-        const resp=await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(word)}`);
-        if(resp.ok){const data=await resp.json();if(data[0])definitions=data[0].meanings.slice(0,2).map(m=>m.definitions.slice(0,2).map(d=>d.definition)).flat()}
-      }catch(e){}
-
-      const exists=S.words.some(x=>x.word.toLowerCase()===word.toLowerCase());
-      // Smart positioning: keep popup fully visible
-      const popupW=320, popupH=Math.min(300,window.innerHeight*0.6);
-      let top=rect.bottom+8;
-      let left=rect.left;
-      if(top+popupH>window.innerHeight)top=Math.max(8,rect.top-popupH-8);
-      if(top<8)top=8;
-      if(left+popupW>window.innerWidth)left=window.innerWidth-popupW-8;
-      if(left<8)left=8;
-      popup.style.top=top+'px';
-      popup.style.left=left+'px';
-      popup.innerHTML=`
-        <div style="font-size:1.1rem;font-weight:700;margin-bottom:6px">${esc(word)}</div>
-        <div style="color:var(--accent);font-size:1rem;margin-bottom:8px">${esc(persian)}</div>
-        ${definitions.length?`<div style="font-size:.8rem;color:var(--text2);margin-bottom:10px;line-height:1.8">${definitions.map(d=>'• '+esc(d)).join('<br>')}</div>`:''}
-        <div style="display:flex;gap:6px;flex-wrap:wrap">
-          <button type="button" class="btn btn-sm btn-ghost" onclick="speakWord('${esc(word)}')">🔊</button>
-          ${!exists?`<button type="button" class="btn btn-sm btn-primary" id="readingAddWord">افزودن به لایتنر</button>`:'<span style="font-size:.8rem;color:var(--success)">✅ در لایتنر موجود</span>'}
-        </div>`;
-
-      const addBtn=document.getElementById('readingAddWord');
-      if(addBtn){
-        addBtn.onclick=()=>{
-          S.words.push({id:uid(),word:word,translation:persian,ipa:'',category:'پیش‌فرض',favorite:false,context:'',box:0,repetitions:0,interval:1,easeFactor:2.5,addedDate:new Date().toISOString(),nextReviewDate:null,lastReviewedAt:null,stability:0,difficulty:0,elapsedDays:0,scheduledDays:0,reps:0,lapses:0,fsrsState:'new',definitions,examples:[],synonyms:[],partOfSpeech:'',audioUs:'',audioBr:'',coreMeaning:'',collocations:[],antonyms:[],wordFamily:[],note:'',trap:'',tags:[],source:'reading-mode'});
-          save();
-          toast(word+' به لایتنر اضافه شد','success');
-          popup.style.display='none';
-          renderReading(c);
-        };
-      }
-    };
-
-    // Close popup on outside click
-    document.addEventListener('click',function closePopup(e){
-      if(!e.target.closest('#readingPopup')&&!e.target.closest('.reading-word')){
-        const p=document.getElementById('readingPopup');if(p)p.style.display='none';
-      }
-    });
-
-    // Auto translate all
-    document.getElementById('readingAutoBtn').onclick=async function(){
-      const spans=display.querySelectorAll('.reading-word');
-      this.disabled=true;this.textContent='در حال ترجمه...';
-      for(const span of spans){
-        const word=span.dataset.word;
-        try{
-          const resp=await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(word)}&langpair=en|fa`);
-          const data=await resp.json();
-          if(data.responseStatus===200&&data.responseData){
-            span.title=data.responseData.translatedText;
-            span.style.background='var(--accent-glow)';
-          }
-        }catch(e){}
-        await new Promise(r=>setTimeout(r,200));
-      }
-      this.disabled=false;this.textContent='ترجمه خودکار همه';
-      toast('ترجمه تمام کلمات انجام شد','success');
-    };
-
-    // Add unknown words
-    document.getElementById('readingAddAllBtn').onclick=async function(){
-      const spans=display.querySelectorAll('.reading-word');
-      const unknown=[...spans].filter(s=>!S.words.some(x=>x.word.toLowerCase()===s.dataset.word.toLowerCase()));
-      if(unknown.length===0){toast('همه کلمات در لایتنر موجود هستند','info');return}
-      this.disabled=true;this.textContent=`افزودن ${unknown.length} کلمه...`;
-      let added=0;
-      for(const span of unknown){
-        const word=span.dataset.word;
-        let persian='';
-        try{
-          const resp=await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(word)}&langpair=en|fa`);
-          const data=await resp.json();
-          if(data.responseStatus===200&&data.responseData)persian=data.responseData.translatedText;
-        }catch(e){}
-        S.words.push({id:uid(),word:word,translation:persian,ipa:'',category:'پیش‌فرض',favorite:false,context:'',box:0,repetitions:0,interval:1,easeFactor:2.5,addedDate:new Date().toISOString(),nextReviewDate:null,lastReviewedAt:null,stability:0,difficulty:0,elapsedDays:0,scheduledDays:0,reps:0,lapses:0,fsrsState:'new',definitions:[],examples:[],synonyms:[],partOfSpeech:'',audioUs:'',audioBr:'',coreMeaning:'',collocations:[],antonyms:[],wordFamily:[],note:'',trap:'',tags:[],source:'reading-mode'});
-        added++;
-        await new Promise(r=>setTimeout(r,200));
-      }
-      save();
-      this.disabled=false;this.textContent='افزودن کلمات ناشناخته به لایتنر';
-      toast(added+' کلمه به لایتنر اضافه شد','success');
-      renderReading(c);
-    };
+        const [trans,dict]=await Promise.all([fetchTranslation(w),fetchDictionary(w)]);
+        const data={translation:trans||'',ipa:'',pos:'',definitions:[],examples:[],synonyms:[],audioUs:'',audioBr:''};
+        if(dict){
+          data.ipa=dict.phoneticBr||dict.phoneticUs||dict.phonetic||'';
+          data.pos=dict.meanings[0]?dict.meanings[0].partOfSpeech:'';
+          data.definitions=dict.meanings.flatMap(m=>m.definitions).slice(0,4);
+          data.examples=dict.meanings.flatMap(m=>m.examples).slice(0,3);
+          data.synonyms=dict.meanings.flatMap(m=>m.synonyms).slice(0,5);
+          data.audioUs=dict.audioUs||'';
+          data.audioBr=dict.audioBr||'';
+        }
+        return data;
+      }catch(e){return{translation:'',ipa:'',pos:'',definitions:[],examples:[],synonyms:[],audioUs:'',audioBr:''}}
+    }));
+    batch.forEach((w,i)=>{readingTransCache[w]=results[i]});
   }
 }
+
+// ── Document Model Builder ─────────────────
+function buildReadingDoc(pages,title,sourceType){
+  const doc={id:uid(),title,sourceType,pages:[],rawText:'',totalPages:pages.length,totalWords:0,uniqueWords:0,occurrences:{},avgWordsPerPage:0,sentenceCount:0,paragraphCount:0,longestWords:[],mostFrequentWords:[],readingDifficulty:'متوسط',pageStats:[]};
+  const allWords=[];const allNormalized=[];
+  pages.forEach((p,pi)=>{
+    const words=p.text.split(/(\s+)/).filter(w=>w.trim());
+    const engWords=words.filter(w=>/^[a-zA-Z']+$/.test(w));
+    const normalized=engWords.map(w=>normalizeWordLookup(w)).filter(w=>w);
+    allWords.push(...engWords);allNormalized.push(...normalized);
+    const unique=[...new Set(normalized)];
+    const pageOcc={};
+    normalized.forEach(w=>{pageOcc[w]=(pageOcc[w]||0)+1});
+    const topWords=Object.entries(pageOcc).sort((a,b)=>b[1]-a[1]).slice(0,10).map(([word,count])=>({word,count}));
+    doc.pages.push({pageNumber:pi+1,text:p.text,words:engWords,totalWords:engWords.length,uniqueWords:unique.length,topWords});
+  });
+  doc.rawText=pages.map(p=>p.text).join('\n\n');
+  doc.occurrences={};
+  allNormalized.forEach(w=>{if(!doc.occurrences[w])doc.occurrences[w]={count:0,pages:[]};doc.occurrences[w].count++});
+  doc.pages.forEach((p,pi)=>{
+    const pageNorm=p.text.split(/(\s+)/).filter(w=>w.trim()).filter(w=>/^[a-zA-Z']+$/.test(w)).map(w=>normalizeWordLookup(w)).filter(w=>w);
+    [...new Set(pageNorm)].forEach(w=>{if(doc.occurrences[w]&&!doc.occurrences[w].pages.includes(pi+1))doc.occurrences[w].pages.push(pi+1)});
+  });
+  doc.totalWords=allNormalized.length;
+  doc.uniqueWords=[...new Set(allNormalized)].length;
+  doc.avgWordsPerPage=doc.totalPages?Math.round(doc.totalWords/doc.totalPages):0;
+  doc.sentenceCount=(doc.rawText.match(/[.!?]+/g)||[]).length;
+  doc.paragraphCount=doc.rawText.split(/\n\s*\n/).filter(p=>p.trim()).length;
+  const sorted=Object.entries(doc.occurrences).sort((a,b)=>b[1].count-a[1].count);
+  doc.mostFrequentWords=sorted.slice(0,20).map(([word,o])=>({word,count:o.count,pages:o.pages}));
+  doc.longestWords=[...new Set(allNormalized)].sort((a,b)=>b.length-a.length).slice(0,15);
+  const complexWords=[...new Set(allNormalized)].filter(w=>w.length>7&&!FREQ_T1.has(w)&&!FREQ_T2.has(w)).length;
+  const uniqueAll=[...new Set(allNormalized)];const complexRatio=uniqueAll.length?complexWords/uniqueAll.length:0;
+  doc.readingDifficulty=complexRatio>0.3?'سخت':complexRatio>0.15?'متوسط':'آسان';
+  doc.pageStats=doc.pages.map(p=>{
+    const pNorm=p.text.split(/(\s+)/).filter(w=>w.trim()).filter(w=>/^[a-zA-Z']+$/.test(w)).map(w=>normalizeWordLookup(w)).filter(w=>w);
+    const pOcc={};pNorm.forEach(w=>{pOcc[w]=(pOcc[w]||0)+1});
+    return{pageNumber:p.pageNumber,totalWords:p.totalWords,uniqueWords:p.uniqueWords,topWords:Object.entries(pOcc).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([w,c])=>({word:w,count:c}))};
+  });
+  return doc;
+}
+
+// ── File Extraction ────────────────────────
+async function extractPDFForReading(file){
+  toast('در حال استخراج متن PDF...','info');
+  if(!pdfjsLib.GlobalWorkerOptions.workerSrc||pdfjsLib.GlobalWorkerOptions.workerSrc.includes('cdnjs')){
+    try{const wr=await fetch('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js');const wb=await wr.blob();pdfjsLib.GlobalWorkerOptions.workerSrc=URL.createObjectURL(wb)}catch(x){pdfjsLib.GlobalWorkerOptions.workerSrc=''}
+  }
+  const buf=await file.arrayBuffer();
+  const pdf=await pdfjsLib.getDocument({data:buf,disableFontFace:false,useSystemFonts:true,cMapUrl:'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/cmaps/',cMapPacked:true}).promise;
+  const pages=[];
+  for(let i=1;i<=pdf.numPages;i++){
+    const p=await pdf.getPage(i);
+    const tc=await p.getTextContent();
+    pages.push({text:tc.items.map(x=>x.str).join(' ')});
+    if(i%5===0)await new Promise(r=>setTimeout(r,0));
+  }
+  return pages;
+}
+function extractTXTForReading(text,charsPerPage){
+  charsPerPage=charsPerPage||3000;
+  const pages=[];let remaining=text;
+  while(remaining.length>0){
+    let cut=remaining.lastIndexOf('\n\n',charsPerPage);
+    if(cut<charsPerPage*0.3)cut=remaining.lastIndexOf('. ',charsPerPage);
+    if(cut<charsPerPage*0.3)cut=charsPerPage;
+    else cut+=2;
+    pages.push({text:remaining.slice(0,cut).trim()});
+    remaining=remaining.slice(cut).trim();
+  }
+  return pages.length?pages:[{text:text||''}];
+}
+
+// ── Render Reading ─────────────────────────
+function renderReading(c){
+  if(!readingDoc){
+    c.innerHTML='<div style="max-width:800px;margin:0 auto">'
+    +'<div class="card" style="margin-bottom:16px;text-align:center;padding:32px">'
+    +'<div style="font-size:2.5rem;margin-bottom:12px">📰</div>'
+    +'<h3 style="margin-bottom:8px;color:var(--accent)">خواندن و تحلیل متن</h3>'
+    +'<p style="color:var(--text2);font-size:.85rem;margin-bottom:20px">متن را بچسبانید یا فایل PDF/TXT را آپلود کنید</p>'
+    +'<textarea id="readingInput" class="input" rows="6" placeholder="متن انگلیسی را اینجا بچسبانید..." style="width:100%;resize:vertical;margin-bottom:12px">'+esc(readingText)+'</textarea>'
+    +'<div style="display:flex;gap:8px;margin-bottom:16px;justify-content:center;flex-wrap:wrap">'
+    +'<button type="button" class="btn btn-primary" id="readingStartBtn">📖 شروع خواندن</button>'
+    +'<button type="button" class="btn btn-ghost" id="readingClearBtn">پاک کردن</button>'
+    +'</div>'
+    +'<div style="border-top:1px solid var(--border);padding-top:16px">'
+    +'<p style="color:var(--text2);font-size:.8rem;margin-bottom:10px">یا فایل آپلود کنید:</p>'
+    +'<div class="reading-upload-zone" id="readingUploadZone">'
+    +'<div class="icon">📁</div>'
+    +'<p><strong>فایل را اینجا بکشید</strong> یا کلیک کنید</p>'
+    +'<p style="font-size:.75rem;margin-top:4px">PDF, TXT</p>'
+    +'<input type="file" id="readingFileInput" accept=".pdf,.txt" style="display:none">'
+    +'</div></div></div></div>';
+    document.getElementById('readingStartBtn').onclick=()=>{
+      readingText=document.getElementById('readingInput').value.trim();
+      if(!readingText){toast('متنی وارد نشده','error');return}
+      const pages=extractTXTForReading(readingText);
+      readingDoc=buildReadingDoc(pages,'متن چسبانده شده','paste');
+      readingCurrentPage=0;readingViewMode='raw';
+      saveReadingSession();renderReading(c);
+      preloadReadingTranslations();
+    };
+    document.getElementById('readingClearBtn').onclick=()=>{readingText='';document.getElementById('readingInput').value=''};
+    const zone=document.getElementById('readingUploadZone');
+    const fi=document.getElementById('readingFileInput');
+    zone.onclick=()=>fi.click();
+    zone.ondragover=e=>{e.preventDefault();zone.classList.add('dragover')};
+    zone.ondragleave=()=>zone.classList.remove('dragover');
+    zone.ondrop=e=>{e.preventDefault();zone.classList.remove('dragover');if(e.dataTransfer.files[0])handleReadingFile(e.dataTransfer.files[0],c)};
+    fi.onchange=e=>{if(e.target.files[0])handleReadingFile(e.target.files[0],c)};
+    return;
+  }
+  const doc=readingDoc;
+  const page=doc.pages[readingCurrentPage];
+  let h='';
+  const prog=doc.totalPages>1?Math.round((readingCurrentPage+1)/doc.totalPages*100):100;
+  h+='<div class="reading-progress-bar"><div class="reading-progress-fill" style="width:'+prog+'%"></div></div>';
+  h+='<div class="reading-toolbar">';
+  h+='<button type="button" class="btn btn-ghost btn-sm" id="rdNewFile" title="فایل جدید">📂</button>';
+  h+='<button type="button" class="btn btn-ghost btn-sm" id="rdClose" title="بستن" style="color:var(--danger)">✕</button>';
+  h+='<div class="sep"></div>';
+  h+='<span style="color:var(--text2);font-size:.78rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:200px" title="'+esc(doc.title)+'">'+esc(doc.title)+'</span>';
+  h+='<div class="sep"></div>';
+  h+='<button type="button" class="btn btn-sm '+(readingViewMode==='raw'?'active':'')+'" data-rmode="raw">📄 متن</button>';
+  h+='<button type="button" class="btn btn-sm '+(readingViewMode==='split'?'active':'')+'" data-rmode="split">🔤 کلمات</button>';
+  h+='<button type="button" class="btn btn-sm '+(readingViewMode==='vocab'?'active':'')+'" data-rmode="vocab">📊 واژگان</button>';
+  if(doc.totalPages>1){h+='<div class="sep"></div>';h+='<button type="button" class="btn btn-ghost btn-sm" id="rdPrevPage" '+(readingCurrentPage===0?'disabled':'')+'>◀</button>';h+='<span class="reading-page-info">'+(readingCurrentPage+1)+' / '+doc.totalPages+'</span>';h+='<button type="button" class="btn btn-ghost btn-sm" id="rdNextPage" '+(readingCurrentPage>=doc.totalPages-1?'disabled':'')+'>▶</button>'}
+  h+='<div style="flex:1"></div>';
+  h+='<input type="text" class="search-box" id="rdSearch" placeholder="جستجو..." value="'+esc(readingSearchQuery)+'">';
+  h+='<button type="button" class="btn btn-ghost btn-sm" id="rdBatchAdd" title="افزودن گروهی">📥</button>';
+  h+='<button type="button" class="btn btn-ghost btn-sm" id="rdExportVocab" title="خروجی واژگان">💾</button>';
+  h+='</div>';
+  h+=renderReadingDashboard(doc);
+  h+='<div class="reading-filter-bar">';
+  h+='<button type="button" class="btn btn-ghost btn-sm '+(readingFilterMode==='all'?'active':'')+'" data-rfilter="all">همه ('+doc.uniqueWords+')</button>';
+  h+='<button type="button" class="btn btn-ghost btn-sm '+(readingFilterMode==='unknown'?'active':'')+'" data-rfilter="unknown">ناشناخته</button>';
+  h+='<button type="button" class="btn btn-ghost btn-sm '+(readingFilterMode==='repeated'?'active':'')+'" data-rfilter="repeated">تکراری‌ها</button>';
+  h+='</div>';
+  if(readingViewMode==='vocab'){
+    h+=renderReadingVocabView(doc);
+  }else if(doc.totalPages>1){
+    h+='<div class="reading-page-marker"><strong>📄 صفحه '+page.pageNumber+'</strong> — '+page.totalWords+' کلمه، '+page.uniqueWords+' منحصربفرد</div>';
+    h+='<div class="reading-content-area" id="rdContentArea">'+renderReadingPageContent(page,doc)+'</div>';
+    h+=renderPageSummary(page,doc);
+  }else{
+    h+='<div class="reading-content-area" id="rdContentArea">'+renderReadingPageContent(page,doc)+'</div>';
+  }
+  c.innerHTML=h;
+  bindReadingEvents(c,doc);
+}
+
+function renderReadingDashboard(doc){
+  let h='<div class="reading-dashboard">';
+  h+='<div class="reading-doc-card"><div class="val">'+doc.totalWords+'</div><div class="lbl">کل کلمات</div></div>';
+  h+='<div class="reading-doc-card"><div class="val">'+doc.uniqueWords+'</div><div class="lbl">کلمه منحصربفرد</div></div>';
+  if(doc.totalPages>1)h+='<div class="reading-doc-card"><div class="val">'+doc.totalPages+'</div><div class="lbl">صفحه</div></div>';
+  h+='<div class="reading-doc-card"><div class="val">'+doc.avgWordsPerPage+'</div><div class="lbl">میانگین کلمه/صفحه</div></div>';
+  h+='<div class="reading-doc-card"><div class="val">'+doc.sentenceCount+'</div><div class="lbl">جمله</div></div>';
+  h+='<div class="reading-doc-card"><div class="val">'+doc.paragraphCount+'</div><div class="lbl">پاراگراف</div></div>';
+  h+='<div class="reading-doc-card"><div class="val" style="color:'+(doc.readingDifficulty==='سخت'?'var(--danger)':doc.readingDifficulty==='متوسط'?'var(--warning)':'var(--success)')+'">'+doc.readingDifficulty+'</div><div class="lbl">دشواری</div></div>';
+  h+='<div class="reading-doc-card"><div class="val" style="font-size:1.1rem">'+(doc.mostFrequentWords[0]?doc.mostFrequentWords[0].word:'—')+'</div><div class="lbl">پرتکرارترین</div></div>';
+  h+='</div>';
+  return h;
+}
+
+function renderReadingPageContent(page,doc){
+  const words=page.text.split(/(\s+)/);
+  let searchLower=readingSearchQuery.toLowerCase();
+  return words.map(w=>{
+    if(!w.trim())return w;
+    if(!/^[a-zA-Z']+$/.test(w))return esc(w);
+    const nw=normalizeWordLookup(w);
+    const exists=S.words.some(x=>x.word.toLowerCase()===nw)||S.longTerm.some(x=>x.word.toLowerCase()===nw);
+    const occ=doc.occurrences[nw];
+    const isUnknown=!exists;
+    const isRepeated=occ&&occ.count>2;
+    const isSearch=searchLower&&nw.includes(searchLower);
+    const isSelected=readingSelectedWords.has(nw);
+    let cls='reading-word';
+    if(isUnknown)cls+=' unknown';
+    if(isRepeated)cls+=' repeated';
+    if(isSearch)cls+=' search-match';
+    if(isSelected)cls+=' selected-word';
+    if(exists)cls+=' known';
+    const title=occ?nw+' ('+occ.count+'x)':nw;
+    return'<span class="'+cls+'" data-word="'+esc(nw)+'" title="'+esc(title)+'">'+esc(w)+'</span>';
+  }).join('');
+}
+
+function renderPageSummary(page,doc){
+  const pageStats=doc.pageStats[page.pageNumber-1];
+  if(!pageStats)return'';
+  let h='<div class="reading-page-summary">';
+  h+='<h4>📊 خلاصه صفحه '+page.pageNumber+'</h4>';
+  h+='<div class="stats-row">';
+  h+='<span>📝 '+page.totalWords+' کلمه</span>';
+  h+='<span>🔤 '+page.uniqueWords+' منحصربفرد</span>';
+  h+='</div>';
+  if(pageStats.topWords.length){
+    h+='<div class="top-words">';
+    pageStats.topWords.forEach(tw=>{h+='<span class="top-word-tag">'+esc(tw.word)+' ('+tw.count+')</span>'});
+    h+='</div>';
+  }
+  h+='</div>';
+  return h;
+}
+
+function renderReadingVocabView(doc){
+  const items=doc.mostFrequentWords;
+  let h='<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">';
+  h+='<div class="reading-vocab-panel">';
+  h+='<h3>🎯 واژگان کلیدی (پرتکرار)</h3>';
+  if(!items.length){h+='<p style="color:var(--text2);font-size:.85rem">داده‌ای موجود نیست</p>'}
+  items.slice(0,15).forEach((item,i)=>{
+    const exists=S.words.some(x=>x.word.toLowerCase()===item.word)||S.longTerm.some(x=>x.word.toLowerCase()===item.word);
+    h+='<div class="reading-vocab-item" data-vword="'+esc(item.word)+'">';
+    h+='<span style="color:var(--text2);font-size:.75rem;min-width:20px">'+(i+1)+'.</span>';
+    h+='<span class="word">'+esc(item.word)+'</span>';
+    h+='<span class="count">'+item.count+'x</span>';
+    if(exists)h+='<span class="badge-sm badge-success" style="font-size:.6rem">✅</span>';
+    h+='</div>';
+  });
+  h+='</div>';
+  h+='<div>';
+  h+='<div class="reading-vocab-panel" style="margin-bottom:14px">';
+  h+='<h3>🗺️ نقشه واژگان صفحات</h3>';
+  h+='<div class="reading-heatmap">';
+  doc.pages.forEach((p,pi)=>{
+    const density=p.totalWords>0?p.uniqueWords/p.totalWords:0;
+    const level=density>0.8?4:density>0.6?3:density>0.4?2:density>0.2?1:0;
+    const colors=['rgba(108,92,231,.1)','rgba(108,92,231,.25)','rgba(108,92,131,.4)','rgba(108,92,231,.6)','rgba(108,92,231,.85)'];
+    h+='<div class="reading-heatmap-cell" style="background:'+colors[level]+'" title="صفحه '+(pi+1)+': '+p.totalWords+' کلمه, '+p.uniqueWords+' منحصربفرد" data-hpage="'+pi+'">'+(pi+1)+'</div>';
+  });
+  h+='</div></div>';
+  const unknownWords=Object.entries(doc.occurrences).sort((a,b)=>b[1].count-a[1].count).filter(function(entry){return !S.words.some(function(x){return x.word.toLowerCase()===entry[0]})&&!S.longTerm.some(function(x){return x.word.toLowerCase()===entry[0]})});
+  h+='<div class="reading-vocab-panel">';
+  h+='<h3>❓ کلمات ناشناخته ('+unknownWords.length+')</h3>';
+  if(!unknownWords.length){h+='<p style="color:var(--success);font-size:.85rem">همه کلمات شناخته شده‌اند! ✅</p>'}
+  unknownWords.slice(0,15).forEach(function(entry){
+    var w=entry[0],o=entry[1];
+    h+='<div class="reading-vocab-item" data-vword="'+esc(w)+'">';
+    h+='<span class="word">'+esc(w)+'</span>';
+    h+='<span class="count">'+o.count+'x</span>';
+    h+='<span style="font-size:.7rem;color:var(--text2)">صفحه '+o.pages.join(', ')+'</span>';
+    h+='</div>';
+  });
+  h+='</div></div></div>';
+  return h;
+}
+
+async function handleReadingFile(file,c){
+  const ext=file.name.split('.').pop().toLowerCase();
+  try{
+    let pages,title;
+    if(ext==='pdf'){
+      pages=await extractPDFForReading(file);
+      title=file.name;
+    }else if(ext==='txt'){
+      const text=await file.text();
+      pages=extractTXTForReading(text);
+      title=file.name;
+    }else{toast('فرمت فایل پشتیبانی نمی‌شود','error');return}
+    readingDoc=buildReadingDoc(pages,title,ext);
+    readingCurrentPage=0;readingViewMode='raw';
+    saveReadingSession();renderReading(c);
+    toast(file.name+' بارگذاری شد ('+readingDoc.totalPages+' صفحه)','success');
+    preloadReadingTranslations();
+  }catch(e){toast('خطا در خواندن فایل: '+e.message,'error')}
+}
+
+async function preloadReadingTranslations(){
+  if(!readingDoc)return;
+  const page=readingDoc.pages[readingCurrentPage];
+  if(!page)return;
+  const words=[...new Set(page.words.map(w=>normalizeWordLookup(w)).filter(w=>w&&w.length>=2))];
+  const unknown=words.filter(w=>!readingTransCache[w]&&!S.words.some(x=>x.word.toLowerCase()===w)&&!S.longTerm.some(x=>x.word.toLowerCase()===w));
+  if(unknown.length>0)await translateBatch(unknown.slice(0,30));
+}
+
+function saveReadingSession(){
+  try{if(readingDoc)localStorage.setItem('leitner_reading_session',JSON.stringify({title:readingDoc.title,sourceType:readingDoc.sourceType,page:readingCurrentPage,view:readingViewMode}))}catch(e){}
+}
+
+function bindReadingEvents(c,doc){
+  var newFileBtn=document.getElementById('rdNewFile');
+  if(newFileBtn)newFileBtn.onclick=function(){readingDoc=null;readingText='';readingCurrentPage=0;renderReading(c)};
+  var closeBtn=document.getElementById('rdClose');
+  if(closeBtn)closeBtn.onclick=function(){readingDoc=null;readingText='';readingCurrentPage=0;renderReading(c)};
+  c.querySelectorAll('[data-rmode]').forEach(function(btn){
+    btn.onclick=function(){readingViewMode=btn.dataset.rmode;renderReading(c)};
+  });
+  c.querySelectorAll('[data-rfilter]').forEach(function(btn){
+    btn.onclick=function(){readingFilterMode=btn.dataset.rfilter;renderReading(c)};
+  });
+  var prevBtn=document.getElementById('rdPrevPage');
+  if(prevBtn)prevBtn.onclick=function(){if(readingCurrentPage>0){readingCurrentPage--;saveReadingSession();renderReading(c);preloadReadingTranslations()}};
+  var nextBtn=document.getElementById('rdNextPage');
+  if(nextBtn)nextBtn.onclick=function(){if(readingCurrentPage<doc.totalPages-1){readingCurrentPage++;saveReadingSession();renderReading(c);preloadReadingTranslations()}};
+  var searchInput=document.getElementById('rdSearch');
+  if(searchInput){var st;searchInput.oninput=function(){clearTimeout(st);st=setTimeout(function(){readingSearchQuery=searchInput.value;renderReading(c)},300)}}
+  var contentArea=document.getElementById('rdContentArea');
+  if(contentArea){
+    contentArea.onclick=async function(e){
+      var span=e.target.closest('.reading-word');
+      if(!span)return;
+      var word=span.dataset.word;
+      showReadingWordDetail(word,span,doc);
+    };
+  }
+  c.querySelectorAll('[data-vword]').forEach(function(item){
+    item.onclick=function(){readingSearchQuery=item.dataset.vword;readingViewMode='raw';renderReading(c)};
+  });
+  c.querySelectorAll('[data-hpage]').forEach(function(cell){
+    cell.onclick=function(){readingCurrentPage=parseInt(cell.dataset.hpage);readingViewMode='raw';saveReadingSession();renderReading(c);preloadReadingTranslations()};
+  });
+  var batchBtn=document.getElementById('rdBatchAdd');
+  if(batchBtn)batchBtn.onclick=function(){showBatchAddPanel(doc)};
+  var exportBtn=document.getElementById('rdExportVocab');
+  if(exportBtn)exportBtn.onclick=function(){exportReadingVocab(doc)};
+}
+
+async function showReadingWordDetail(word,spanEl,doc){
+  var popup=document.getElementById('readingWordDetail');
+  if(!popup){popup=document.createElement('div');popup.id='readingWordDetail';popup.className='reading-word-detail';document.body.appendChild(popup)}
+  var rect=spanEl.getBoundingClientRect();
+  popup.innerHTML='<div style="text-align:center;color:var(--text2);font-size:.85rem;padding:16px">در حال جستجو...</div>';
+  popup.classList.add('visible');
+  var top=rect.bottom+10;var left=rect.left;
+  var pw=380;
+  if(left+pw>window.innerWidth-16)left=window.innerWidth-pw-16;
+  if(left<16)left=16;
+  if(top+300>window.innerHeight-16)top=rect.top-310;
+  if(top<16)top=16;
+  popup.style.top=top+'px';popup.style.left=left+'px';
+  var cached=getCachedTrans(word);
+  if(!cached){
+    var arr=await Promise.all([fetchTranslation(word),fetchDictionary(word)]);
+    var trans=arr[0],dict=arr[1];
+    cached={translation:trans||'',ipa:'',pos:'',definitions:[],examples:[],synonyms:[],audioUs:'',audioBr:''};
+    if(dict){
+      cached.ipa=dict.phoneticBr||dict.phoneticUs||dict.phonetic||'';
+      cached.pos=dict.meanings[0]?dict.meanings[0].partOfSpeech:'';
+      cached.definitions=dict.meanings.flatMap(function(m){return m.definitions}).slice(0,4);
+      cached.examples=dict.meanings.flatMap(function(m){return m.examples}).slice(0,3);
+      cached.synonyms=dict.meanings.flatMap(function(m){return m.synonyms}).slice(0,5);
+      cached.audioUs=dict.audioUs||'';
+      cached.audioBr=dict.audioBr||'';
+    }
+    cacheTrans(word,cached);
+  }
+  var nw=normalizeWordLookup(word);
+  var occ=doc.occurrences[nw]||{count:1,pages:[]};
+  var exists=S.words.some(function(x){return x.word.toLowerCase()===word.toLowerCase()})||S.longTerm.some(function(x){return x.word.toLowerCase()===word.toLowerCase()});
+  var h='<button type="button" class="trans-close" id="rdDetailClose" style="position:absolute;top:8px;left:10px;background:none;border:none;color:var(--text2);cursor:pointer;font-size:1rem;padding:4px">&times;</button>';
+  h+='<div class="wd-header"><span class="wd-word">'+esc(word)+'</span>';
+  if(cached.ipa)h+='<span class="wd-ipa">'+esc(cached.ipa)+'</span>';
+  h+='<span class="wd-occ">'+occ.count+'x</span></div>';
+  if(cached.translation)h+='<div class="wd-persian">'+esc(cached.translation)+'</div>';
+  if(cached.pos)h+='<span class="trans-pos">'+esc(cached.pos)+'</span> ';
+  if(cached.definitions.length){
+    h+='<div class="wd-defs">';
+    cached.definitions.forEach(function(d){h+='<div class="wd-def">'+esc(typeof d==='string'?d:d.definition||'')+'</div>'});
+    h+='</div>';
+  }
+  if(cached.examples.length){
+    h+='<div style="margin-bottom:6px">';
+    cached.examples.forEach(function(ex){h+='<div style="font-size:.78rem;color:var(--text2);font-style:italic;padding:4px 8px;margin-bottom:3px;border-right:2px solid var(--accent);line-height:1.5">"'+esc(ex)+'"</div>'});
+    h+='</div>';
+  }
+  if(cached.synonyms.length){
+    h+='<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px">';
+    cached.synonyms.forEach(function(s){h+='<span class="trans-syn-tag">'+esc(s)+'</span>'});
+    h+='</div>';
+  }
+  h+='<div class="wd-pages">📝 صفحات: '+(occ.pages.join(', ')||'—')+' | تکرار: '+occ.count+' بار</div>';
+  h+='<div class="wd-actions">';
+  h+='<button type="button" class="trans-audio-btn" data-speak="'+esc(word)+'" title="شنیدن">🔊</button>';
+  if(cached.audioUs)h+='<button type="button" class="trans-audio-btn" data-audio="'+esc(cached.audioUs)+'" title="American">🇺🇸</button>';
+  if(cached.audioBr)h+='<button type="button" class="trans-audio-btn" data-audio="'+esc(cached.audioBr)+'" title="British">🇬🇧</button>';
+  if(!exists){
+    h+='<button type="button" class="btn btn-sm btn-primary" id="rdAddWord">＋ لایتنر</button>';
+    h+='<button type="button" class="btn btn-sm btn-success" id="rdAddLT" style="font-size:.75rem;padding:6px 12px">＋ حافظه بلندمدت</button>';
+  }else{
+    h+='<span style="font-size:.78rem;color:var(--success)">✅ موجود</span>';
+  }
+  h+='</div>';
+  popup.innerHTML=h;
+  popup.querySelectorAll('[data-audio]').forEach(function(btn){btn.onclick=function(){playAudioUrl(btn.dataset.audio)}});
+  popup.querySelectorAll('[data-speak]').forEach(function(btn){btn.onclick=function(){speakWord(btn.dataset.speak)}});
+  document.getElementById('rdDetailClose').onclick=function(){popup.classList.remove('visible')};
+  var addBtn=document.getElementById('rdAddWord');
+  if(addBtn)addBtn.onclick=function(){
+    var allDefs=cached.definitions.map(function(d){return typeof d==='string'?d:d.definition||''});
+    S.words.push({id:uid(),word:word,translation:cached.translation||'',ipa:cached.ipa,category:'پیش‌فرض',favorite:false,context:'',box:0,repetitions:0,interval:1,easeFactor:2.5,addedDate:new Date().toISOString(),nextReviewDate:null,lastReviewedAt:null,stability:0,difficulty:0,elapsedDays:0,scheduledDays:0,reps:0,lapses:0,fsrsState:'new',definitions:allDefs,examples:cached.examples,synonyms:cached.synonyms,partOfSpeech:cached.pos,audioUs:cached.audioUs,audioBr:cached.audioBr,coreMeaning:'',collocations:[],antonyms:[],wordFamily:[],note:'',trap:'',tags:[],source:'reading-mode'});
+    save();toast(word+' به لایتنر اضافه شد','success');popup.classList.remove('visible');renderReading(document.getElementById('content'));
+  };
+  var ltBtn=document.getElementById('rdAddLT');
+  if(ltBtn)ltBtn.onclick=function(){
+    var allDefs=cached.definitions.map(function(d){return typeof d==='string'?d:d.definition||''});
+    S.longTerm.push({id:uid(),word:word,translation:cached.translation||'',ipa:cached.ipa,category:'پیش‌فرض',favorite:false,context:'',box:0,repetitions:0,interval:1,easeFactor:2.5,addedDate:new Date().toISOString(),nextReviewDate:null,lastReviewedAt:null,stability:0,difficulty:0,elapsedDays:0,scheduledDays:0,reps:0,lapses:0,fsrsState:'new',definitions:allDefs,examples:cached.examples,synonyms:cached.synonyms,partOfSpeech:cached.pos,audioUs:cached.audioUs,audioBr:cached.audioBr,coreMeaning:'',collocations:[],antonyms:[],wordFamily:[],note:'',trap:'',tags:[],source:'reading-mode'});
+    save();toast(word+' به حافظه بلندمدت اضافه شد','success');popup.classList.remove('visible');renderReading(document.getElementById('content'));
+  };
+  setTimeout(function(){
+    document.addEventListener('mousedown',function rdCloseHandler(e){
+      if(!popup.contains(e.target)&&!spanEl.contains(e.target)){popup.classList.remove('visible');document.removeEventListener('mousedown',rdCloseHandler)}
+    });
+  },50);
+}
+
+function showBatchAddPanel(doc){
+  var unknown=Object.entries(doc.occurrences).filter(function(entry){return !S.words.some(function(x){return x.word.toLowerCase()===entry[0]})&&!S.longTerm.some(function(x){return x.word.toLowerCase()===entry[0]})}).sort(function(a,b){return b[1].count-a[1].count});
+  if(!unknown.length){toast('همه کلمات در کتابخانه موجود هستند','info');return}
+  var ov=document.createElement('div');ov.className='modal-overlay';
+  var selected=new Set(unknown.map(function(e){return e[0]}));
+  function renderBatchModal(){
+    ov.innerHTML='<div class="modal" style="max-width:560px">'
+      +'<h3 style="margin-bottom:12px">📥 افزودن گروهی کلمات ('+selected.size+' انتخاب شده)</h3>'
+      +'<p style="color:var(--text2);font-size:.85rem;margin-bottom:12px">کلمات ناشناخته با تکرار بالا. روی کلمات کلیک کنید تا انتخاب/لغو شوند.</p>'
+      +'<div style="max-height:400px;overflow-y:auto">'
+      +unknown.map(function(entry){
+        var w=entry[0],o=entry[1];
+        return'<div class="import-word-item'+(selected.has(w)?'':' existing')+'" data-bword="'+esc(w)+'" style="justify-content:space-between">'
+          +'<div><strong>'+esc(w)+'</strong> <span style="color:var(--text2);font-size:.78rem">'+o.count+'x — صفحه '+o.pages.join(', ')+'</span></div>'
+          +'<input type="checkbox" '+(selected.has(w)?'checked':'')+' data-bcheck="'+esc(w)+'" style="accent-color:var(--accent)"></div>';
+      }).join('')
+      +'</div>'
+      +'<div style="display:flex;gap:8px;margin-top:16px;justify-content:flex-end">'
+      +'<button type="button" class="btn btn-ghost" id="batchClose">بستن</button>'
+      +'<button type="button" class="btn btn-primary" id="batchAddLeitner">افزودن به لایتنر ('+selected.size+')</button>'
+      +'<button type="button" class="btn btn-success" id="batchAddLT" style="font-size:.8rem">افزودن به حافظه بلندمدت ('+selected.size+')</button>'
+      +'</div></div>';
+    ov.querySelector('#batchClose').onclick=function(){ov.remove()};
+    ov.querySelectorAll('[data-bcheck]').forEach(function(cb){
+      cb.onchange=function(){var w=cb.dataset.bcheck;if(cb.checked)selected.add(w);else selected.delete(w);renderBatchModal()};
+    });
+    ov.querySelectorAll('[data-bword]').forEach(function(item){
+      item.onclick=function(){var w=item.dataset.bword;if(selected.has(w))selected.delete(w);else selected.add(w);renderBatchModal()};
+    });
+    ov.querySelector('#batchAddLeitner').onclick=async function(){
+      var words=[...selected];
+      toast('در حال ترجمه '+words.length+' کلمه...','info');
+      await translateBatch(words);
+      var added=0;
+      words.forEach(function(w){
+        if(S.words.some(function(x){return x.word.toLowerCase()===w})||S.longTerm.some(function(x){return x.word.toLowerCase()===w}))return;
+        var c2=getCachedTrans(w)||{};
+        S.words.push({id:uid(),word:w,translation:c2.translation||'',ipa:c2.ipa||'',category:'پیش‌فرض',favorite:false,context:'',box:0,repetitions:0,interval:1,easeFactor:2.5,addedDate:new Date().toISOString(),nextReviewDate:null,lastReviewedAt:null,stability:0,difficulty:0,elapsedDays:0,scheduledDays:0,reps:0,lapses:0,fsrsState:'new',definitions:c2.definitions||[],examples:c2.examples||[],synonyms:c2.synonyms||[],partOfSpeech:c2.pos||'',audioUs:c2.audioUs||'',audioBr:c2.audioBr||'',coreMeaning:'',collocations:[],antonyms:[],wordFamily:[],note:'',trap:'',tags:[],source:'reading-mode'});
+        added++;
+      });
+      save();ov.remove();toast(added+' کلمه به لایتنر اضافه شد','success');renderReading(document.getElementById('content'));
+    };
+    ov.querySelector('#batchAddLT').onclick=async function(){
+      var words=[...selected];
+      toast('در حال ترجمه '+words.length+' کلمه...','info');
+      await translateBatch(words);
+      var added=0;
+      words.forEach(function(w){
+        if(S.words.some(function(x){return x.word.toLowerCase()===w})||S.longTerm.some(function(x){return x.word.toLowerCase()===w}))return;
+        var c2=getCachedTrans(w)||{};
+        S.longTerm.push({id:uid(),word:w,translation:c2.translation||'',ipa:c2.ipa||'',category:'پیش‌فرض',favorite:false,context:'',box:0,repetitions:0,interval:1,easeFactor:2.5,addedDate:new Date().toISOString(),nextReviewDate:null,lastReviewedAt:null,stability:0,difficulty:0,elapsedDays:0,scheduledDays:0,reps:0,lapses:0,fsrsState:'new',definitions:c2.definitions||[],examples:c2.examples||[],synonyms:c2.synonyms||[],partOfSpeech:c2.pos||'',audioUs:c2.audioUs||'',audioBr:c2.audioBr||'',coreMeaning:'',collocations:[],antonyms:[],wordFamily:[],note:'',trap:'',tags:[],source:'reading-mode'});
+        added++;
+      });
+      save();ov.remove();toast(added+' کلمه به حافظه بلندمدت اضافه شد','success');renderReading(document.getElementById('content'));
+    };
+  }
+  renderBatchModal();
+  document.body.appendChild(ov);
+  ov.onclick=function(e){if(e.target===ov)ov.remove()};
+}
+
+function exportReadingVocab(doc){
+  var vocab=Object.entries(doc.occurrences).sort(function(a,b){return b[1].count-a[1].count}).map(function(entry){
+    var word=entry[0],o=entry[1];
+    var cached=getCachedTrans(word)||{};
+    return{word:word,translation:cached.translation||'',ipa:cached.ipa||'',count:o.count,pages:o.pages,inLeitner:S.words.some(function(x){return x.word.toLowerCase()===word})};
+  });
+  var blob=new Blob([JSON.stringify(vocab,null,2)],{type:'application/json'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');a.href=url;a.download='reading-vocab-'+doc.title.replace(/[^a-z0-9]/gi,'_')+'.json';a.click();URL.revokeObjectURL(url);
+  toast(vocab.length+' واژه خروجی گرفته شد','success');
+}
+
+
 
 // 6. EXPORT (with IndexedDB backup)
 // ═══════════════════════════════════════════
@@ -2305,7 +2734,7 @@ c.innerHTML=`<div style="max-width:700px;margin:0 auto">
       <div style="padding:8px 12px;background:var(--bg);border-radius:8px;font-size:.85rem">🎮 آزمون هوشمند ۸ حالتی با به‌روزرسانی خودکار لایتنر</div>
       <div style="padding:8px 12px;background:var(--bg);border-radius:8px;font-size:.85rem">🎯 آزمون انگلیسی با ارتباط مستقیم با لایتنر</div>
       <div style="padding:8px 12px;background:var(--bg);border-radius:8px;font-size:.85rem">⚡ ورود سریع با بوکمارکلت و ترجمه خودکار</div>
-      <div style="padding:8px 12px;background:var(--bg);border-radius:8px;font-size:.85rem">📰 حالت خواندن با ترجمه آنی کلمات</div>
+      <div style="padding:8px 12px;background:var(--bg);border-radius:8px;font-size:.85rem">📰 خواندن پیشرفته با تحلیل متن، ترجمه کش‌شده و PDF</div>
       <div style="padding:8px 12px;background:var(--bg);border-radius:8px;font-size:.85rem">🗂️ مدیریت دسته‌ها و گروه‌های واژگانی</div>
       <div style="padding:8px 12px;background:var(--bg);border-radius:8px;font-size:.85rem">🤖 تولید مثال با هوش مصنوعی</div>
       <div style="padding:8px 12px;background:var(--bg);border-radius:8px;font-size:.85rem">🏆 سیستم امتیاز و سطح‌بندی</div>
@@ -2340,8 +2769,36 @@ c.innerHTML=`<div style="max-width:700px;margin:0 auto">
         <p style="color:var(--text2);font-size:.8rem;margin-top:4px">تولید خودکار مثال‌های انگلیسی از فرهنگ لغت رایگان. قابل استفاده در ویرایش و کارت مرور.</p>
       </div>
       <div style="padding:10px 14px;background:var(--bg);border-radius:8px;border-right:3px solid var(--accent2)">
-        <strong style="font-size:.9rem">حالت خواندن با ترجمه آنی</strong>
-        <p style="color:var(--text2);font-size:.8rem;margin-top:4px">متن انگلیسی بچسبانید، روی هر کلمه کلیک کنید. ترجمه خودکار و افزودن مستقیم کلمات ناشناخته به لایتنر.</p>
+        <strong style="font-size:.9rem">داشبورد تحلیل متن</strong>
+        <p style="color:var(--text2);font-size:.8rem;margin-top:4px">نمایش آمار کامل سند: تعداد کل کلمات، کلمات منحصربفرد، جملات، پاراگراف‌ها، دشواری متن و پرتکرارترین کلمه.</p>
+      </div>
+      <div style="padding:10px 14px;background:var(--bg);border-radius:8px;border-right:3px solid var(--success)">
+        <strong style="font-size:.9rem">بارگذاری فایل PDF و TXT</strong>
+        <p style="color:var(--text2);font-size:.8rem;margin-top:4px">آپلود فایل PDF با استخراج متن صفحه به صفحه. پشتیبانی از فایل‌های TXT با تقسیم خودکار صفحات. Drag & Drop ساده.</p>
+      </div>
+      <div style="padding:10px 14px;background:var(--bg);border-radius:8px;border-right:3px solid var(--warning)">
+        <strong style="font-size:.9rem">ترجمه کش‌شده و سریع</strong>
+        <p style="color:var(--text2);font-size:.8rem;margin-top:4px">ترجمه یک‌بار انجام شده، همه‌جا استفاده می‌شود. اگر کلمه‌ای ۳۰ بار تکرار شود، فقط یک‌بار ترجمه می‌شود. بارگذاری از پیش کلمات تکراری.</p>
+      </div>
+      <div style="padding:10px 14px;background:var(--bg);border-radius:8px;border-right:3px solid var(--danger)">
+        <strong style="font-size:.9rem">پنل جزئیات کلمه</strong>
+        <p style="color:var(--text2);font-size:.8rem;margin-top:4px">کلیک روی هر کلمه: ترجمه، IPA، بخش کلام، تعریف، تعداد تکرار، صفحات حضور، افزودن به لایتنر و حافظه بلندمدت.</p>
+      </div>
+      <div style="padding:10px 14px;background:var(--bg);border-radius:8px;border-right:3px solid var(--accent)">
+        <strong style="font-size:.9rem">تحلیل واژگان صفحات</strong>
+        <p style="color:var(--text2);font-size:.8rem;margin-top:4px">نمایش خلاصه هر صفحه: تعداد کلمات، منحصربفرد، کلمات کلیدی. نقشه حرارتی تراکم واژگان در تمام صفحات.</p>
+      </div>
+      <div style="padding:10px 14px;background:var(--bg);border-radius:8px;border-right:3px solid var(--accent2)">
+        <strong style="font-size:.9rem">افزودن گروهی کلمات</strong>
+        <p style="color:var(--text2);font-size:.8rem;margin-top:4px">پنل مدیریت کلمات ناشناخته مرتب شده بر اساس تکرار. انتخاب و افزودن گروهی به لایتنر یا حافظه بلندمدت با ترجمه خودکار.</p>
+      </div>
+      <div style="padding:10px 14px;background:var(--bg);border-radius:8px;border-right:3px solid var(--success)">
+        <strong style="font-size:.9rem">خروجی واژگان</strong>
+        <p style="color:var(--text2);font-size:.8rem;margin-top:4px">دانلود لیست کامل واژگان سند به صورت JSON شامل کلمه، ترجمه، تعداد تکرار، صفحات و وضعیت لایتنر.</p>
+      </div>
+      <div style="padding:10px 14px;background:var(--bg);border-radius:8px;border-right:3px solid var(--warning)">
+        <strong style="font-size:.9rem">سه حالت نمایش</strong>
+        <p style="color:var(--text2);font-size:.8rem;margin-top:4px">حالت متن (خواندن روان)، حالت کلمات (جدا شده با حاشیه رنگی)، حالت واژگان (تحلیل و آمار). جستجو و فیلتر در همه حالت‌ها.</p>
       </div>
     </div>
   </div>
