@@ -44,7 +44,7 @@ a{color:var(--accent);text-decoration:none}
 .btn-danger{background:linear-gradient(135deg,var(--danger),#f0825e);color:#fff;box-shadow:0 2px 12px rgba(225,112,85,.3)}.btn-danger:hover{box-shadow:0 4px 20px rgba(225,112,85,.45);transform:translateY(-1px)}
 .btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--border)}.btn-ghost:hover{background:var(--accent-glow);color:var(--text);border-color:var(--accent)}
 .btn-sm{padding:7px 16px;font-size:.8rem;border-radius:10px}
-.card{background:var(--card);border-radius:var(--radius);padding:22px;box-shadow:var(--shadow);border:1px solid var(--border);transition:all .3s}
+.card{background:var(--card);border-radius:var(--radius);padding:24px;box-shadow:var(--shadow);border:1px solid var(--border);transition:all .3s}
 .card:hover{box-shadow:var(--shadow),0 0 0 1px var(--accent-glow)}
 .stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-bottom:24px}
 .stat-card{text-align:center;padding:20px;border:1px solid var(--border);transition:all .3s}
@@ -63,13 +63,14 @@ table{width:100%;border-collapse:collapse;font-size:.85rem;min-width:600px}
 th,td{padding:12px 14px;text-align:right;border-bottom:1px solid var(--border)}
 th{color:var(--text2);font-weight:600;font-size:.75rem;text-transform:uppercase;letter-spacing:.04em}
 tr:hover td{background:var(--card-hover)}
-.empty{text-align:center;padding:60px 20px;color:var(--text2)}
+.empty{text-align:center;padding:48px 20px;color:var(--text2)}
 .empty .icon{font-size:3rem;margin-bottom:12px;opacity:.5}
+.empty p{margin-top:8px;font-size:.9rem}
 .review-card{max-width:500px;margin:0 auto;text-align:center;min-height:280px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;perspective:1000px}
 .review-inner{width:100%;min-height:280px;position:relative;transition:transform .6s cubic-bezier(.4,0,.2,1);transform-style:preserve-3d}
 .review-card.flipped .review-inner{transform:rotateY(180deg)}
 .review-face{position:absolute;inset:0;backface-visibility:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px;border-radius:var(--radius);background:var(--card);border:2px solid var(--border);box-shadow:var(--shadow)}
-.review-back{transform:rotateY(180deg)}
+.review-back{transform:rotateY(180deg);overflow-y:auto;max-height:calc(100vh - 200px)}
 .rating-bar{display:flex;gap:10px;justify-content:center;margin-top:24px;flex-wrap:wrap}
 .quiz-option{width:100%;text-align:center;padding:14px;font-size:1rem;word-break:break-word;min-height:48px;border-radius:12px;transition:all .25s}
 .quiz-option:hover{transform:translateY(-1px)}
@@ -93,12 +94,17 @@ tr:hover td{background:var(--card-hover)}
 .sidebar:not(.open){transform:translateX(100%)}
 .main.sidebar-open{margin-right:260px}
 .main.sidebar-closed{margin-right:0}
-@media(max-width:768px){.sidebar{transform:translateX(100%)}.sidebar.open{transform:translateX(0)}.main{margin-right:0;padding:16px}.stat-grid{grid-template-columns:repeat(2,1fr)}.grid-2{grid-template-columns:1fr}}
+@media(max-width:768px){.sidebar{transform:translateX(100%)}.sidebar.open{transform:translateX(0)}.main{margin-right:0;padding:16px}.stat-grid{grid-template-columns:repeat(2,1fr)}.grid-2{grid-template-columns:1fr}.modal{max-width:95vw;padding:20px;max-height:85vh}.btn{padding:9px 18px;font-size:.82rem}}
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(6px);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px}
 .modal{background:var(--card);border-radius:var(--radius);padding:28px;max-width:500px;width:100%;max-height:80vh;overflow-y:auto;border:1px solid var(--border);box-shadow:0 24px 80px rgba(0,0,0,.5)}
 .modal h3{margin-bottom:18px;font-weight:700}
 .tag{display:inline-block;padding:3px 10px;border-radius:8px;font-size:.7rem;background:linear-gradient(135deg,var(--accent),#7c6cf0);color:#fff;margin:2px}
 .hidden{display:none!important}
+.lib-pager{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:16px;flex-wrap:wrap}
+.lib-pg{min-width:36px;min-height:36px;text-align:center}
+.lib-pg-active{background:linear-gradient(135deg,var(--accent),#7c6cf0)!important;color:#fff!important;box-shadow:0 2px 8px rgba(108,92,231,.3)!important}
+.lib-pg:disabled{opacity:.4;cursor:not-allowed}
+.lib-pg-ellipsis{color:var(--text2);padding:0 4px}
 .pdf-toolbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:14px;background:var(--card);border-radius:var(--radius);margin-bottom:18px;border:1px solid var(--border)}
 .pdf-toolbar .btn{padding:8px 14px;font-size:.8rem;border-radius:10px}
 .pdf-page-info{color:var(--text2);font-size:.85rem;min-width:60px;text-align:center}
@@ -363,6 +369,8 @@ tr:hover td{background:var(--card-hover)}
 const MS_PER_DAY=86400000;
 const PDF_DEFAULT_SCALE=1.5;
 const PDF_THUMB_SCALE=0.2;
+const FSRS_DECAY_COEFF=0.5;
+const LIST_PAGE_SIZE=50;
 
 // ═══════════════════════════════════════════
 // STATE & STORAGE
@@ -386,11 +394,40 @@ function sanitizeCard(c){
 }
 
 function loadState(){try{const d=localStorage.getItem(LS_KEY);if(!d)return defaultState();const p=JSON.parse(d);const s={...defaultState(),...p};s.words=(p.words||[]).map(sanitizeCard).filter(w=>w.word);s.longTerm=(p.longTerm||[]).map(sanitizeCard).filter(w=>w.word);s.stats={...defaultState().stats,...(p.stats||{})};if(Array.isArray(s.stats.history))s.stats.history={};s.quizStats={...defaultState().quizStats,...(p.quizStats||{})};if(!s.quizStats.wordPerformance)s.quizStats.wordPerformance={};if(!s.quizStats.sessions)s.quizStats.sessions=[];s.settings={...defaultState().settings,...(p.settings||{})};return s}catch(e){return defaultState()}}
-function save(){try{localStorage.setItem(LS_KEY,JSON.stringify(S));autoBackup()}catch(e){toast('خطا در ذخیره‌سازی','error')}}
-function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML}
+function save(){try{localStorage.setItem(LS_KEY,JSON.stringify(S));rebuildIndex();autoBackup()}catch(e){toast('خطا در ذخیره‌سازی','error')}}
+function esc(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,8)}
 function fmtDate(d){if(!d)return'-';return new Date(d).toLocaleDateString('fa-IR')}
 function todayKey(){return new Date().toISOString().slice(0,10)}
+
+// ═══════════════════════════════════════════
+// CARD FACTORY
+// ═══════════════════════════════════════════
+function createCard(overrides){
+  return Object.assign({
+    id:uid(),word:'',translation:'',ipa:'',category:'پیش‌فرض',
+    favorite:false,context:'',
+    box:0,repetitions:0,interval:1,easeFactor:2.5,
+    addedDate:new Date().toISOString(),nextReviewDate:null,lastReviewedAt:null,
+    stability:0,difficulty:0,elapsedDays:0,scheduledDays:0,
+    reps:0,lapses:0,fsrsState:'new',
+    definitions:[],examples:[],synonyms:[],partOfSpeech:'',
+    audioUs:'',audioBr:'',
+    coreMeaning:'',collocations:[],antonyms:[],wordFamily:[],
+    note:'',trap:'',tags:[],source:''
+  },overrides||{})}
+
+// ═══════════════════════════════════════════
+// WORD LOOKUP INDEX (O(1) existence checks)
+// ═══════════════════════════════════════════
+let _wordsSet=null,_ltSet=null;
+function rebuildIndex(){
+  _wordsSet=new Set(S.words.map(function(w){return w.word.toLowerCase()}));
+  _ltSet=new Set(S.longTerm.map(function(w){return w.word.toLowerCase()}))}
+function wordExists(word){
+  if(!_wordsSet)rebuildIndex();
+  var w=word.toLowerCase();
+  return _wordsSet.has(w)||_ltSet.has(w)}
 
 // ═══════════════════════════════════════════
 // STATE SNAPSHOT IMPORT/EXPORT HELPERS
@@ -562,7 +599,6 @@ function fsrsNext(w,rating){
   w.easeFactor=Math.max(1.3,3-newDifficulty/5);
   return w;
 }
-const FSRS_DECAY_COEFF=0.5;
 
 function clampReviewValues(w){
   w.repetitions=Math.max(0,Number(w.repetitions)||0);
@@ -795,7 +831,7 @@ async function renderTransPopup(word,rect){
   }else if(!persianResult)html+='<div class="trans-error">نتیجه‌ای یافت نشد. اتصال اینترنت را بررسی کنید.</div>';
 
   const cleanWord=displayWord.toLowerCase();
-  const alreadyExists=S.words.some(w=>w.word.toLowerCase()===cleanWord)||S.longTerm.some(w=>w.word.toLowerCase()===cleanWord);
+  const alreadyExists=wordExists(cleanWord);
 
   html+='<button type="button" class="trans-add-btn" id="transAddBtn"'+(alreadyExists?' disabled':'')+'>';
   if(alreadyExists)html+='✅ در کتابخانه موجود است';
@@ -815,11 +851,12 @@ async function renderTransPopup(word,rect){
     const allExamples=dictResult?dictResult.meanings.flatMap(m=>m.examples):[];
     const allSynonyms=dictResult?dictResult.meanings.flatMap(m=>m.synonyms):[];
     const pos=dictResult&&dictResult.meanings[0]?dictResult.meanings[0].partOfSpeech:'';
-    S.words.push({id:uid(),word:displayWord,translation:persianResult||'',ipa:ipaText,category:'پیش‌فرض',favorite:false,context:'',box:0,repetitions:0,interval:1,easeFactor:2.5,addedDate:new Date().toISOString(),nextReviewDate:null,lastReviewedAt:null,stability:0,difficulty:0,elapsedDays:0,scheduledDays:0,reps:0,lapses:0,fsrsState:'new',definitions:allDefs,examples:allExamples,synonyms:allSynonyms,partOfSpeech:pos,audioUs:dictResult?dictResult.audioUs||'':'',audioBr:dictResult?dictResult.audioBr||'':''});
+    S.words.push(createCard({word:displayWord,translation:persianResult||'',ipa:ipaText,definitions:allDefs,examples:allExamples,synonyms:allSynonyms,partOfSpeech:pos,audioUs:dictResult?dictResult.audioUs||'':'',audioBr:dictResult?dictResult.audioBr||'':''}));
     save();
     toast(displayWord+' به لایتنر اضافه شد','success');
     const addBtn=document.getElementById('transAddBtn');
-    if(addBtn){addBtn.disabled=true;addBtn.textContent='✅ در کتابخانه موجود است'}}
+    if(addBtn){addBtn.disabled=true;addBtn.textContent='✅ در کتابخانه موجود است'}
+  }
 }
 
 // ═══════════════════════════════════════════
@@ -830,7 +867,6 @@ const TABS=[
 {id:'library',label:'کتابخانه',icon:'📚'},
 {id:'longterm',label:'حافظه بلندمدت',icon:'🧠'},
 {id:'import',label:'ورود',icon:'📥'},
-{id:'quickimport',label:'ورود سریع',icon:'⚡'},
 {id:'reading',label:'خواندن',icon:'📰'},
 {id:'export',label:'خروج / پشتیبان',icon:'💾'},
 {id:'stats',label:'آمار',icon:'📊'},
@@ -849,10 +885,10 @@ function render(){
 if(currentTab!=='review'&&currentTab!=='pdfreader')document.onkeydown=null;
 if(currentTab!=='pdfreader')hideTransPopup();
 renderNav();
-const titles={review:'مرور',library:'کتابخانه',longterm:'حافظه بلندمدت',import:'ورود',quickimport:'ورود سریع',reading:'خواندن با ترجمه',export:'خروج / پشتیبان',stats:'آمار',quiz:'آزمون',engquiz:'آزمون انگلیسی',pdfreader:'خواننده PDF',settings:'تنظیمات',about:'درباره'};
+const titles={review:'مرور',library:'کتابخانه',longterm:'حافظه بلندمدت',import:'ورود',reading:'خواندن با ترجمه',export:'خروج / پشتیبان',stats:'آمار',quiz:'آزمون',engquiz:'آزمون انگلیسی',pdfreader:'خواننده PDF',settings:'تنظیمات',about:'درباره'};
 document.getElementById('pageTitle').textContent=titles[currentTab]||'';
 const c=document.getElementById('content');
-const renders={review:renderReview,library:renderLibrary,longterm:renderLongterm,import:renderImport,quickimport:renderQuickImport,reading:renderReading,export:renderExport,stats:renderStats,quiz:renderQuiz,engquiz:renderEngQuiz,pdfreader:renderPDFReader,settings:renderSettings,about:renderAbout};
+const renders={review:renderReview,library:renderLibrary,longterm:renderLongterm,import:renderImport,reading:renderReading,export:renderExport,stats:renderStats,quiz:renderQuiz,engquiz:renderEngQuiz,pdfreader:renderPDFReader,settings:renderSettings,about:renderAbout};
 (renders[currentTab]||(()=>''))(c)}
 
 // ═══════════════════════════════════════════
@@ -931,7 +967,17 @@ c.querySelectorAll('[data-genex]').forEach(btn=>{
           const newExs=data[0].meanings.flatMap(m=>m.definitions.filter(d=>d.example).map(d=>d.example)).slice(0,5);
           if(newExs.length>0){
             w.examples=[...(w.examples||[]),...newExs].slice(0,10);
-            save();renderReview(c);
+            const idx=S.words.findIndex(x=>x.id===w.id);if(idx>=0)S.words[idx].examples=w.examples;
+            save();
+            // Update examples section in-place without full re-render
+            const backSection=btn.closest('.rb-section');
+            if(backSection){
+              const exHtml=w.examples.slice(0,3).map(ex=>'<div class="rb-example">"'+esc(ex)+'"</div>').join('');
+              backSection.innerHTML='<div class="rb-section-label"><span class="icon">💬</span> مثال</div>'+exHtml+'<button type="button" class="btn btn-sm btn-ghost" data-genex="'+esc(w.id)+'" style="margin-top:6px;font-size:.75rem">تولید مثال بیشتر 🤖</button>';
+              // Re-bind the new button
+              const newBtn=backSection.querySelector('[data-genex]');
+              if(newBtn){newBtn.onclick=btn.onclick}
+            }
             toast(newExs.length+' مثال جدید اضافه شد','success');
           }else toast('مثالی یافت نشد','info');
         }
@@ -962,34 +1008,78 @@ if(e.key===' '&&reviewSession.flipped===false&&currentTab==='review'){e.preventD
 if(reviewSession.flipped&&currentTab==='review'&&!reviewRatingPending){const map={'1':1,'2':3,'3':4,'4':5};if(map[e.key])rateReview(map[e.key])}}
 
 // ═══════════════════════════════════════════
-// 2. LIBRARY (with frequency tier)
+// 2. LIBRARY (with frequency tier + pagination)
 // ═══════════════════════════════════════════
-let libFilter='',libCat='',libSort='';
-function renderLibrary(c){
+let libFilter='',libCat='',libSort='',libPage=0,_libSearchTimer=null;
+const LIB_PAGE_SIZE=50;
+let _libCache=null,_libCacheKey='';
+function getLibFiltered(){
+const key=libFilter+'|'+libCat+'|'+libSort;
+if(_libCache&&_libCacheKey===key)return _libCache;
 const words=S.words;
 const filtered=words.filter(w=>{if(libCat&&w.category!==libCat)return false;if(libFilter&&!w.word.toLowerCase().includes(libFilter.toLowerCase())&&!w.translation.toLowerCase().includes(libFilter.toLowerCase()))return false;return true});
 if(libSort==='newest')filtered.sort((a,b)=>new Date(b.addedDate)-new Date(a.addedDate));
 else if(libSort==='due')filtered.sort((a,b)=>{const da=a.nextReviewDate?new Date(a.nextReviewDate):new Date('2099-01-01');const db=b.nextReviewDate?new Date(b.nextReviewDate):new Date('2099-01-01');return da-db});
 else if(libSort==='alpha')filtered.sort((a,b)=>a.word.localeCompare(b.word,'fa'));
 else if(libSort==='freq')filtered.sort((a,b)=>getFrequencyTier(a.word)-getFrequencyTier(b.word));
-const dueToday=new Set(getDue().map(w=>w.id));
-c.innerHTML=`<div class="filter-bar"><input class="input" placeholder="جستجو..." style="max-width:300px" value="${esc(libFilter)}" id="libSearch"><select class="input" style="max-width:200px" id="libCat"><option value="">همه دسته‌ها</option>${S.categories.map(c=>`<option value="${esc(c)}"${c===libCat?' selected':''}>${esc(c)}</option>`).join('')}</select><select class="input" style="max-width:180px" id="libSort"><option value="">مرتب‌سازی</option><option value="newest"${libSort==='newest'?' selected':''}>جدیدترین</option><option value="due"${libSort==='due'?' selected':''}>زودترین مرور</option><option value="alpha"${libSort==='alpha'?' selected':''}>الفبایی</option><option value="freq"${libSort==='freq'?' selected':''}>فراوانی</option></select><button type="button" class="btn btn-sm btn-ghost" id="manageDecksBtn">🗂️ مدیریت دسته‌ها</button><span style="color:var(--text2);font-size:.85rem">${filtered.length} کلمه</span></div><div class="table-wrap card"><table><thead><tr><th>کلمه</th><th>ترجمه</th><th>دسته</th><th>جعبه</th><th>مرور بعدی</th><th>عملیات</th></tr></thead><tbody>${filtered.length?filtered.map(w=>{const tier=getFrequencyTier(w.word);return`<tr><td><strong>${esc(w.word)}</strong> <button type="button" class="btn btn-ghost btn-sm" data-speak="${esc(w.word)}" style="padding:2px 6px;font-size:.75rem" title="شنیدن تلفظ">🔊</button>${w.ipa?`<br><small style="color:var(--text2)">${esc(w.ipa)}</small>`:''}${tier?`<br><span class="badge tier-${tier}" style="font-size:.6rem">${tierLabel(tier)}</span>`:''}</td><td>${esc(w.translation)}</td><td><span class="tag">${esc(w.category)}</span>${w.favorite?' <span style="font-size:.9rem">⭐</span>':''}</td><td>${dueToday.has(w.id)?`<span class="badge badge-warning">زودترین</span>`:w.box}</td><td>${fmtDate(w.nextReviewDate)}</td><td><button type="button" class="btn btn-ghost btn-sm" data-edit="${w.id}" aria-label="ویرایش">✏️</button><button type="button" class="btn btn-ghost btn-sm" data-fav="${w.id}" aria-label="${w.favorite?'حذف از علاقه‌مندی':'افزودن به علاقه‌مندی'}">${w.favorite?'⭐':'☆'}</button><button type="button" class="btn btn-ghost btn-sm" data-del="${w.id}" aria-label="حذف">🗑️</button><button type="button" class="btn btn-ghost btn-sm" data-lt="${w.id}" aria-label="انتقال به حافظه بلندمدت">🧠</button></td></tr>`}).join(''):'<tr><td colspan="6" class="empty">کلمه‌ای یافت نشد</td></tr>'}</tbody></table></div>`;
-document.getElementById('libSearch').oninput=e=>{libFilter=e.target.value;renderLibrary(c)};
-document.getElementById('libCat').onchange=e=>{libCat=e.target.value;renderLibrary(c)};
-document.getElementById('libSort').onchange=e=>{libSort=e.target.value;renderLibrary(c)};
-c.querySelector('tbody').onclick=e=>{
-const btn=e.target.closest('button');if(!btn)return;
-if(btn.dataset.speak){speakWord(btn.dataset.speak);return}
-const id=btn.dataset.edit||btn.dataset.del||btn.dataset.fav||btn.dataset.lt;
-if(btn.dataset.del){const w=S.words.find(x=>x.id===id);const name=w?w.word:'';if(!confirm(`حذف «${name}»؟`))return;S.words=S.words.filter(w=>w.id!==id);save();renderLibrary(c);toast('حذف شد','success')}
-if(btn.dataset.fav){const w=S.words.find(x=>x.id===id);if(w){w.favorite=!w.favorite;save();renderLibrary(c)}}
-if(btn.dataset.lt){const w=S.words.find(x=>x.id===id);if(w){S.words=S.words.filter(x=>x.id!==id);w.box=0;w.nextReviewDate=null;S.longTerm.push(w);save();renderLibrary(c);toast('به حافظه بلندمدت منتقل شد','success')}}
-if(btn.dataset.edit)editWord(id)}
-if(btn.dataset.ltedit)editWord(btn.dataset.ltedit,()=>renderLongterm(document.getElementById('content')),'longTerm')}
-// Deck management button
-const manageBtn=document.getElementById('manageDecksBtn');
-if(manageBtn)manageBtn.onclick=()=>showDeckManager();
+_libCache=filtered;_libCacheKey=key;return filtered}
+function invalidateLibCache(){_libCache=null;_libCacheKey=''}
 // ═══════════════════════════════════════════
+// SHARED LIST ENGINE
+// ═══════════════════════════════════════════
+function makePagerHtml(total,page,pageSize,pgClass,pgAttr){
+const pages=Math.ceil(total/pageSize);if(pages<=1)return'';
+let h='<div class="lib-pager '+pgClass+'">';
+h+='<button type="button" class="btn btn-ghost btn-sm '+pgClass+'" data-'+pgAttr+'="prev" '+(page===0?'disabled':'')+'>◀</button>';
+const s=Math.max(0,page-2),e=Math.min(pages,page+3);
+if(s>0)h+='<button type="button" class="btn btn-ghost btn-sm '+pgClass+'" data-'+pgAttr+'="0">1</button>';
+if(s>1)h+='<span class="lib-pg-ellipsis">…</span>';
+for(let i=s;i<e;i++)h+='<button type="button" class="btn btn-sm '+pgClass+(i===page?' lib-pg-active':'')+'" data-'+pgAttr+'="'+i+'">'+(i+1)+'</button>';
+if(e<pages-1)h+='<span class="lib-pg-ellipsis">…</span>';
+if(e<pages)h+='<button type="button" class="btn btn-ghost btn-sm '+pgClass+'" data-'+pgAttr+'="'+(pages-1)+'">'+pages+'</button>';
+h+='<button type="button" class="btn btn-ghost btn-sm '+pgClass+'" data-'+pgAttr+'="next" '+(page>=pages-1?'disabled':'')+'>▶</button>';
+h+='</div>';return h}
+function paginate(total,page,pageSize){const pages=Math.ceil(total/pageSize);if(page>=pages)page=Math.max(0,pages-1);const start=page*pageSize;return{start,end:start+pageSize,totalPages:pages}}
+function bindPager(c,libPageFn,ltPageFn){c.onclick=function(e){var pgBtn=e.target.closest('[data-pg]');if(pgBtn&&!pgBtn.disabled){libPageFn(pgBtn.dataset.pg);return}var ltBtn=e.target.closest('[data-ltpg]');if(ltBtn&&!ltBtn.disabled){ltPageFn(ltBtn.dataset.ltpg);return}}}
+
+function libRowHtml(w,dueToday){
+const tier=getFrequencyTier(w.word);
+return '<tr><td><strong>'+esc(w.word)+'</strong> <button type="button" class="btn btn-ghost btn-sm" data-speak="'+esc(w.word)+'" style="padding:2px 6px;font-size:.75rem" title="شنیدن تلفظ">🔊</button>'+(w.ipa?'<br><small style="color:var(--text2)">'+esc(w.ipa)+'</small>':'')+(tier?'<br><span class="badge tier-'+tier+'" style="font-size:.6rem">'+tierLabel(tier)+'</span>':'')+'</td><td>'+esc(w.translation)+'</td><td><span class="tag">'+esc(w.category)+'</span>'+(w.favorite?' <span style="font-size:.9rem">⭐</span>':'')+'</td><td>'+(dueToday.has(w.id)?'<span class="badge badge-warning">زودترین</span>':w.box)+'</td><td>'+fmtDate(w.nextReviewDate)+'</td><td><button type="button" class="btn btn-ghost btn-sm" data-edit="'+w.id+'" aria-label="ویرایش">✏️</button><button type="button" class="btn btn-ghost btn-sm" data-fav="'+w.id+'" aria-label="'+(w.favorite?'حذف از علاقه‌مندی':'افزودن به علاقه‌مندی')+'">'+(w.favorite?'💔':'⭐')+'</button><button type="button" class="btn btn-ghost btn-sm" data-lt="'+w.id+'" aria-label="انتقال به حافظه بلندمدت">🧠</button><button type="button" class="btn btn-ghost btn-sm" data-del="'+w.id+'" aria-label="حذف" style="color:var(--danger)">🗑️</button></td></tr>'}
+function libPagerHtml(total,page,pageSize){return makePagerHtml(total,page,pageSize,'lib-pg','pg')}
+function renderLibrary(c){
+const filtered=getLibFiltered();
+const total=filtered.length;
+const p=paginate(total,libPage,LIB_PAGE_SIZE);libPage=Math.min(libPage,Math.max(0,p.totalPages-1));
+const pageItems=filtered.slice(p.start,p.end);
+const dueToday=new Set(getDue().map(w=>w.id));
+var _lp=libPage,_tp=p.totalPages;
+var _ph='';
+if(_tp>1){
+_ph='<div class="lib-pager">';
+_ph+='<button type="button" class="btn btn-ghost btn-sm lib-pg" onclick="libPage=Math.max(0,'+(_lp-1)+');renderLibrary(document.getElementById(\'content\'))"'+(_lp===0?' disabled':'')+'>◀</button>';
+var _s=Math.max(0,_lp-2),_e=Math.min(_tp,_lp+3);
+if(_s>0)_ph+='<button type="button" class="btn btn-ghost btn-sm lib-pg" onclick="libPage=0;renderLibrary(document.getElementById(\'content\'))">1</button>';
+if(_s>1)_ph+='<span class="lib-pg-ellipsis">…</span>';
+for(var _i=_s;_i<_e;_i++)_ph+='<button type="button" class="btn btn-sm lib-pg'+(_i===_lp?' lib-pg-active':'')+'" onclick="libPage='+_i+';renderLibrary(document.getElementById(\'content\'))">'+(_i+1)+'</button>';
+if(_e<_tp-1)_ph+='<span class="lib-pg-ellipsis">…</span>';
+if(_e<_tp)_ph+='<button type="button" class="btn btn-ghost btn-sm lib-pg" onclick="libPage='+(_tp-1)+';renderLibrary(document.getElementById(\'content\'))">'+_tp+'</button>';
+_ph+='<button type="button" class="btn btn-ghost btn-sm lib-pg" onclick="libPage=Math.min('+(_tp-1)+','+(_lp+1)+');renderLibrary(document.getElementById(\'content\'))"'+(_lp>=_tp-1?' disabled':'')+'>▶</button>';
+_ph+='</div>'}
+c.innerHTML='<div class="filter-bar"><input class="input" placeholder="جستجو..." style="max-width:300px" value="'+esc(libFilter)+'" id="libSearch"><select class="input" style="max-width:200px" id="libCat"><option value="">همه دسته‌ها</option>'+S.categories.map(function(c){return '<option value="'+esc(c)+'"'+(c===libCat?' selected':'')+'>'+esc(c)+'</option>'}).join('')+'</select><select class="input" style="max-width:180px" id="libSort"><option value="">مرتب‌سازی</option><option value="newest"'+(libSort==='newest'?' selected':'')+'>جدیدترین</option><option value="due"'+(libSort==='due'?' selected':'')+'>زودترین مرور</option><option value="alpha"'+(libSort==='alpha'?' selected':'')+'>الفبایی</option><option value="freq"'+(libSort==='freq'?' selected':'')+'>فراوانی</option></select><button type="button" class="btn btn-sm btn-ghost" id="manageDecksBtn">🗂️ مدیریت دسته‌ها</button><span style="color:var(--text2);font-size:.85rem">'+total+' کلمه'+(total!==S.words.length?' (از '+S.words.length+')':'')+'</span></div>'+_ph+'<div class="table-wrap card"><table><thead><tr><th>کلمه</th><th>ترجمه</th><th>دسته</th><th>جعبه</th><th>مرور بعدی</th><th>عملیات</th></tr></thead><tbody>'+(pageItems.length?pageItems.map(function(w){return libRowHtml(w,dueToday)}).join(''):'<tr><td colspan="6"><div class="empty"><div class="icon">📚</div><p>نتیجه‌ای یافت نشد</p></div></td></tr>')+'</tbody></table></div>';
+document.getElementById('libSearch').oninput=function(e){clearTimeout(_libSearchTimer);_libSearchTimer=setTimeout(function(){libFilter=e.target.value;libPage=0;invalidateLibCache();renderLibrary(c)},250)};
+document.getElementById('libCat').onchange=function(e){libCat=e.target.value;libPage=0;invalidateLibCache();renderLibrary(c)};
+document.getElementById('libSort').onchange=function(e){libSort=e.target.value;libPage=0;invalidateLibCache();renderLibrary(c)};
+c.querySelector('tbody').onclick=function(e){
+var btn=e.target.closest('button');if(!btn)return;
+if(btn.dataset.speak){speakWord(btn.dataset.speak);return}
+var id=btn.dataset.edit||btn.dataset.del||btn.dataset.fav||btn.dataset.lt;
+if(btn.dataset.del){var w=S.words.find(function(x){return x.id===id});var name=w?w.word:'';if(!confirm('\u062d\u0630\u0641 \u00ab'+name+'\u00bb\u061f'))return;S.words=S.words.filter(function(w){return w.id!==id});save();invalidateLibCache();renderLibrary(c);toast('\u062d\u0630\u0641 \u0634\u062f','success')}
+if(btn.dataset.fav){var w=S.words.find(function(x){return x.id===id});if(w){w.favorite=!w.favorite;save();invalidateLibCache();renderLibrary(c)}}
+if(btn.dataset.lt){var w=S.words.find(function(x){return x.id===id});if(w){S.words=S.words.filter(function(x){return x.id!==id});w.box=0;w.nextReviewDate=null;S.longTerm.push(w);save();invalidateLibCache();renderLibrary(c);toast('\u0628\u0647 \u062d\u0627\u0641\u0638\u0647 \u0628\u0644\u0646\u062f\u0645\u062f \u062a\u0646\u0642\u0644 \u0634\u062f','success')}}
+if(btn.dataset.edit)editWord(id)};
+var manageBtn=document.getElementById('manageDecksBtn');
+if(manageBtn)manageBtn.onclick=function(){showDeckManager()};
+}
 // DECK MANAGEMENT
 // ═══════════════════════════════════════════
 function showDeckManager(){
@@ -1146,32 +1236,46 @@ save();closeModal();if(!onClose)renderLibrary(document.getElementById('content')
 ov.querySelector('#eCancel').onclick=()=>{document.removeEventListener('keydown',onKey);closeModal()}}
 
 // ═══════════════════════════════════════════
-// 3. LONG-TERM MEMORY
+// 3. LONG-TERM MEMORY (with pagination)
 // ═══════════════════════════════════════════
-let ltFilter='',ltTagFilter='',ltSourceFilter='';
-function renderLongterm(c){
-// Get unique tags and sources for filters
-const allTags=new Set();const allSources=new Set();
-S.longTerm.forEach(w=>{(w.tags||[]).forEach(t=>allTags.add(t));if(w.source)allSources.add(w.source)});
+let ltFilter='',ltTagFilter='',ltSourceFilter='',ltPage=0;
+const LT_PAGE_SIZE=50;
+let _ltCache=null,_ltCacheKey='';
+function getLtFiltered(){
+const key=ltFilter+'|'+ltTagFilter+'|'+ltSourceFilter;
+if(_ltCache&&_ltCacheKey===key)return _ltCache;
 const items=S.longTerm.filter(w=>{
   if(ltFilter&&!w.word.toLowerCase().includes(ltFilter.toLowerCase())&&!w.translation.toLowerCase().includes(ltFilter.toLowerCase()))return false;
   if(ltTagFilter&&!(w.tags||[]).includes(ltTagFilter))return false;
   if(ltSourceFilter&&w.source!==ltSourceFilter)return false;
   return true;
 });
-const tagOpts=[...allTags].sort().map(t=>`<option value="${esc(t)}"${t===ltTagFilter?' selected':''}>${esc(t)}</option>`).join('');
-const srcOpts=[...allSources].sort().map(s=>`<option value="${esc(s)}"${s===ltSourceFilter?' selected':''}>${esc(s)}</option>`).join('');
-c.innerHTML=`<div class="filter-bar"><input class="input" placeholder="جستجو..." style="max-width:250px" value="${esc(ltFilter)}" id="ltSearch"><select class="input" style="max-width:160px" id="ltTagFilter"><option value="">همه برچسب‌ها</option>${tagOpts}</select><select class="input" style="max-width:180px" id="ltSourceFilter"><option value="">همه منابع</option>${srcOpts}</select><span style="color:var(--text2);font-size:.85rem">${items.length} کلمه</span></div><div class="table-wrap card"><table><thead><tr><th>کلمه</th><th>ترجمه</th><th>برچسب‌ها</th><th>عملیات</th></tr></thead><tbody>${items.length?items.map(w=>`<tr><td><strong>${esc(w.word)}</strong>${w.ipa?`<br><small style="color:var(--text2)">${esc(w.ipa)}</small>`:''} <button type="button" class="btn btn-ghost btn-sm" data-speak="${esc(w.word)}" style="padding:2px 6px;font-size:.75rem" title="شنیدن تلفظ">🔊</button></td><td>${esc(w.translation)}</td><td>${(w.tags||[]).map(t=>'<span class="tag" style="font-size:.6rem">'+esc(t)+'</span>').join(' ')}${w.source?`<br><small style="color:var(--text2);font-size:.65rem">${esc(w.source)}</small>`:''}</td><td><button type="button" class="btn btn-ghost btn-sm" data-ltedit="${w.id}" aria-label="ویرایش">✏️</button><button type="button" class="btn btn-ghost btn-sm" data-back="${w.id}" aria-label="بازگشت به کتابخانه">↩️ بازگشت</button><button type="button" class="btn btn-ghost btn-sm" data-dlt="${w.id}" aria-label="حذف">🗑️</button></td></tr>`).join(''):'<tr><td colspan="4" class="empty">حافظه بلندمدت خالی است</td></tr>'}</tbody></table></div>`;
-document.getElementById('ltSearch').oninput=e=>{ltFilter=e.target.value;renderLongterm(c)};
-document.getElementById('ltTagFilter').onchange=e=>{ltTagFilter=e.target.value;renderLongterm(c)};
-document.getElementById('ltSourceFilter').onchange=e=>{ltSourceFilter=e.target.value;renderLongterm(c)};
-c.querySelector('tbody').onclick=e=>{
-const btn=e.target.closest('button');if(!btn)return;
+_ltCache=items;_ltCacheKey=key;return items}
+function invalidateLtCache(){_ltCache=null;_ltCacheKey=''}
+function ltRowHtml(w){
+return '<tr><td><strong>'+esc(w.word)+'</strong>'+(w.ipa?'<br><small style="color:var(--text2)">'+esc(w.ipa)+'</small>':'')+' <button type="button" class="btn btn-ghost btn-sm" data-speak="'+esc(w.word)+'" style="padding:2px 6px;font-size:.75rem" title="شنیدن تلفظ">🔊</button></td><td>'+esc(w.translation)+'</td><td>'+(w.tags||[]).map(function(t){return '<span class="tag" style="font-size:.6rem">'+esc(t)+'</span>'}).join(' ')+(w.source?'<br><small style="color:var(--text2);font-size:.65rem">'+esc(w.source)+'</small>':'')+'</td><td><button type="button" class="btn btn-ghost btn-sm" data-ltedit="'+w.id+'" aria-label="ویرایش">✏️</button><button type="button" class="btn btn-ghost btn-sm" data-back="'+w.id+'" aria-label="بازگشت به کتابخانه">↩️ بازگشت</button><button type="button" class="btn btn-ghost btn-sm" data-dlt="'+w.id+'" aria-label="حذف">🗑️</button></td></tr>'}
+function ltPagerHtml(total,page,pageSize){return makePagerHtml(total,page,pageSize,'lt-pg','ltpg')}
+function renderLongterm(c){
+const allTags=new Set();const allSources=new Set();
+S.longTerm.forEach(function(w){(w.tags||[]).forEach(function(t){allTags.add(t)});if(w.source)allSources.add(w.source)});
+const items=getLtFiltered();
+const tagOpts=[...allTags].sort().map(function(t){return '<option value="'+esc(t)+'"'+(t===ltTagFilter?' selected':'')+'>'+esc(t)+'</option>'}).join('');
+const srcOpts=[...allSources].sort().map(function(s){return '<option value="'+esc(s)+'"'+(s===ltSourceFilter?' selected':'')+'>'+esc(s)+'</option>'}).join('');
+const total=items.length;
+const p=paginate(total,ltPage,LT_PAGE_SIZE);ltPage=Math.min(ltPage,Math.max(0,p.totalPages-1));
+const pageItems=items.slice(p.start,p.end);
+c.innerHTML='<div class="filter-bar"><input class="input" placeholder="جستجو..." style="max-width:250px" value="'+esc(ltFilter)+'" id="ltSearch"><select class="input" style="max-width:160px" id="ltTagFilter"><option value="">همه برچسب‌ها</option>'+tagOpts+'</select><select class="input" style="max-width:180px" id="ltSourceFilter"><option value="">همه منابع</option>'+srcOpts+'</select><span style="color:var(--text2);font-size:.85rem">'+total+' کلمه'+(total!==S.longTerm.length?' (از '+S.longTerm.length+')':'')+'</span></div>'+ltPagerHtml(total,ltPage,LT_PAGE_SIZE)+'<div class="table-wrap card"><table><thead><tr><th>کلمه</th><th>ترجمه</th><th>برچسب‌ها</th><th>عملیات</th></tr></thead><tbody>'+(pageItems.length?pageItems.map(ltRowHtml).join(''):'<tr><td colspan="4"><div class="empty"><div class="icon">🧠</div><p>هنوز کلمه‌ای به حافظه بلندمدت منتقل نشده</p><p style="color:var(--text2);font-size:.8rem;margin-top:8px">کلمات تثبیت شده را از کتابخانه به حافظه بلندمدت منتقل کنید</p></div></td></tr>')+'</tbody></table></div>';
+document.getElementById('ltSearch').oninput=function(e){ltFilter=e.target.value;ltPage=0;invalidateLtCache();renderLongterm(c)};
+document.getElementById('ltTagFilter').onchange=function(e){ltTagFilter=e.target.value;ltPage=0;invalidateLtCache();renderLongterm(c)};
+document.getElementById('ltSourceFilter').onchange=function(e){ltSourceFilter=e.target.value;ltPage=0;invalidateLtCache();renderLongterm(c)};
+c.querySelector('tbody').onclick=function(e){
+var btn=e.target.closest('button');if(!btn)return;
 if(btn.dataset.speak){speakWord(btn.dataset.speak);return}
-if(btn.dataset.back){const w=S.longTerm.find(x=>x.id===btn.dataset.back);if(w){S.longTerm=S.longTerm.filter(x=>x.id!==w.id);w.box=1;w.nextReviewDate=null;S.words.push(w);save();renderLongterm(c);toast('بازگشت به کتابخانه','success')}}
-if(btn.dataset.dlt){const w=S.longTerm.find(x=>x.id===btn.dataset.dlt);const name=w?w.word:'';if(!confirm(`حذف «${name}»؟`))return;S.longTerm=S.longTerm.filter(x=>x.id!==btn.dataset.dlt);save();renderLongterm(c);toast('حذف شد','success')}}}
+if(btn.dataset.back){var w=S.longTerm.find(function(x){return x.id===btn.dataset.back});if(w){S.longTerm=S.longTerm.filter(function(x){return x.id!==w.id});w.box=1;w.nextReviewDate=null;S.words.push(w);save();invalidateLtCache();invalidateLibCache();renderLongterm(c);toast('بازگشت به کتابخانه','success')}}
+if(btn.dataset.dlt){var w=S.longTerm.find(function(x){return x.id===btn.dataset.dlt});var name=w?w.word:'';if(!confirm('\u062d\u0630\u0641 \u00ab'+name+'\u00bb\u061f'))return;S.longTerm=S.longTerm.filter(function(x){return x.id!==btn.dataset.dlt});save();invalidateLtCache();renderLongterm(c);toast('\u062d\u0630\u0641 \u0634\u062f','success')}};
+bindPager(c,null,function(v){ltPage=v==='prev'?Math.max(0,ltPage-1):v==='next'?ltPage+1:parseInt(v);renderLongterm(c)});
+}
 
-// ═══════════════════════════════════════════
 // 4. IMPORT (with Anki + URL import)
 // ═══════════════════════════════════════════
 let importStep=0,importRawText='',importWords=[],importExisting=new Set(),importSelected=new Set(),importTranslations=[],importCategory='پیش‌فرض',importFilter='all',importTransProgress={done:0,total:0};
@@ -1205,7 +1309,8 @@ else if(importStep===4)h+=renderImportStep4();
 c.innerHTML=h;bindImportEvents()}
 
 function renderImportStep0(){
-return`<div class="card" style="margin-bottom:16px"><h3 style="margin-bottom:12px">ورود متن</h3><textarea class="input" id="importText" rows="6" placeholder="متن انگلیسی را اینجا بچسبانید...">${esc(importRawText)}</textarea><div class="flex" style="margin-top:12px"><select class="input" style="max-width:200px" id="importCat">${S.categories.map(c=>`<option${c===importCategory?' selected':''}>${esc(c)}</option>`).join('')}</select><button type="button" class="btn btn-primary" id="importParse">نمایش متن</button></div></div><div class="card" style="margin-bottom:16px"><h3 style="margin-bottom:12px">ورود فایل</h3><div class="flex"><input type="file" id="fileInput" accept=".txt,.pdf,.docx,.json,.apkg" style="display:none"><button type="button" class="btn btn-ghost" onclick="document.getElementById('fileInput').click()">انتخاب فایل</button><span style="color:var(--text2);font-size:.85rem">TXT, PDF, DOCX, JSON, Anki (.apkg)</span></div></div><div class="card" style="margin-bottom:16px;border:1px solid var(--accent)"><h3 style="margin-bottom:12px;color:var(--accent)">📥 ورود هوشمند DOCX واژگان</h3><p style="color:var(--text2);font-size:.85rem;margin-bottom:12px">فایل DOCX حاوی واژگان با ساختار غنی را وارد کنید. تعاریف، مثال‌ها، مترادف‌ها و متضادها به‌صورت خودکار استخراج می‌شوند.</p><div class="flex"><input type="file" id="richDocxInput" accept=".docx" style="display:none"><button type="button" class="btn btn-primary" onclick="document.getElementById('richDocxInput').click()">📂 انتخاب فایل DOCX</button><span style="color:var(--text2);font-size:.8rem">مانند Manhattan 500</span></div></div><div class="card"><h3 style="margin-bottom:12px">ورود از URL</h3><div class="flex"><input class="input" id="importUrl" placeholder="https://example.com/words.txt" style="max-width:400px"><button type="button" class="btn btn-ghost" id="importUrlBtn">دریافت</button></div></div>`}
+const bookmarkletCode=`javascript:void(window.open('${location.href.split('?')[0]}?quickimport=1','_blank'))`;
+return`<div class="card" style="margin-bottom:16px"><h3 style="margin-bottom:12px">ورود متن</h3><textarea class="input" id="importText" rows="6" placeholder="متن انگلیسی را اینجا بچسبانید...">${esc(importRawText)}</textarea><div class="flex" style="margin-top:12px"><select class="input" style="max-width:200px" id="importCat">${S.categories.map(c=>`<option${c===importCategory?' selected':''}>${esc(c)}</option>`).join('')}</select><button type="button" class="btn btn-primary" id="importParse">نمایش متن</button></div></div><div class="card" style="margin-bottom:16px"><h3 style="margin-bottom:12px">ورود فایل</h3><div class="flex"><input type="file" id="fileInput" accept=".txt,.pdf,.docx,.json,.apkg" style="display:none"><button type="button" class="btn btn-ghost" onclick="document.getElementById('fileInput').click()">انتخاب فایل</button><span style="color:var(--text2);font-size:.85rem">TXT, PDF, DOCX, JSON, Anki (.apkg)</span></div></div><div class="card" style="margin-bottom:16px;border:1px solid var(--accent)"><h3 style="margin-bottom:12px;color:var(--accent)">📥 ورود هوشمند DOCX واژگان</h3><p style="color:var(--text2);font-size:.85rem;margin-bottom:12px">فایل DOCX حاوی واژگان با ساختار غنی را وارد کنید. تعاریف، مثال‌ها، مترادف‌ها و متضادها به‌صورت خودکار استخراج می‌شوند.</p><div class="flex"><input type="file" id="richDocxInput" accept=".docx" style="display:none"><button type="button" class="btn btn-primary" onclick="document.getElementById('richDocxInput').click()">📂 انتخاب فایل DOCX</button><span style="color:var(--text2);font-size:.8rem">مانند Manhattan 500</span></div></div><div class="card" style="margin-bottom:16px"><h3 style="margin-bottom:12px">ورود از URL</h3><div class="flex"><input class="input" id="importUrl" placeholder="https://example.com/words.txt" style="max-width:400px"><button type="button" class="btn btn-ghost" id="importUrlBtn">دریافت</button></div></div><div class="card" style="margin-bottom:16px"><h3 style="margin-bottom:12px;color:var(--accent)">⚡ افزودن سریع کلمات</h3><p style="color:var(--text2);font-size:.85rem;margin-bottom:12px">کلمات را هر خط یکی وارد کنید (فرمت: word یا word=ترجمه)</p><textarea id="quickImportText" class="input" rows="4" placeholder="hello=سلام&#10;world=دنیا&#10;book&#10;water=آب" style="width:100%;resize:vertical;font-family:monospace"></textarea><div style="display:flex;gap:8px;margin-top:10px"><button type="button" class="btn btn-primary btn-sm" id="quickImportBtn">افزودن کلمات</button><button type="button" class="btn btn-ghost btn-sm" id="quickImportClearBtn">پاک کردن</button></div><div id="quickImportResult" style="margin-top:10px"></div></div>`}
 
 function renderSelectableTextSection(){
 if(!textRenderedWords.length){
@@ -1295,9 +1400,8 @@ function moveSelectedToLeitner(){
 const toAdd=translatedItems.filter(t=>t.selected&&t.translation&&!t.moved);
 let added=0,skipped=0;
 toAdd.forEach(t=>{
-const exists=S.words.some(w=>w.word.toLowerCase()===t.text.toLowerCase())||S.longTerm.some(w=>w.word.toLowerCase()===t.text.toLowerCase());
-if(exists){skipped++;t.moved=true;return}
-S.words.push({id:uid(),word:t.text,translation:t.translation,ipa:t.ipa||'',category:importCategory,favorite:false,context:'',box:0,repetitions:0,interval:1,easeFactor:2.5,addedDate:new Date().toISOString(),nextReviewDate:null,lastReviewedAt:null,stability:0,difficulty:0,elapsedDays:0,scheduledDays:0,reps:0,lapses:0,fsrsState:'new',definitions:t.definitions||[],examples:t.examples||[],synonyms:t.synonyms||[],partOfSpeech:t.partOfSpeech||'',audioUs:t.audioUs||'',audioBr:t.audioBr||''});
+if(wordExists(t.text)){skipped++;t.moved=true;return}
+S.words.push(createCard({word:t.text,translation:t.translation,ipa:t.ipa||'',category:importCategory,definitions:t.definitions||[],examples:t.examples||[],synonyms:t.synonyms||[],partOfSpeech:t.partOfSpeech||'',audioUs:t.audioUs||'',audioBr:t.audioBr||''}));
 t.moved=true;added++});
 save();
 renderImport(document.getElementById('content'));
@@ -1308,9 +1412,8 @@ function moveSelectedToLongTermMemory(){
 const toAdd=translatedItems.filter(t=>t.selected&&t.translation&&!t.moved);
 let added=0,skipped=0;
 toAdd.forEach(t=>{
-const exists=S.words.some(w=>w.word.toLowerCase()===t.text.toLowerCase())||S.longTerm.some(w=>w.word.toLowerCase()===t.text.toLowerCase());
-if(exists){skipped++;t.moved=true;return}
-S.longTerm.push({id:uid(),word:t.text,translation:t.translation,ipa:t.ipa||'',category:importCategory,favorite:false,context:'',box:0,repetitions:0,interval:1,easeFactor:2.5,addedDate:new Date().toISOString(),nextReviewDate:null,lastReviewedAt:null,stability:0,difficulty:0,elapsedDays:0,scheduledDays:0,reps:0,lapses:0,fsrsState:'new',definitions:t.definitions||[],examples:t.examples||[],synonyms:t.synonyms||[],partOfSpeech:t.partOfSpeech||'',audioUs:t.audioUs||'',audioBr:t.audioBr||''});
+if(wordExists(t.text)){skipped++;t.moved=true;return}
+S.longTerm.push(createCard({word:t.text,translation:t.translation,ipa:t.ipa||'',category:importCategory,definitions:t.definitions||[],examples:t.examples||[],synonyms:t.synonyms||[],partOfSpeech:t.partOfSpeech||'',audioUs:t.audioUs||'',audioBr:t.audioBr||''}));
 t.moved=true;added++});
 save();
 renderImport(document.getElementById('content'));
@@ -1338,9 +1441,33 @@ const fi=document.getElementById('fileInput');
 if(fi)fi.onchange=handleFileImport;
 // Rich DOCX import handler
 const richDocx=document.getElementById('richDocxInput');
-if(richDocx)richDocx.onchange=async e=>{const file=e.target.files[0];if(!file)return;try{toast('در حال پردازش فایل DOCX...','info');const buf=await file.arrayBuffer();const zip=await JSZip.loadAsync(buf);const xml=await zip.file('word/document.xml').async('text');const parser=new DOMParser();const doc=parser.parseFromString(xml,'text/xml');const texts=doc.getElementsByTagName('w:t');let txt='';for(let i=0;i<texts.length;i++)txt+=texts[i].textContent+' ';const cards=parseDocxToVocabJSON(txt);if(!cards.length){toast('هیچ واژه‌ای از فایل استخراج نشد','error');return}toast(cards.length+' واژه استخراج شد','success');const existingWords=new Set(S.words.map(w=>w.word.toLowerCase()));const existingLT=new Set(S.longTerm.map(w=>w.word.toLowerCase()));const fresh=cards.filter(w=>!existingWords.has(w.word.toLowerCase())&&!existingLT.has(w.word.toLowerCase())).map(sanitizeCard);S.words.push(...fresh);save();toast(`${fresh.length} کلمه وارد شد (${cards.length-fresh.length} تکراری رد شد)`,'success');importStep=0;renderImport(document.getElementById('content'))}catch(e){toast('خطا در پردازش فایل DOCX: '+e.message,'error')};e.target.value=''};
+if(richDocx)richDocx.onchange=async e=>{const file=e.target.files[0];if(!file)return;try{toast('در حال پردازش فایل DOCX...','info');const buf=await file.arrayBuffer();const zip=await JSZip.loadAsync(buf);let cards=[];try{cards=await parseDocxTableStructured(zip)}catch(e){}if(!cards.length){const xml=await zip.file('word/document.xml').async('text');const parser=new DOMParser();const doc=parser.parseFromString(xml,'text/xml');const texts=doc.getElementsByTagName('w:t');let txt='';for(let i=0;i<texts.length;i++)txt+=texts[i].textContent+' ';cards=parseDocxToVocabJSON(txt)}if(!cards.length){toast('هیچ واژه‌ای از فایل استخراج نشد','error');return}toast(cards.length+' واژه استخراج شد','success');const existingWords=new Set(S.words.map(w=>w.word.toLowerCase()));const existingLT=new Set(S.longTerm.map(w=>w.word.toLowerCase()));const fresh=cards.filter(w=>!existingWords.has(w.word.toLowerCase())&&!existingLT.has(w.word.toLowerCase())).map(sanitizeCard);S.words.push(...fresh);save();toast(`${fresh.length} کلمه وارد شد (${cards.length-fresh.length} تکراری رد شد)`,'success');importStep=0;renderImport(document.getElementById('content'))}catch(e){toast('خطا در پردازش فایل DOCX: '+e.message,'error')};e.target.value=''};
 const urlBtn=document.getElementById('importUrlBtn');
-if(urlBtn)urlBtn.onclick=async()=>{const url=document.getElementById('importUrl')?.value?.trim();if(!url){toast('URL وارد نشده','error');return}try{toast('در حال دریافت...','info');const r=await fetch(url);if(!r.ok)throw new Error(r.status);const txt=await r.text();importRawText=txt;document.getElementById('importText').value=txt;textRenderedWords=parseWords(txt).map((w,i)=>({id:i,word:w,selected:false}));importStep=1;renderImport(document.getElementById('content'));toast('متن دریافت شد','success')}catch(e){toast('خطا در دریافت URL','error')}}}
+if(urlBtn)urlBtn.onclick=async()=>{const url=document.getElementById('importUrl')?.value?.trim();if(!url){toast('URL وارد نشده','error');return}try{toast('در حال دریافت...','info');const r=await fetch(url);if(!r.ok)throw new Error(r.status);const txt=await r.text();importRawText=txt;document.getElementById('importText').value=txt;textRenderedWords=parseWords(txt).map((w,i)=>({id:i,word:w,selected:false}));importStep=1;renderImport(document.getElementById('content'));toast('متن دریافت شد','success')}catch(e){toast('خطا در دریافت URL','error')}}
+// Quick import handler
+const qiBtn=document.getElementById('quickImportBtn');
+if(qiBtn)qiBtn.onclick=async function(){
+const text=document.getElementById('quickImportText').value.trim();
+if(!text)return;
+const lines=text.split('\n').map(l=>l.trim()).filter(l=>l);
+const resultDiv=document.getElementById('quickImportResult');
+let added=0;
+for(const line of lines){
+const parts=line.split('=');
+const word=parts[0].trim().toLowerCase();
+const translation=(parts[1]||'').trim();
+if(!word||wordExists(word))continue;
+let autoTranslation=translation;
+if(!autoTranslation){
+try{const resp=await fetch('https://api.mymemory.translated.net/get?q='+encodeURIComponent(word)+'&langpair=en|fa');const data=await resp.json();if(data.responseStatus===200&&data.responseData)autoTranslation=data.responseData.translatedText;}catch(e){}}
+S.words.push(createCard({word:word,translation:autoTranslation,source:'quick-import'}));
+added++;}
+save();
+resultDiv.innerHTML='<div style="padding:10px;background:'+(added>0?'var(--success)':'var(--warning)')+';color:#fff;border-radius:8px;font-size:.85rem">'+(added>0?added+' کلمه اضافه شد!':'کلمه جدیدی یافت نشد (تکراری یا خالی)')+'</div>';
+document.getElementById('quickImportText').value='';
+};
+const qiClear=document.getElementById('quickImportClearBtn');
+if(qiClear)qiClear.onclick=()=>{document.getElementById('quickImportText').value='';document.getElementById('quickImportResult').innerHTML='';}}
 else if(importStep===1){
 document.querySelectorAll('.text-word').forEach(el=>{
 el.onclick=()=>{const wid=parseInt(el.dataset.wid);const w=textRenderedWords.find(x=>x.id===wid);if(w){w.selected=!w.selected;el.classList.toggle('selected');const selCount=textRenderedWords.filter(x=>x.selected).length;const btn=document.getElementById('tsTranslate');if(btn){btn.disabled=selCount===0;btn.textContent='ترجمه انتخاب شده ('+selCount+')'}}};
@@ -1378,7 +1505,91 @@ const again=document.getElementById('impAgain');
 if(again)again.onclick=()=>{importStep=0;importWords=[];importSelected.clear();importTranslations=[];translatedItems=[];textRenderedWords=[];importRawText='';renderImport(document.getElementById('content'))}}}
 
 // ═══════════════════════════════════════════
-// DOCX-TO-JSON VOCABULARY PARSER
+// DOCX TABLE STRUCTURED PARSER
+// ═══════════════════════════════════════════
+const DOCX_NS='http://schemas.openxmlformats.org/wordprocessingml/2006/main';
+function getDocxCellText(tc){
+  const ns=DOCX_NS;
+  const ps=tc.querySelectorAll('p');
+  const lines=[];
+  for(const p of ps){
+    const runs=p.querySelectorAll('t');
+    let line='';
+    for(const t of runs) line+=t.textContent;
+    lines.push(line.trim());
+  }
+  return lines.join('\n');
+}
+function parseDocxTableStructured(zip){
+  return new Promise(async (resolve,reject)=>{
+    try{
+      const xml=await zip.file('word/document.xml').async('text');
+      const parser=new DOMParser();
+      const doc=parser.parseFromString(xml,'text/xml');
+      const tables=doc.querySelectorAll('tbl');
+      if(!tables.length){resolve([]);return}
+      const table=tables[0];
+      const rows=table.querySelectorAll('tr');
+      const cards=[];
+      for(let i=1;i<rows.length;i++){
+        const cells=rows[i].querySelectorAll('tc');
+        if(cells.length<6) continue;
+        const col0=getDocxCellText(cells[0]);
+        const col1=getDocxCellText(cells[1]);
+        const col2=getDocxCellText(cells[2]);
+        const col3=getDocxCellText(cells[3]);
+        const col4=getDocxCellText(cells[4]);
+        const col5=getDocxCellText(cells[5]);
+        const wordMatch=col0.match(/^([a-z]+)\s*\((verb|noun|adj|adv|adjective|noun,\s*verb|verb,\s*noun)\)\s*\n?\s*(.*)/i);
+        if(!wordMatch) continue;
+        const word=wordMatch[1].toLowerCase();
+        const pos=wordMatch[2].toLowerCase().replace(/,\s*\w+/g,'');
+        const pronunciation=wordMatch[3]?wordMatch[3].trim():'';
+        const translation=col1.trim();
+        const coreMeaning=col2.trim();
+        const synonyms=col4.split(/[;,]/).map(s=>s.trim()).filter(s=>s.length>1&&s.length<40);
+        const antonyms=col5.split(/[;,]/).map(s=>s.trim()).filter(s=>s.length>1&&s.length<40);
+        // Collect following metadata rows
+        let examples='',context='',note='',trap='';
+        for(let j=i+1;j<rows.length;j++){
+          const mc=rows[j].querySelectorAll('tc');
+          if(mc.length<2) break;
+          const label=getDocxCellText(mc[0]);
+          const content=getDocxCellText(mc[1]);
+          if(label.match(/Example/i)){examples=content}
+          else if(label.match(/Context/i)){context=content}
+          else if(label.match(/Note|Trap/i)){
+            const trapMatch=content.match(/Trap\s*:?\s*(.+)/i);
+            if(trapMatch){trap=trapMatch[1].trim();note=content.replace(/Trap\s*:?\s*.*/i,'').replace(/Note\s*:?\s*/i,'').trim()}
+            else{note=content.replace(/Note\s*:?\s*/i,'').trim()}
+          }
+          else if(label.match(/\(verb|noun|adj|adv/i)) break;
+          else break;
+        }
+        cards.push({
+          id:uid()+'_'+word.replace(/[^a-z0-9]/g,''),
+          word,translation,ipa:pronunciation,partOfSpeech:pos,
+          coreMeaning,definitions:coreMeaning?[coreMeaning]:[],
+          examples:examples?examples.split(/[.!?]\s+(?=[A-Z])/).map(s=>s.trim()).filter(s=>s.length>5).slice(0,3):[],
+          context:context.slice(0,300),
+          collocations:context.split(/[;,]/).map(s=>s.trim()).filter(s=>s.length>2&&s.length<80).slice(0,5),
+          synonyms:synonyms.slice(0,6),antonyms:antonyms.slice(0,6),
+          wordFamily:[],note:note.slice(0,500),trap:trap.slice(0,500),
+          category:'پیش‌فرض',favorite:false,
+          box:0,repetitions:0,interval:1,easeFactor:2.5,
+          addedDate:new Date().toISOString(),nextReviewDate:null,lastReviewedAt:null,
+          stability:0,difficulty:0,elapsedDays:0,scheduledDays:0,
+          reps:0,lapses:0,fsrsState:'new',
+          audioUs:'',audioBr:'',tags:[],source:''
+        });
+      }
+      resolve(cards);
+    }catch(e){reject(e)}
+  });
+}
+
+// ═══════════════════════════════════════════
+// DOCX-TO-JSON VOCABULARY PARSER (text-based fallback)
 // ═══════════════════════════════════════════
 function parseDocxToVocabJSON(rawText){
   // Step 1: Clean raw text
@@ -1658,7 +1869,7 @@ async function doPdfTranslate(word){
         var allExamples=dictResult?dictResult.meanings.flatMap(function(m){return m.examples}):[];
         var allSynonyms=dictResult?dictResult.meanings.flatMap(function(m){return m.synonyms}):[];
         var pos=dictResult&&dictResult.meanings[0]?dictResult.meanings[0].partOfSpeech:'';
-        S.words.push({id:uid(),word:displayWord,translation:persianResult||'',ipa:ipaText,category:'پیش‌فرض',favorite:false,context:'',box:0,repetitions:0,interval:1,easeFactor:2.5,addedDate:new Date().toISOString(),nextReviewDate:null,lastReviewedAt:null,stability:0,difficulty:0,elapsedDays:0,scheduledDays:0,reps:0,lapses:0,fsrsState:'new',definitions:allDefs,examples:allExamples,synonyms:allSynonyms,partOfSpeech:pos,audioUs:dictResult?dictResult.audioUs||'':'',audioBr:dictResult?dictResult.audioBr||'':''});
+        S.words.push(createCard({word:displayWord,translation:persianResult||'',ipa:ipaText,definitions:allDefs,examples:allExamples,synonyms:allSynonyms,partOfSpeech:pos,audioUs:dictResult?dictResult.audioUs||'':'',audioBr:dictResult?dictResult.audioBr||'':''}));
         save();
         addBtn.disabled=true;
         addBtn.textContent='✅ در کتابخانه موجود است';
@@ -1735,7 +1946,7 @@ function renderQuickImport(c){
       const parts=line.split('=');
       const word=parts[0].trim().toLowerCase();
       const translation=(parts[1]||'').trim();
-      if(!word||S.words.some(w=>w.word.toLowerCase()===word))continue;
+      if(!word||wordExists(word))continue;
       let autoTranslation=translation;
       if(!autoTranslation){
         try{
@@ -1744,7 +1955,7 @@ function renderQuickImport(c){
           if(data.responseStatus===200&&data.responseData)autoTranslation=data.responseData.translatedText;
         }catch(e){}
       }
-      S.words.push({id:uid(),word:word,translation:autoTranslation,ipa:'',category:'پیش‌فرض',favorite:false,context:'',box:0,repetitions:0,interval:1,easeFactor:2.5,addedDate:new Date().toISOString(),nextReviewDate:null,lastReviewedAt:null,stability:0,difficulty:0,elapsedDays:0,scheduledDays:0,reps:0,lapses:0,fsrsState:'new',definitions:[],examples:[],synonyms:[],partOfSpeech:'',audioUs:'',audioBr:'',coreMeaning:'',collocations:[],antonyms:[],wordFamily:[],note:'',trap:'',tags:[],source:'quick-import'});
+      S.words.push(createCard({word:word,translation:autoTranslation,source:'quick-import'}))
       added++;
     }
     save();
@@ -2034,7 +2245,7 @@ function renderReadingVocabView(doc){
     h+='<div class="reading-heatmap-cell" style="background:'+colors[level]+'" title="صفحه '+(pi+1)+': '+p.totalWords+' کلمه, '+p.uniqueWords+' منحصربفرد" data-hpage="'+pi+'">'+(pi+1)+'</div>';
   });
   h+='</div></div>';
-  const unknownWords=Object.entries(doc.occurrences).sort((a,b)=>b[1].count-a[1].count).filter(function(entry){return !S.words.some(function(x){return x.word.toLowerCase()===entry[0]})&&!S.longTerm.some(function(x){return x.word.toLowerCase()===entry[0]})});
+  const unknownWords=Object.entries(doc.occurrences).sort((a,b)=>b[1].count-a[1].count).filter(function(entry){return !wordExists(entry[0])});
   h+='<div class="reading-vocab-panel">';
   h+='<h3>❓ کلمات ناشناخته ('+unknownWords.length+')</h3>';
   if(!unknownWords.length){h+='<p style="color:var(--success);font-size:.85rem">همه کلمات شناخته شده‌اند! ✅</p>'}
@@ -2152,7 +2363,7 @@ async function showReadingWordDetail(word,spanEl,doc){
   }
   var nw=normalizeWordLookup(word);
   var occ=doc.occurrences[nw]||{count:1,pages:[]};
-  var exists=S.words.some(function(x){return x.word.toLowerCase()===word.toLowerCase()})||S.longTerm.some(function(x){return x.word.toLowerCase()===word.toLowerCase()});
+  var exists=wordExists(word.toLowerCase());
   var h='<button type="button" class="trans-close" id="rdDetailClose" style="position:absolute;top:8px;left:10px;background:none;border:none;color:var(--text2);cursor:pointer;font-size:1rem;padding:4px">&times;</button>';
   h+='<div class="wd-header"><span class="wd-word">'+esc(word)+'</span>';
   if(cached.ipa)h+='<span class="wd-ipa">'+esc(cached.ipa)+'</span>';
@@ -2193,13 +2404,13 @@ async function showReadingWordDetail(word,spanEl,doc){
   var addBtn=document.getElementById('rdAddWord');
   if(addBtn)addBtn.onclick=function(){
     var allDefs=cached.definitions.map(function(d){return typeof d==='string'?d:d.definition||''});
-    S.words.push({id:uid(),word:word,translation:cached.translation||'',ipa:cached.ipa,category:'پیش‌فرض',favorite:false,context:'',box:0,repetitions:0,interval:1,easeFactor:2.5,addedDate:new Date().toISOString(),nextReviewDate:null,lastReviewedAt:null,stability:0,difficulty:0,elapsedDays:0,scheduledDays:0,reps:0,lapses:0,fsrsState:'new',definitions:allDefs,examples:cached.examples,synonyms:cached.synonyms,partOfSpeech:cached.pos,audioUs:cached.audioUs,audioBr:cached.audioBr,coreMeaning:'',collocations:[],antonyms:[],wordFamily:[],note:'',trap:'',tags:[],source:'reading-mode'});
+    S.words.push(createCard({word:word,translation:cached.translation||'',ipa:cached.ipa,definitions:allDefs,examples:cached.examples,synonyms:cached.synonyms,partOfSpeech:cached.pos,audioUs:cached.audioUs,audioBr:cached.audioBr,source:'reading-mode'}))
     save();toast(word+' به لایتنر اضافه شد','success');popup.classList.remove('visible');renderReading(document.getElementById('content'));
   };
   var ltBtn=document.getElementById('rdAddLT');
   if(ltBtn)ltBtn.onclick=function(){
     var allDefs=cached.definitions.map(function(d){return typeof d==='string'?d:d.definition||''});
-    S.longTerm.push({id:uid(),word:word,translation:cached.translation||'',ipa:cached.ipa,category:'پیش‌فرض',favorite:false,context:'',box:0,repetitions:0,interval:1,easeFactor:2.5,addedDate:new Date().toISOString(),nextReviewDate:null,lastReviewedAt:null,stability:0,difficulty:0,elapsedDays:0,scheduledDays:0,reps:0,lapses:0,fsrsState:'new',definitions:allDefs,examples:cached.examples,synonyms:cached.synonyms,partOfSpeech:cached.pos,audioUs:cached.audioUs,audioBr:cached.audioBr,coreMeaning:'',collocations:[],antonyms:[],wordFamily:[],note:'',trap:'',tags:[],source:'reading-mode'});
+    S.longTerm.push(createCard({word:word,translation:cached.translation||'',ipa:cached.ipa,definitions:allDefs,examples:cached.examples,synonyms:cached.synonyms,partOfSpeech:cached.pos,audioUs:cached.audioUs,audioBr:cached.audioBr,source:'reading-mode'}))
     save();toast(word+' به حافظه بلندمدت اضافه شد','success');popup.classList.remove('visible');renderReading(document.getElementById('content'));
   };
   setTimeout(function(){
@@ -2210,7 +2421,7 @@ async function showReadingWordDetail(word,spanEl,doc){
 }
 
 function showBatchAddPanel(doc){
-  var unknown=Object.entries(doc.occurrences).filter(function(entry){return !S.words.some(function(x){return x.word.toLowerCase()===entry[0]})&&!S.longTerm.some(function(x){return x.word.toLowerCase()===entry[0]})}).sort(function(a,b){return b[1].count-a[1].count});
+  var unknown=Object.entries(doc.occurrences).filter(function(entry){return !wordExists(entry[0])}).sort(function(a,b){return b[1].count-a[1].count});
   if(!unknown.length){toast('همه کلمات در کتابخانه موجود هستند','info');return}
   var ov=document.createElement('div');ov.className='modal-overlay';
   var selected=new Set(unknown.map(function(e){return e[0]}));
@@ -2244,9 +2455,9 @@ function showBatchAddPanel(doc){
       await translateBatch(words);
       var added=0;
       words.forEach(function(w){
-        if(S.words.some(function(x){return x.word.toLowerCase()===w})||S.longTerm.some(function(x){return x.word.toLowerCase()===w}))return;
+        if(wordExists(w))return;
         var c2=getCachedTrans(w)||{};
-        S.words.push({id:uid(),word:w,translation:c2.translation||'',ipa:c2.ipa||'',category:'پیش‌فرض',favorite:false,context:'',box:0,repetitions:0,interval:1,easeFactor:2.5,addedDate:new Date().toISOString(),nextReviewDate:null,lastReviewedAt:null,stability:0,difficulty:0,elapsedDays:0,scheduledDays:0,reps:0,lapses:0,fsrsState:'new',definitions:c2.definitions||[],examples:c2.examples||[],synonyms:c2.synonyms||[],partOfSpeech:c2.pos||'',audioUs:c2.audioUs||'',audioBr:c2.audioBr||'',coreMeaning:'',collocations:[],antonyms:[],wordFamily:[],note:'',trap:'',tags:[],source:'reading-mode'});
+        S.words.push(createCard({word:w,translation:c2.translation||'',ipa:c2.ipa||'',definitions:c2.definitions||[],examples:c2.examples||[],synonyms:c2.synonyms||[],partOfSpeech:c2.pos||'',audioUs:c2.audioUs||'',audioBr:c2.audioBr||'',source:'reading-mode'}))
         added++;
       });
       save();ov.remove();toast(added+' کلمه به لایتنر اضافه شد','success');renderReading(document.getElementById('content'));
@@ -2257,9 +2468,9 @@ function showBatchAddPanel(doc){
       await translateBatch(words);
       var added=0;
       words.forEach(function(w){
-        if(S.words.some(function(x){return x.word.toLowerCase()===w})||S.longTerm.some(function(x){return x.word.toLowerCase()===w}))return;
+        if(wordExists(w))return;
         var c2=getCachedTrans(w)||{};
-        S.longTerm.push({id:uid(),word:w,translation:c2.translation||'',ipa:c2.ipa||'',category:'پیش‌فرض',favorite:false,context:'',box:0,repetitions:0,interval:1,easeFactor:2.5,addedDate:new Date().toISOString(),nextReviewDate:null,lastReviewedAt:null,stability:0,difficulty:0,elapsedDays:0,scheduledDays:0,reps:0,lapses:0,fsrsState:'new',definitions:c2.definitions||[],examples:c2.examples||[],synonyms:c2.synonyms||[],partOfSpeech:c2.pos||'',audioUs:c2.audioUs||'',audioBr:c2.audioBr||'',coreMeaning:'',collocations:[],antonyms:[],wordFamily:[],note:'',trap:'',tags:[],source:'reading-mode'});
+        S.longTerm.push(createCard({word:w,translation:c2.translation||'',ipa:c2.ipa||'',definitions:c2.definitions||[],examples:c2.examples||[],synonyms:c2.synonyms||[],partOfSpeech:c2.pos||'',audioUs:c2.audioUs||'',audioBr:c2.audioBr||'',source:'reading-mode'}))
         added++;
       });
       save();ov.remove();toast(added+' کلمه به حافظه بلندمدت اضافه شد','success');renderReading(document.getElementById('content'));
@@ -2274,7 +2485,7 @@ function exportReadingVocab(doc){
   var vocab=Object.entries(doc.occurrences).sort(function(a,b){return b[1].count-a[1].count}).map(function(entry){
     var word=entry[0],o=entry[1];
     var cached=getCachedTrans(word)||{};
-    return{word:word,translation:cached.translation||'',ipa:cached.ipa||'',count:o.count,pages:o.pages,inLeitner:S.words.some(function(x){return x.word.toLowerCase()===word})};
+    return{word:word,translation:cached.translation||'',ipa:cached.ipa||'',count:o.count,pages:o.pages,inLeitner:wordExists(word)};
   });
   var blob=new Blob([JSON.stringify(vocab,null,2)],{type:'application/json'});
   var url=URL.createObjectURL(blob);
@@ -2287,10 +2498,15 @@ function exportReadingVocab(doc){
 // 6. EXPORT (with IndexedDB backup)
 // ═══════════════════════════════════════════
 function renderExport(c){
-c.innerHTML=`<div class="card" style="margin-bottom:16px"><h3 style="margin-bottom:12px">پشتیبان‌گیری JSON</h3><p style="color:var(--text2);margin-bottom:16px;font-size:.9rem">تمام کلمات، آمار و تنظیمات در یک فایل JSON ذخیره می‌شود.</p><div class="flex"><button type="button" class="btn btn-primary" id="exportBtn">دانلود پشتیبان</button><button type="button" class="btn btn-ghost" id="exportBackupBtn">بازیابی از پشتیبان خودکار</button></div></div><div class="card" style="margin-bottom:16px;border:1px solid var(--warning)"><p style="color:var(--warning);font-size:.85rem">توصیه: به‌صورت دوره‌ای از داده‌ها پشتیبان‌گیری کنید تا در صورت پاک شدن مرورگر اطلاعات از بین نرود. پشتیبان خودکار در IndexedDB ذخیره می‌شود.</p></div><div class="card" style="border:2px solid var(--danger)"><h3 style="margin-bottom:12px;color:var(--danger)">⚠️ پاکسازی کامل</h3><p style="color:var(--text2);margin-bottom:16px;font-size:.9rem">تمام داده‌ها شامل کلمات، حافظه بلندمدت و آمار پاک می‌شود. این عمل غیرقابل بازگشت است.</p><button type="button" class="btn btn-danger" id="resetBtn">پاکسازی کامل</button></div>`;
-document.getElementById('exportBtn').onclick=()=>{const blob=new Blob([exportStateSnapshot()],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`leitner-backup-${todayKey()}.json`;a.click();URL.revokeObjectURL(url);toast('پشتیبان دانلود شد','success')};
-document.getElementById('exportBackupBtn').onclick=async()=>{const data=await exportBackup();if(data){const blob=new Blob([data],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`leitner-auto-backup-${todayKey()}.json`;a.click();URL.revokeObjectURL(url);toast('پشتیبان خودکار دانلود شد','success')}else{toast('پشتیبان خودکاری یافت نشد','info')}};
-document.getElementById('resetBtn').onclick=()=>{if(confirm('آیا مطمئن هستید؟ تمام داده‌ها پاک خواهد شد!')){S=defaultState();save();toast('تمام داده‌ها پاک شد','success');render()}}}
+const dataSize=(new Blob([localStorage.getItem(LS_KEY)||'']).size/1024).toFixed(1);
+const catCount=S.categories.length;
+const lastBackup=S.stats.lastReviewDate?fmtDate(S.stats.lastReviewDate):'—';
+c.innerHTML=`<div class="card" style="margin-bottom:16px"><h3 style="margin-bottom:16px">📊 خلاصه داده‌ها</h3><div class="stat-grid"><div class="stat-card"><div class="val">${S.words.length}</div><div class="lbl">کلمه لایتنر</div></div><div class="stat-card"><div class="val">${S.longTerm.length}</div><div class="lbl">حافظه بلندمدت</div></div><div class="stat-card"><div class="val">${catCount}</div><div class="lbl">دسته‌بندی</div></div><div class="stat-card"><div class="val">${S.stats.reviewed}</div><div class="lbl">کل مرورها</div></div><div class="stat-card"><div class="val" style="font-size:1.1rem">${dataSize} KB</div><div class="lbl">حجم داده</div></div><div class="stat-card"><div class="val" style="font-size:.9rem">${lastBackup}</div><div class="lbl">آخرین مرور</div></div></div></div><div class="card" style="margin-bottom:16px"><h3 style="margin-bottom:12px">💾 پشتیبان‌گیری JSON</h3><p style="color:var(--text2);margin-bottom:16px;font-size:.9rem">تمام کلمات، حافظه بلندمدت، آمار و تنظیمات در یک فایل JSON ذخیره می‌شود.</p><div class="flex"><button type="button" class="btn btn-primary" id="exportBtn">دانلود پشتیبان (${S.words.length+S.longTerm.length} کلمه)</button><button type="button" class="btn btn-ghost" id="exportBackupBtn">بازیابی از پشتیبان خودکار</button></div></div><div class="card" style="margin-bottom:16px"><h3 style="margin-bottom:12px">📂 بازیابی از فایل</h3><p style="color:var(--text2);margin-bottom:12px;font-size:.85rem">فایل پشتیبان JSON قبلی را برای بازیابی انتخاب کنید.</p><div class="flex"><input type="file" id="importJsonInput" accept=".json" style="display:none"><button type="button" class="btn btn-ghost" onclick="document.getElementById('importJsonInput').click()">انتخاب فایل پشتیبان</button></div></div><div class="card" style="margin-bottom:16px;border:1px solid var(--warning)"><p style="color:var(--warning);font-size:.85rem">توصیه: به‌صورت دوره‌ای از داده‌ها پشتیبان‌گیری کنید تا در صورت پاک شدن مرورگر اطلاعات از بین نرود. پشتیبان خودکار در IndexedDB ذخیره می‌شود.</p></div><div class="card" style="border:2px solid var(--danger)"><h3 style="margin-bottom:12px;color:var(--danger)">⚠️ پاکسازی کامل</h3><p style="color:var(--text2);margin-bottom:16px;font-size:.9rem">تمام داده‌ها شامل ${S.words.length} کلمه لایتنر، ${S.longTerm.length} کلمه حافظه بلندمدت و آمار پاک می‌شود. این عمل غیرقابل بازگشت است.</p><button type="button" class="btn btn-danger" id="resetBtn">پاکسازی کامل</button></div>`;
+document.getElementById('exportBtn').onclick=()=>{const blob=new Blob([exportStateSnapshot()],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='leitner-backup-'+todayKey()+'.json';a.click();URL.revokeObjectURL(url);toast('پشتیبان دانلود شد — '+S.words.length+' لایتنر، '+S.longTerm.length+' حافظه بلندمدت','success')};
+document.getElementById('exportBackupBtn').onclick=async()=>{const data=await exportBackup();if(data){const blob=new Blob([data],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='leitner-auto-backup-'+todayKey()+'.json';a.click();URL.revokeObjectURL(url);toast('پشتیبان خودکار دانلود شد','success')}else{toast('پشتیبان خودکاری یافت نشد','info')}};
+const importJson=document.getElementById('importJsonInput');
+if(importJson)importJson.onchange=async e=>{const file=e.target.files[0];if(!file)return;try{const text=await file.text();const data=JSON.parse(text);const result=importStateSnapshot(data);if(result.ok){toast(result.msg,'success');render()}else{toast(result.msg,'error')}}catch(e){toast('خطا در خواندن فایل: '+e.message,'error')};e.target.value=''};
+document.getElementById('resetBtn').onclick=()=>{if(confirm('آیا مطمئن هستید؟ تمام '+S.words.length+' کلمه لایتنر و '+S.longTerm.length+' کلمه حافظه بلندمدت پاک خواهد شد!')){S=defaultState();save();toast('تمام داده‌ها پاک شد','success');render()}}}
 
 // ═══════════════════════════════════════════
 // 7. STATISTICS (with heatmap + forecast)
@@ -2315,7 +2531,7 @@ const heatmapHtml=buildHeatmap(heatmapDays);
 const forecastData=buildForecast(14);
 
 c.innerHTML=`<div class="card" style="margin-bottom:16px;text-align:center;padding:20px"><div style="font-size:2.5rem;margin-bottom:4px">${levelInfo.icon}</div><div style="font-size:1.2rem;font-weight:700;color:var(--accent)">${levelInfo.name}</div><div style="font-size:.85rem;color:var(--text2);margin:6px 0">${levelInfo.xp} امتیاز</div>${levelInfo.next?`<div style="max-width:300px;margin:0 auto"><div style="height:8px;background:var(--border);border-radius:4px;overflow:hidden"><div style="height:100%;width:${levelInfo.progress}%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:4px;transition:width .5s"></div></div><div style="font-size:.75rem;color:var(--text2);margin-top:4px">${levelInfo.next.icon} ${levelInfo.next.name}: ${levelInfo.next.min-levelInfo.xp} امتیاز دیگر</div></div>`:'<div style="font-size:.85rem;color:var(--warning)">حداکثر سطح رسیده!</div>'}</div>
-<div class="stat-grid"><div class="card stat-card"><div class="val">${S.words.length}</div><div class="lbl">کل کلمات</div></div><div class="card stat-card"><div class="val">${S.longTerm.length}</div><div class="lbl">حافظه بلندمدت</div></div><div class="card stat-card"><div class="val" style="color:var(--warning)">${dueCount}</div><div class="lbl">مرور امروز</div></div><div class="card stat-card"><div class="val">${todayH.reviewed}</div><div class="lbl">مرور شده امروز</div></div><div class="card stat-card"><div class="val" style="color:var(--success)">${todayH.correct}</div><div class="lbl">درست امروز</div></div><div class="card stat-card"><div class="val" style="color:var(--danger)">${todayH.wrong}</div><div class="lbl">نادرست امروز</div></div><div class="card stat-card"><div class="val">${S.stats.streak}</div><div class="lbl">روز متوالی</div></div><div class="card stat-card"><div class="val" style="color:var(--accent)">${S.stats.xp}</div><div class="lbl">امتیاز کل</div></div><div class="card stat-card"><div class="val" style="color:var(--success)">${accuracyPct}%</div><div class="lbl">دقت کل</div></div><div class="card stat-card"><div class="val" style="color:var(--accent2)">${masteredCount}</div><div class="lbl">تثبیت شده</div></div></div><div class="card" style="margin-bottom:16px;padding:var(--sp-5)"><h3 style="margin-bottom:12px">تقویم مرور (۵۲ هفته اخیر)</h3>${heatmapHtml}<div class="heatmap-legend"><span>کم</span><div class="heatmap-legend-cell heatmap-l0"></div><div class="heatmap-legend-cell heatmap-l1"></div><div class="heatmap-legend-cell heatmap-l2"></div><div class="heatmap-legend-cell heatmap-l3"></div><div class="heatmap-legend-cell heatmap-l4"></div><span>زیاد</span></div></div><div class="grid-2"><div class="card"><h3 style="margin-bottom:12px">توزیع جعبه‌ها</h3><canvas id="boxChart"></canvas></div><div class="card"><h3 style="margin-bottom:12px">۷ روز اخیر</h3><canvas id="weekChart"></canvas></div></div><div class="card" style="margin-top:16px"><h3 style="margin-bottom:12px">پیش‌بینی ۱۴ روز آینده</h3><canvas id="forecastChart"></canvas></div>`;
+<div class="stat-grid"><div class="card stat-card"><div class="val">${S.words.length}</div><div class="lbl">کل کلمات</div></div><div class="card stat-card"><div class="val">${S.longTerm.length}</div><div class="lbl">حافظه بلندمدت</div></div><div class="card stat-card"><div class="val" style="color:var(--warning)">${dueCount}</div><div class="lbl">مرور امروز</div></div><div class="card stat-card"><div class="val">${todayH.reviewed}</div><div class="lbl">مرور شده امروز</div></div><div class="card stat-card"><div class="val" style="color:var(--success)">${todayH.correct}</div><div class="lbl">درست امروز</div></div><div class="card stat-card"><div class="val" style="color:var(--danger)">${todayH.wrong}</div><div class="lbl">نادرست امروز</div></div><div class="card stat-card"><div class="val">${S.stats.streak}</div><div class="lbl">روز متوالی</div></div><div class="card stat-card"><div class="val" style="color:var(--accent)">${S.stats.xp}</div><div class="lbl">امتیاز کل</div></div><div class="card stat-card"><div class="val" style="color:var(--success)">${accuracyPct}%</div><div class="lbl">دقت کل</div></div><div class="card stat-card"><div class="val" style="color:var(--accent2)">${masteredCount}</div><div class="lbl">تثبیت شده</div></div></div><div class="card" style="margin-bottom:16px;padding:24px"><h3 style="margin-bottom:12px">تقویم مرور (۵۲ هفته اخیر)</h3>${heatmapHtml}<div class="heatmap-legend"><span>کم</span><div class="heatmap-legend-cell heatmap-l0"></div><div class="heatmap-legend-cell heatmap-l1"></div><div class="heatmap-legend-cell heatmap-l2"></div><div class="heatmap-legend-cell heatmap-l3"></div><div class="heatmap-legend-cell heatmap-l4"></div><span>زیاد</span></div></div><div class="grid-2"><div class="card"><h3 style="margin-bottom:12px">توزیع جعبه‌ها</h3><canvas id="boxChart"></canvas></div><div class="card"><h3 style="margin-bottom:12px">۷ روز اخیر</h3><canvas id="weekChart"></canvas></div></div><div class="card" style="margin-top:16px"><h3 style="margin-bottom:12px">پیش‌بینی ۱۴ روز آینده</h3><canvas id="forecastChart"></canvas></div>`;
 
 if(boxChart){boxChart.destroy();boxChart=null}
 if(weekChart){weekChart.destroy();weekChart=null}
@@ -2409,17 +2625,6 @@ function getWordStrength(w){
   if(quizPerf){const total=quizPerf.correct+quizPerf.wrong;if(total>0)quizScore=quizPerf.correct/total}
   const difficultyScore=1-((w.difficulty||0)/10);
   return stabilityScore*0.4+quizScore*0.4+difficultyScore*0.2;
-}
-function getFrequencyTier(word){
-  if(typeof TOP_5000!=='undefined'){
-    const idx=TOP_5000.indexOf(word.toLowerCase());
-    if(idx===-1)return 3;
-    if(idx<500)return 0;
-    if(idx<1500)return 1;
-    if(idx<3000)return 2;
-    return 3;
-  }
-  return Math.floor(Math.random()*4);
 }
 
 // ═══════════════════════════════════════════
@@ -2608,7 +2813,7 @@ if(quizMode==='mcq'||quizMode==='reverse'){
 }else if(quizMode==='defmatch'){
   const opts=new Set();
   opts.add(w.word);
-  const definition=w.coreMeaning||'';if(!definition&&w.definitions&&w.definitions.length>0)definition=w.definitions[0];
+  let definition=w.coreMeaning||'';if(!definition&&w.definitions&&w.definitions.length>0)definition=w.definitions[0];
   const others=S.words.filter(x=>x.id!==w.id);
   const seen=new Set([w.word]);
   for(let i=0;i<3&&others.length;i++){const rIdx=Math.floor(Math.random()*others.length);const r=others.splice(rIdx,1)[0];if(!seen.has(r.word)){opts.add(r.word);seen.add(r.word)}}
@@ -2651,7 +2856,8 @@ function renderSettings(c){
 const s=S.settings;
 const langOpts=Object.entries(LANGUAGES).map(([code,label])=>`<option value="${code}"${code===s.sourceLang?' selected':''}>${label}</option>`).join('');
 const langOptsTarget=Object.entries(LANGUAGES).map(([code,label])=>`<option value="${code}"${code===s.targetLang?' selected':''}>${label}</option>`).join('');
-c.innerHTML=`<div class="card" style="margin-bottom:16px"><h3 style="margin-bottom:16px">تنظیمات ترجمه</h3><div style="display:grid;gap:12px;max-width:400px"><div><label style="display:block;font-size:.85rem;color:var(--text2);margin-bottom:4px">زبان مبدأ</label><select class="input" id="setSourceLang">${langOpts}</select></div><div><label style="display:block;font-size:.85rem;color:var(--text2);margin-bottom:4px">زبان مقصد</label><select class="input" id="setTargetLang">${langOptsTarget}</select></div></div></div><div class="card" style="margin-bottom:16px"><h3 style="margin-bottom:16px">یادآوری روزانه</h3><p style="color:var(--text2);font-size:.85rem;margin-bottom:12px">اگر کارتی برای مرور دارید، یادآوری دریافت کنید.</p><div style="display:grid;gap:12px;max-width:400px"><div class="flex"><label style="font-size:.85rem;color:var(--text2)">فعال‌سازی یادآوری</label><input type="checkbox" id="setNotif" ${s.notifications?'checked':''} style="accent-color:var(--accent)"></div><div><label style="display:block;font-size:.85rem;color:var(--text2);margin-bottom:4px">ساعت یادآوری</label><input type="time" class="input" id="setNotifTime" value="${s.notificationTime||'09:00'}" style="max-width:200px"></div></div></div><div class="card" style="margin-bottom:16px"><h3 style="margin-bottom:16px">اطلاعات ذخیره‌سازی</h3><p style="color:var(--text2);font-size:.85rem">داده‌ها در مرورگر شما ذخیره می‌شوند. پشتیبان خودکار در IndexedDB نگهداری می‌شود.</p></div>`;
+const dataSize=(new Blob([localStorage.getItem(LS_KEY)||'']).size/1024).toFixed(1);
+c.innerHTML=`<div class="card" style="margin-bottom:16px"><h3 style="margin-bottom:16px">🌐 تنظیمات ترجمه</h3><div style="display:grid;gap:12px;max-width:400px"><div><label style="display:block;font-size:.85rem;color:var(--text2);margin-bottom:4px">زبان مبدأ</label><select class="input" id="setSourceLang">${langOpts}</select></div><div><label style="display:block;font-size:.85rem;color:var(--text2);margin-bottom:4px">زبان مقصد</label><select class="input" id="setTargetLang">${langOptsTarget}</select></div></div></div><div class="card" style="margin-bottom:16px"><h3 style="margin-bottom:16px">🔔 یادآوری روزانه</h3><p style="color:var(--text2);font-size:.85rem;margin-bottom:12px">اگر کارتی برای مرور دارید، یادآوری دریافت کنید.</p><div style="display:grid;gap:12px;max-width:400px"><div class="flex"><label style="font-size:.85rem;color:var(--text2)">فعال‌سازی یادآوری</label><input type="checkbox" id="setNotif" ${s.notifications?'checked':''} style="accent-color:var(--accent)"></div><div><label style="display:block;font-size:.85rem;color:var(--text2);margin-bottom:4px">ساعت یادآوری</label><input type="time" class="input" id="setNotifTime" value="${s.notificationTime||'09:00'}" style="max-width:200px"></div></div></div><div class="card" style="margin-bottom:16px"><h3 style="margin-bottom:16px">🎨 پوسته</h3><div class="stat-grid" style="margin-bottom:0"><div class="stat-card"><div class="val">${s.theme==='dark'?'🌙':'☀️'}</div><div class="lbl">${s.theme==='dark'?'تاریک':'روشن'}</div></div><div class="stat-card"><div class="val">${dataSize} KB</div><div class="lbl">حجم داده</div></div><div class="stat-card"><div class="val">${S.words.length+S.longTerm.length}</div><div class="lbl">کل کلمات</div></div><div class="stat-card"><div class="val">${S.stats.reviewed}</div><div class="lbl">کل مرورها</div></div></div></div><div class="card"><h3 style="margin-bottom:12px">💾 ذخیره‌سازی و امنیت</h3><p style="color:var(--text2);font-size:.85rem;line-height:1.8">داده‌ها در مرورگر شما ذخیره می‌شوند و هرگز به سرور ارسال نمی‌شوند. پشتیبان خودکار در IndexedDB نگهداری می‌شود. حریم خصوصی شما کاملاً حفظ می‌شود.</p></div>`;
 document.getElementById('setSourceLang').onchange=e=>{S.settings.sourceLang=e.target.value;save()};
 document.getElementById('setTargetLang').onchange=e=>{S.settings.targetLang=e.target.value;save()};
 document.getElementById('setNotif').onchange=async e=>{
@@ -2661,9 +2867,9 @@ document.getElementById('setNotif').onchange=async e=>{
       if(perm==='granted'){S.settings.notifications=true;save();toast('یادآوری فعال شد','success')}
       else{e.target.checked=false;toast('اجازه اعلان داده نشد','error')}
     }else{e.target.checked=false;toast('مرورگر از اعلان پشتیبانی نمی‌کند','error')}
-  }else{S.settings.notifications=false;save()};
+  }else{S.settings.notifications=false;save()}
+};
 document.getElementById('setNotifTime').onchange=e=>{S.settings.notificationTime=e.target.value;save()};
-}
 }
 
 // ═══════════════════════════════════════════
@@ -2951,7 +3157,7 @@ lockBtn.onclick=()=>{S.settings.sidebarLocked=!S.settings.sidebarLocked;save();u
 // Restore PDF state if available - show on PDF reader tab
 const savedPdf=loadPdfState();
 if(savedPdf&&savedPdf.fileName)pdfFileName=savedPdf.fileName;
-applyTheme();render();
+applyTheme();render();rebuildIndex();
 // Re-init quiz delegation after each render
 const origRender=render;
 render=function(){origRender();if(currentTab==='quiz')initQuiz()};
