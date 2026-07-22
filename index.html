@@ -404,7 +404,7 @@ function todayKey(){return new Date().toISOString().slice(0,10)}
 // CARD FACTORY
 // ═══════════════════════════════════════════
 function createCard(overrides){
-  return Object.assign({
+  return sanitizeCard(Object.assign({
     id:uid(),word:'',translation:'',ipa:'',category:'پیش‌فرض',
     favorite:false,context:'',
     box:0,repetitions:0,interval:1,easeFactor:2.5,
@@ -415,7 +415,7 @@ function createCard(overrides){
     audioUs:'',audioBr:'',
     coreMeaning:'',collocations:[],antonyms:[],wordFamily:[],
     note:'',trap:'',tags:[],source:''
-  },overrides||{})}
+  },overrides||{}))}
 
 // ═══════════════════════════════════════════
 // WORD LOOKUP INDEX (O(1) existence checks)
@@ -1540,7 +1540,7 @@ function parseDocxTableStructured(zip){
         const col3=getDocxCellText(cells[3]);
         const col4=getDocxCellText(cells[4]);
         const col5=getDocxCellText(cells[5]);
-        const wordMatch=col0.match(/^([a-z]+)\s*\((verb|noun|adj|adv|adjective|noun,\s*verb|verb,\s*noun)\)\s*\n?\s*(.*)/i);
+        const wordMatch=col0.match(/^([a-z]+)\s*\((verb|noun|adj|adv|adjective|adverb|preposition|interjection|conjunction|pronoun|determiner|noun,\s*verb|verb,\s*noun)\)\s*\n?\s*(.*)/i);
         if(!wordMatch) continue;
         const word=wordMatch[1].toLowerCase();
         const pos=wordMatch[2].toLowerCase().replace(/,\s*\w+/g,'');
@@ -1563,7 +1563,7 @@ function parseDocxTableStructured(zip){
             if(trapMatch){trap=trapMatch[1].trim();note=content.replace(/Trap\s*:?\s*.*/i,'').replace(/Note\s*:?\s*/i,'').trim()}
             else{note=content.replace(/Note\s*:?\s*/i,'').trim()}
           }
-          else if(label.match(/\(verb|noun|adj|adv/i)) break;
+          else if(label.match(/\(verb|noun|adj|adv|adverb|preposition|interjection|conjunction|pronoun|determiner/i)) break;
           else break;
         }
         cards.push({
