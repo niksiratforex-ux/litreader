@@ -1540,11 +1540,12 @@ function parseDocxTableStructured(zip){
         const col3=getDocxCellText(cells[3]);
         const col4=getDocxCellText(cells[4]);
         const col5=getDocxCellText(cells[5]);
-        const wordMatch=col0.match(/^([a-z]+)\s*\((verb|noun|adj|adv|adjective|adverb|preposition|interjection|conjunction|pronoun|determiner|noun,\s*verb|verb,\s*noun)\)\s*\n?\s*(.*)/i);
-        if(!wordMatch) continue;
-        const word=wordMatch[1].toLowerCase();
-        const pos=wordMatch[2].toLowerCase().replace(/,\s*\w+/g,'');
-        const pronunciation=wordMatch[3]?wordMatch[3].trim():'';
+        let word='',pos='',pronunciation='';
+        const wordMatchWithPos=col0.match(/^([a-zA-Z']+)\s*\((verb|noun|adj|adv|adjective|adverb|preposition|interjection|conjunction|pronoun|determiner|noun,\s*verb|verb,\s*noun)\)\s*\n?\s*(.*)/i);
+        const wordMatchPlain=col0.match(/^([a-zA-Z']+)$/);
+        if(wordMatchWithPos){word=wordMatchWithPos[1].toLowerCase();pos=wordMatchWithPos[2].toLowerCase().replace(/,\s*\w+/g,'');pronunciation=wordMatchWithPos[3]?wordMatchWithPos[3].trim():''}
+        else if(wordMatchPlain){word=wordMatchPlain[1].toLowerCase()}
+        else continue;
         const translation=col1.trim();
         const coreMeaning=col2.trim();
         const synonyms=col4.split(/[;,]/).map(s=>s.trim()).filter(s=>s.length>1&&s.length<40);
@@ -1563,7 +1564,7 @@ function parseDocxTableStructured(zip){
             if(trapMatch){trap=trapMatch[1].trim();note=content.replace(/Trap\s*:?\s*.*/i,'').replace(/Note\s*:?\s*/i,'').trim()}
             else{note=content.replace(/Note\s*:?\s*/i,'').trim()}
           }
-          else if(label.match(/\(verb|noun|adj|adv|adverb|preposition|interjection|conjunction|pronoun|determiner/i)) break;
+          else if(label.match(/\(verb|noun|adj|adv|adverb|preposition|interjection|conjunction|pronoun|determiner/i)||/^[a-zA-Z']+$/.test(label)) break;
           else break;
         }
         cards.push({
@@ -2017,8 +2018,8 @@ function buildReadingDoc(pages,title,sourceType){
   const allWords=[];const allNormalized=[];
   pages.forEach((p,pi)=>{
     const words=p.text.split(/(\s+)/).filter(w=>w.trim());
-    const engWords=words.filter(w=>/^[a-zA-Z']+$/.test(w));
-    const normalized=engWords.map(w=>normalizeWordLookup(w)).filter(w=>w);
+    const engWords=words.map(w=>normalizeWordLookup(w)).filter(w=>w&&w.length>=2);
+    const normalized=engWords;
     allWords.push(...engWords);allNormalized.push(...normalized);
     const unique=[...new Set(normalized)];
     const pageOcc={};
@@ -2030,7 +2031,7 @@ function buildReadingDoc(pages,title,sourceType){
   doc.occurrences={};
   allNormalized.forEach(w=>{if(!doc.occurrences[w])doc.occurrences[w]={count:0,pages:[]};doc.occurrences[w].count++});
   doc.pages.forEach((p,pi)=>{
-    const pageNorm=p.text.split(/(\s+)/).filter(w=>w.trim()).filter(w=>/^[a-zA-Z']+$/.test(w)).map(w=>normalizeWordLookup(w)).filter(w=>w);
+    const pageNorm=p.text.split(/(\s+)/).filter(w=>w.trim()).map(w=>normalizeWordLookup(w)).filter(w=>w&&w.length>=2);
     [...new Set(pageNorm)].forEach(w=>{if(doc.occurrences[w]&&!doc.occurrences[w].pages.includes(pi+1))doc.occurrences[w].pages.push(pi+1)});
   });
   doc.totalWords=allNormalized.length;
@@ -2045,7 +2046,7 @@ function buildReadingDoc(pages,title,sourceType){
   const uniqueAll=[...new Set(allNormalized)];const complexRatio=uniqueAll.length?complexWords/uniqueAll.length:0;
   doc.readingDifficulty=complexRatio>0.3?'سخت':complexRatio>0.15?'متوسط':'آسان';
   doc.pageStats=doc.pages.map(p=>{
-    const pNorm=p.text.split(/(\s+)/).filter(w=>w.trim()).filter(w=>/^[a-zA-Z']+$/.test(w)).map(w=>normalizeWordLookup(w)).filter(w=>w);
+    const pNorm=p.text.split(/(\s+)/).filter(w=>w.trim()).map(w=>normalizeWordLookup(w)).filter(w=>w&&w.length>=2);
     const pOcc={};pNorm.forEach(w=>{pOcc[w]=(pOcc[w]||0)+1});
     return{pageNumber:p.pageNumber,totalWords:p.totalWords,uniqueWords:p.uniqueWords,topWords:Object.entries(pOcc).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([w,c])=>({word:w,count:c}))};
   });
@@ -2181,8 +2182,8 @@ function renderReadingPageContent(page,doc){
   let searchLower=readingSearchQuery.toLowerCase();
   return words.map(w=>{
     if(!w.trim())return w;
-    if(!/^[a-zA-Z']+$/.test(w))return esc(w);
     const nw=normalizeWordLookup(w);
+    if(!nw||nw.length<2)return esc(w);
     const exists=S.words.some(x=>x.word.toLowerCase()===nw)||S.longTerm.some(x=>x.word.toLowerCase()===nw);
     const occ=doc.occurrences[nw];
     const isUnknown=!exists;
