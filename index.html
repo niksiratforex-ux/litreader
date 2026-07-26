@@ -338,8 +338,11 @@ html[data-fontsize="xlarge"]{font-size:20px}
 .reading-vocab-item .word{font-weight:600;min-width:80px;font-size:.88rem}
 .reading-vocab-item .count{font-size:.75rem;color:var(--text2);min-width:30px;text-align:center}
 .reading-vocab-item .badge-sm{font-size:.65rem;padding:2px 6px;border-radius:6px}
-.reading-word-detail{position:fixed;z-index:310;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px;box-shadow:0 12px 48px rgba(0,0,0,.5);display:none;max-width:380px;width:auto;max-height:70vh;overflow-y:auto;backdrop-filter:blur(12px);font-family:var(--font);direction:ltr;text-align:left}
-.reading-word-detail.visible{display:block}
+.reading-word-detail{position:fixed;z-index:310;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:0 12px 48px rgba(0,0,0,.5);display:none;width:400px;min-width:280px;min-height:200px;max-height:85vh;overflow:auto;backdrop-filter:blur(12px);font-family:var(--font);direction:ltr;text-align:left;resize:both;user-select:none}
+.reading-word-detail.visible{display:flex;flex-direction:column}
+.reading-word-detail .wd-drag-handle{display:flex;align-items:center;gap:6px;padding:10px 14px;cursor:move;background:var(--bg);border-bottom:1px solid var(--border);border-radius:var(--radius) var(--radius) 0 0;flex-shrink:0}
+.reading-word-detail .wd-drag-handle .wd-drag-dots{color:var(--text2);font-size:.7rem;letter-spacing:2px;user-select:none}
+.reading-word-detail .wd-body{padding:14px;flex:1;overflow-y:auto;direction:ltr;text-align:left}
 .reading-word-detail .wd-header{display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap}
 .reading-word-detail .wd-word{font-size:1.3rem;font-weight:700}
 .reading-word-detail .wd-ipa{font-size:.85rem;color:var(--text2)}
@@ -348,7 +351,6 @@ html[data-fontsize="xlarge"]{font-size:20px}
 .reading-word-detail .wd-defs{margin-bottom:8px}
 .reading-word-detail .wd-def{font-size:.83rem;color:var(--text);margin-bottom:4px;line-height:1.5}
 .reading-word-detail .wd-def::before{content:'• ';color:var(--accent)}
-.reading-word-detail .wd-pages{font-size:.78rem;color:var(--text2);margin-bottom:8px}
 .reading-word-detail .wd-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
 .reading-heatmap{display:grid;grid-template-columns:repeat(auto-fill,minmax(28px,1fr));gap:4px;margin:12px 0}
 .reading-heatmap-cell{aspect-ratio:1;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:.6rem;color:var(--text2);cursor:default;transition:all .2s;border:1px solid var(--border)}
@@ -405,6 +407,7 @@ html[data-fontsize="xlarge"]{font-size:20px}
 <div class="app">
 <aside class="sidebar" id="sidebar">
 <div class="sidebar-header"><div style="display:flex;align-items:center;justify-content:space-between"><div><h1>لایتنر</h1><p>مرور هوشمند واژگان</p></div><button type="button" class="theme-toggle" id="sidebarLockBtn" title="قفل سایدبار" style="width:32px;height:32px;font-size:.9rem">🔓</button></div></div>
+<div id="dailyChallengeWidget"></div>
 <nav id="nav"></nav>
 <div style="margin-top:auto;padding:16px 20px"><button class="theme-toggle" id="themeBtn" type="button" aria-label="تغییر پوسته">🌙</button></div>
 </aside>
@@ -1351,15 +1354,16 @@ async function renderTransPopup(word,rect){
 // ═══════════════════════════════════════════
 const TABS=[
 {id:'review',label:'مرور',icon:'📖'},
+{id:'quiz',label:'آزمون',icon:'❓'},
+{id:'engquiz',label:'تعیین سطح',icon:'🎯'},
 {id:'library',label:'کتابخانه',icon:'📚'},
 {id:'longterm',label:'حافظه بلندمدت',icon:'🧠'},
 {id:'import',label:'ورود',icon:'📥'},
 {id:'reading',label:'خواندن',icon:'📰'},
-{id:'export',label:'خروج / پشتیبان',icon:'💾'},
-{id:'stats',label:'آمار',icon:'📊'},
-{id:'quiz',label:'آزمون',icon:'❓'},
-{id:'engquiz',label:'آزمون انگلیسی',icon:'🎯'},
 {id:'pdfreader',label:'خواننده PDF',icon:'📄'},
+{id:'wordweb',label:'نقشه واژگان',icon:'🗺️'},
+{id:'stats',label:'آمار و تقویم',icon:'📊'},
+{id:'export',label:'خروج / پشتیبان',icon:'💾'},
 {id:'aichat',label:'چت با هوش مصنوعی',icon:'🤖'},
 {id:'settings',label:'تنظیمات',icon:'⚙️'},
 {id:'about',label:'درباره',icon:'ℹ️'}
@@ -1372,14 +1376,21 @@ nav.querySelectorAll('.nav-btn').forEach(b=>b.onclick=()=>{if(currentTab==='quiz
 function render(){
 if(currentTab!=='review'&&currentTab!=='pdfreader')document.onkeydown=null;
 if(currentTab!=='pdfreader')hideTransPopup();
+// Clear speed review timer when leaving speed review
+if(currentTab!=='speedreview'&&speedState.timer){clearInterval(speedState.timer);speedState.timer=null}
+// Clear quiz speed timer when leaving quiz
+if(currentTab!=='quiz'&&quizState&&quizState._speedInterval){clearInterval(quizState._speedInterval);quizState._speedInterval=null}
 renderNav();
-const titles={review:'مرور',library:'کتابخانه',longterm:'حافظه بلندمدت',import:'ورود',reading:'خواندن با ترجمه',export:'خروج / پشتیبان',stats:'آمار',quiz:'آزمون',engquiz:'آزمون انگلیسی',pdfreader:'خواننده PDF',aichat:'چت با هوش مصنوعی',settings:'تنظیمات',about:'درباره'};
+// Render daily challenge widget in sidebar
+const dcw=document.getElementById('dailyChallengeWidget');
+if(dcw&&typeof renderDailyChallengeWidget==='function')dcw.innerHTML=renderDailyChallengeWidget();
+const titles={review:'مرور',quiz:'آزمون',engquiz:'تعیین سطح',library:'کتابخانه',longterm:'حافظه بلندمدت',import:'ورود',reading:'خواندن',pdfreader:'خواننده PDF',wordweb:'نقشه واژگان',stats:'آمار و تقویم',export:'خروج / پشتیبان',aichat:'چت با هوش مصنوعی',settings:'تنظیمات',about:'درباره'};
 document.getElementById('pageTitle').textContent=titles[currentTab]||'';
 // Update page title with due count badge
 const dueBadge=getDue().length;
 document.title=dueBadge>0?'('+dueBadge+') لایتنر — '+titles[currentTab]:'لایتنر — مرور هوشمند';
 const c=document.getElementById('content');
-const renders={review:renderReview,library:renderLibrary,longterm:renderLongterm,import:renderImport,reading:renderReading,export:renderExport,stats:renderStats,quiz:renderQuiz,engquiz:renderEngQuiz,pdfreader:renderPDFReader,aichat:renderAiChat,settings:renderSettings,about:renderAbout};
+const renders={review:renderReview,library:renderLibrary,longterm:renderLongterm,import:renderImport,reading:renderReading,pdfreader:renderPDFReader,wordweb:renderWordWeb,export:renderExport,stats:renderStats,quiz:renderQuiz,engquiz:renderEngQuiz,aichat:renderAiChat,settings:renderSettings,about:renderAbout};
 (renders[currentTab]||(()=>''))(c)}
 
 // ═══════════════════════════════════════════
@@ -3404,26 +3415,45 @@ async function showReadingWordDetail(word,spanEl,doc){
   var popup=document.getElementById('readingWordDetail');
   if(!popup){popup=document.createElement('div');popup.id='readingWordDetail';popup.className='reading-word-detail';document.body.appendChild(popup)}
   var rect=spanEl.getBoundingClientRect();
-  popup.innerHTML='<div style="text-align:center;color:var(--text2);font-size:.85rem;padding:16px">در حال جستجو...</div>';
+  popup.innerHTML='<div class="wd-drag-handle"><span class="wd-drag-dots">⠿</span><span style="flex:1;text-align:center;font-size:.8rem;color:var(--text2)">در حال جستجو...</span><button type="button" id="rdDetailClose" style="background:none;border:none;color:var(--text2);cursor:pointer;font-size:1rem;padding:2px 6px">✕</button></div><div class="wd-body"></div>';
   popup.classList.add('visible');
+  popup.style.width='400px';popup.style.height='auto';
   var top=rect.bottom+10;var left=rect.left;
-  var pw=380;
-  if(left+pw>window.innerWidth-16)left=window.innerWidth-pw-16;
+  if(left+420>window.innerWidth-16)left=window.innerWidth-420;
   if(left<16)left=16;
-  if(top+300>window.innerHeight-16)top=rect.top-310;
+  if(top+400>window.innerHeight-16)top=rect.top-410;
   if(top<16)top=16;
   popup.style.top=top+'px';popup.style.left=left+'px';
+  var handle=popup.querySelector('.wd-drag-handle');
+  var isDragging=false,dragOffX=0,dragOffY=0;
+  handle.onmousedown=function(e){
+    if(e.target.id==='rdDetailClose')return;
+    isDragging=true;
+    var pRect=popup.getBoundingClientRect();
+    dragOffX=e.clientX-pRect.left;dragOffY=e.clientY-pRect.top;
+    popup.style.transition='none';
+    document.onmousemove=function(ev){
+      if(!isDragging)return;
+      var nx=ev.clientX-dragOffX;var ny=ev.clientY-dragOffY;
+      nx=Math.max(0,Math.min(nx,window.innerWidth-popup.offsetWidth-4));
+      ny=Math.max(0,Math.min(ny,window.innerHeight-popup.offsetHeight-4));
+      popup.style.left=nx+'px';popup.style.top=ny+'px';
+    };
+    document.onmouseup=function(){isDragging=false;document.onmousemove=null;document.onmouseup=null;popup.style.transition=''};
+    e.preventDefault();
+  };
   var cached=getCachedTrans(word);
   if(!cached){
     var arr=await Promise.all([fetchTranslation(word),fetchDictionary(word)]);
     var trans=arr[0],dict=arr[1];
-    cached={translation:trans||'',ipa:'',pos:'',definitions:[],examples:[],synonyms:[],audioUs:'',audioBr:''};
+    cached={translation:trans||'',ipa:'',pos:'',definitions:[],examples:[],synonyms:[],antonyms:[],audioUs:'',audioBr:''};
     if(dict){
       cached.ipa=dict.phoneticBr||dict.phoneticUs||dict.phonetic||'';
       cached.pos=dict.meanings[0]?dict.meanings[0].partOfSpeech:'';
-      cached.definitions=dict.meanings.flatMap(function(m){return m.definitions}).slice(0,4);
-      cached.examples=dict.meanings.flatMap(function(m){return m.examples}).slice(0,3);
-      cached.synonyms=dict.meanings.flatMap(function(m){return m.synonyms}).slice(0,5);
+      cached.definitions=dict.meanings.flatMap(function(m){return m.definitions}).slice(0,5);
+      cached.examples=dict.meanings.flatMap(function(m){return m.examples}).slice(0,4);
+      cached.synonyms=dict.meanings.flatMap(function(m){return m.synonyms}).slice(0,6);
+      cached.antonyms=dict.meanings.flatMap(function(m){return m.antonyms||[]}).slice(0,4);
       cached.audioUs=dict.audioUs||'';
       cached.audioBr=dict.audioBr||'';
     }
@@ -3432,60 +3462,99 @@ async function showReadingWordDetail(word,spanEl,doc){
   var nw=normalizeWordLookup(word);
   var occ=doc.occurrences[nw]||{count:1,pages:[]};
   var exists=wordExists(word.toLowerCase());
-  var h='<button type="button" class="trans-close" id="rdDetailClose" style="position:absolute;top:8px;left:10px;background:none;border:none;color:var(--text2);cursor:pointer;font-size:1rem;padding:4px">&times;</button>';
-  h+='<div class="wd-header"><span class="wd-word">'+esc(word)+'</span>';
-  if(cached.ipa)h+='<span class="wd-ipa">'+esc(cached.ipa)+'</span>';
-  h+='<span class="wd-occ">'+occ.count+'x</span></div>';
-  if(cached.translation)h+='<div class="wd-persian">'+esc(cached.translation)+'</div>';
-  if(cached.pos)h+='<span class="trans-pos">'+esc(cached.pos)+'</span> ';
+  var inLT=S.longTerm.some(function(x){return x.word.toLowerCase()===word.toLowerCase()});
+  var body=popup.querySelector('.wd-body');
+  var h='';
+  h+='<div style="text-align:center;margin-bottom:12px">';
+  h+='<div style="font-size:1.5rem;font-weight:800;color:var(--accent);margin-bottom:4px">'+esc(word)+'</div>';
+  if(cached.ipa)h+='<div style="color:var(--text2);font-size:.9rem;margin-bottom:2px">/'+esc(cached.ipa)+'/</div>';
+  h+='<div style="display:flex;gap:6px;justify-content:center;align-items:center;flex-wrap:wrap">';
+  if(cached.pos)h+='<span class="badge badge-accent">'+esc(cached.pos)+'</span>';
+  h+='<span style="font-size:.75rem;color:var(--text2)">'+occ.count+'x در متن</span>';
+  if(exists)h+='<span class="badge badge-success">✅ لایتنر</span>';
+  if(inLT)h+='<span class="badge badge-warning">🧠 حافظه بلندمدت</span>';
+  h+='</div></div>';
+  if(cached.translation)h+='<div style="text-align:center;font-size:1.2rem;font-weight:700;color:var(--success);margin-bottom:12px;padding:8px;background:var(--bg);border-radius:10px">'+esc(cached.translation)+'</div>';
+  h+='<div style="display:flex;border-bottom:1px solid var(--border);margin-bottom:10px">';
+  h+='<button type="button" class="wd-tab active" data-wtab="info" style="flex:1;padding:6px;border:none;background:none;color:var(--accent);font:inherit;font-size:.78rem;font-weight:600;cursor:pointer;border-bottom:2px solid var(--accent)">📖 تعریف</button>';
+  h+='<button type="button" class="wd-tab" data-wtab="examples" style="flex:1;padding:6px;border:none;background:none;color:var(--text2);font:inherit;font-size:.78rem;cursor:pointer;border-bottom:2px solid transparent">💬 مثال</button>';
+  h+='<button type="button" class="wd-tab" data-wtab="related" style="flex:1;padding:6px;border:none;background:none;color:var(--text2);font:inherit;font-size:.78rem;cursor:pointer;border-bottom:2px solid transparent">🔗 مرتبط</button>';
+  h+='<button type="button" class="wd-tab" data-wtab="trick" style="flex:1;padding:6px;border:none;background:none;color:var(--text2);font:inherit;font-size:.78rem;cursor:pointer;border-bottom:2px solid transparent">🧠 حفظ</button>';
+  h+='</div>';
+  h+='<div class="wd-tab-content" data-wtab="info">';
   if(cached.definitions.length){
-    h+='<div class="wd-defs">';
-    cached.definitions.forEach(function(d){h+='<div class="wd-def">'+esc(typeof d==='string'?d:d.definition||'')+'</div>'});
-    h+='</div>';
-  }
+    cached.definitions.forEach(function(d){
+      var def=typeof d==='string'?d:d.definition||'';
+      h+='<div style="font-size:.85rem;line-height:1.7;margin-bottom:6px;padding:6px 10px;background:var(--bg);border-radius:8px;border-right:3px solid var(--accent)">'+esc(def)+'</div>';
+    });
+  }else{h+='<div style="color:var(--text2);font-size:.85rem;text-align:center;padding:12px">تعریفی یافت نشد</div>'}
+  h+='</div>';
+  h+='<div class="wd-tab-content" data-wtab="examples" style="display:none">';
   if(cached.examples.length){
-    h+='<div style="margin-bottom:6px">';
-    cached.examples.forEach(function(ex){h+='<div style="font-size:.78rem;color:var(--text2);font-style:italic;padding:4px 8px;margin-bottom:3px;border-right:2px solid var(--accent);line-height:1.5">"'+esc(ex)+'"</div>'});
-    h+='</div>';
-  }
+    cached.examples.forEach(function(ex){
+      h+='<div style="font-size:.85rem;font-style:italic;line-height:1.7;margin-bottom:8px;padding:8px 12px;background:var(--bg);border-radius:8px;border-right:3px solid var(--success)">\"'+esc(ex)+'\"</div>';
+    });
+  }else{h+='<div style="color:var(--text2);font-size:.85rem;text-align:center;padding:12px">مثالی یافت نشد</div>'}
+  h+='</div>';
+  h+='<div class="wd-tab-content" data-wtab="related" style="display:none">';
   if(cached.synonyms.length){
-    h+='<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px">';
-    cached.synonyms.forEach(function(s){h+='<span class="trans-syn-tag">'+esc(s)+'</span>'});
+    h+='<div style="margin-bottom:10px"><div style="font-size:.75rem;color:var(--success);font-weight:600;margin-bottom:6px">🔄 مترادف‌ها</div><div style="display:flex;flex-wrap:wrap;gap:4px">';
+    cached.synonyms.forEach(function(s){h+='<span style="padding:4px 10px;border-radius:8px;font-size:.8rem;background:rgba(0,184,148,.1);color:var(--success);border:1px solid rgba(0,184,148,.2)">'+esc(s)+'</span>'});
+    h+='</div></div>';
+  }
+  if(cached.antonyms&&cached.antonyms.length){
+    h+='<div><div style="font-size:.75rem;color:var(--danger);font-weight:600;margin-bottom:6px">⚡ متضادها</div><div style="display:flex;flex-wrap:wrap;gap:4px">';
+    cached.antonyms.forEach(function(a){h+='<span style="padding:4px 10px;border-radius:8px;font-size:.8rem;background:rgba(225,112,85,.1);color:var(--danger);border:1px solid rgba(225,112,85,.2)">'+esc(a)+'</span>'});
+    h+='</div></div>';
+  }
+  if(!cached.synonyms.length&&!(cached.antonyms&&cached.antonyms.length)){h+='<div style="color:var(--text2);font-size:.85rem;text-align:center;padding:12px">مورد مرتبطی یافت نشد</div>'}
+  h+='</div>';
+  h+='<div class="wd-tab-content" data-wtab="trick" style="display:none">';
+  h+='<div style="background:var(--bg);border-radius:10px;padding:12px;border-right:3px solid var(--accent)">';
+  h+='<div style="font-size:.78rem;color:var(--accent);font-weight:600;margin-bottom:6px">🧠 ترفند حفظ کردن</div>';
+  h+='<div style="font-size:.85rem;color:var(--text);line-height:1.8">'+getMemoryTrick(word,cached.translation||'',cached.pos||'')+'</div>';
+  h+='</div>';
+  if(cached.pos){
+    h+='<div style="background:var(--bg);border-radius:10px;padding:12px;margin-top:8px;border-right:3px solid var(--success)">';
+    h+='<div style="font-size:.78rem;color:var(--success);font-weight:600;margin-bottom:6px">📝 نکته استفاده</div>';
+    h+='<div style="font-size:.85rem;color:var(--text);line-height:1.8">'+getUsageTip(word,cached.translation||'',cached.pos||'')+'</div>';
     h+='</div>';
   }
-  h+='<div class="wd-pages">📝 صفحات: '+(occ.pages.join(', ')||'—')+' | تکرار: '+occ.count+' بار</div>';
-  h+='<div class="wd-actions">';
+  h+='</div>';
+  h+='<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:12px;padding-top:10px;border-top:1px solid var(--border)">';
   h+='<button type="button" class="trans-audio-btn" data-speak="'+esc(word)+'" title="شنیدن">🔊</button>';
   if(cached.audioUs)h+='<button type="button" class="trans-audio-btn" data-audio="'+esc(cached.audioUs)+'" title="American">🇺🇸</button>';
   if(cached.audioBr)h+='<button type="button" class="trans-audio-btn" data-audio="'+esc(cached.audioBr)+'" title="British">🇬🇧</button>';
-  if(!exists){
-    h+='<button type="button" class="btn btn-sm btn-primary" id="rdAddWord">＋ لایتنر</button>';
-    h+='<button type="button" class="btn btn-sm btn-success" id="rdAddLT" style="font-size:.75rem;padding:6px 12px">＋ حافظه بلندمدت</button>';
-  }else{
-    h+='<span style="font-size:.78rem;color:var(--success)">✅ موجود</span>';
-  }
+  if(!exists){h+='<button type="button" class="btn btn-sm btn-primary" id="rdAddWord">＋ لایتنر</button>'}
+  if(!inLT){h+='<button type="button" class="btn btn-sm btn-success" id="rdAddLT" style="font-size:.75rem;padding:6px 12px">＋ حافظه بلندمدت</button>'}
+  if(exists&&inLT){h+='<span style="font-size:.78rem;color:var(--success);padding:4px 8px">✅ ذخیره شده</span>'}
   h+='</div>';
-  popup.innerHTML=h;
+  body.innerHTML=h;
+  popup.querySelectorAll('.wd-tab').forEach(function(tab){
+    tab.onclick=function(){
+      popup.querySelectorAll('.wd-tab').forEach(function(t){t.style.color='var(--text2)';t.style.borderBottomColor='transparent';t.style.fontWeight='400';t.classList.remove('active')});
+      tab.style.color='var(--accent)';tab.style.borderBottomColor='var(--accent)';tab.style.fontWeight='600';tab.classList.add('active');
+      popup.querySelectorAll('.wd-tab-content').forEach(function(c){c.style.display='none'});
+      var target=popup.querySelector('.wd-tab-content[data-wtab="'+tab.dataset.wtab+'"]');
+      if(target)target.style.display='block';
+    };
+  });
   popup.querySelectorAll('[data-audio]').forEach(function(btn){btn.onclick=function(){playAudioUrl(btn.dataset.audio)}});
   popup.querySelectorAll('[data-speak]').forEach(function(btn){btn.onclick=function(){speakWord(btn.dataset.speak)}});
   document.getElementById('rdDetailClose').onclick=function(){popup.classList.remove('visible')};
   var addBtn=document.getElementById('rdAddWord');
   if(addBtn)addBtn.onclick=function(){
     var allDefs=cached.definitions.map(function(d){return typeof d==='string'?d:d.definition||''});
-    S.words.push(createCard({word:word,translation:cached.translation||'',ipa:cached.ipa,definitions:allDefs,examples:cached.examples,synonyms:cached.synonyms,partOfSpeech:cached.pos,audioUs:cached.audioUs,audioBr:cached.audioBr,source:'reading-mode'}))
+    S.words.push(createCard({word:word,translation:cached.translation||'',ipa:cached.ipa,definitions:allDefs,examples:cached.examples,synonyms:cached.synonyms,antonyms:cached.antonyms||[],partOfSpeech:cached.pos,audioUs:cached.audioUs,audioBr:cached.audioBr,source:'reading-mode'}));
     save();toast(word+' به لایتنر اضافه شد','success');popup.classList.remove('visible');renderReading(document.getElementById('content'));
   };
   var ltBtn=document.getElementById('rdAddLT');
   if(ltBtn)ltBtn.onclick=function(){
     var allDefs=cached.definitions.map(function(d){return typeof d==='string'?d:d.definition||''});
-    S.longTerm.push(createCard({word:word,translation:cached.translation||'',ipa:cached.ipa,definitions:allDefs,examples:cached.examples,synonyms:cached.synonyms,partOfSpeech:cached.pos,audioUs:cached.audioUs,audioBr:cached.audioBr,source:'reading-mode'}))
+    S.longTerm.push(createCard({word:word,translation:cached.translation||'',ipa:cached.ipa,definitions:allDefs,examples:cached.examples,synonyms:cached.synonyms,antonyms:cached.antonyms||[],partOfSpeech:cached.pos,audioUs:cached.audioUs,audioBr:cached.audioBr,source:'reading-mode'}));
     save();toast(word+' به حافظه بلندمدت اضافه شد','success');popup.classList.remove('visible');renderReading(document.getElementById('content'));
   };
-  setTimeout(function(){
-    document.addEventListener('mousedown',function rdCloseHandler(e){
-      if(!popup.contains(e.target)&&!spanEl.contains(e.target)){popup.classList.remove('visible');document.removeEventListener('mousedown',rdCloseHandler)}
-    });
-  },50);
+  setTimeout(function(){body.scrollTop=0},50);
 }
 
 function showBatchAddPanel(doc){
@@ -3700,8 +3769,20 @@ const heatmapHtml=buildHeatmap(heatmapDays);
 // Build forecast data (next 14 days)
 const forecastData=buildForecast(14);
 
+// 30-day calendar predictions
+const calPredictions=[];
+for(let d=0;d<30;d++){
+  const date=new Date();date.setDate(date.getDate()+d);
+  const dateStr=date.toISOString().slice(0,10);
+  let count=0;
+  S.words.forEach(w=>{if(w.due&&w.due.slice(0,10)===dateStr)count++});
+  calPredictions.push({date:dateStr,count,day:date.toLocaleDateString('fa-IR',{weekday:'short'}),num:date.getDate()});
+}
+const calTotalDue=calPredictions.reduce((s,p)=>s+p.count,0);
+const calMaxCount=Math.max(1,...calPredictions.map(p=>p.count));
+
 c.innerHTML=`<div class="card" style="margin-bottom:16px;text-align:center;padding:20px"><div style="font-size:2.5rem;margin-bottom:4px">${levelInfo.icon}</div><div style="font-size:1.2rem;font-weight:700;color:var(--accent)">${levelInfo.name}</div><div style="font-size:.85rem;color:var(--text2);margin:6px 0">${levelInfo.xp} امتیاز</div>${levelInfo.next?`<div style="max-width:300px;margin:0 auto"><div style="height:8px;background:var(--border);border-radius:4px;overflow:hidden"><div style="height:100%;width:${levelInfo.progress}%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:4px;transition:width .5s"></div></div><div style="font-size:.75rem;color:var(--text2);margin-top:4px">${levelInfo.next.icon} ${levelInfo.next.name}: ${levelInfo.next.min-levelInfo.xp} امتیاز دیگر</div></div>`:'<div style="font-size:.85rem;color:var(--warning)">حداکثر سطح رسیده!</div>'}</div>
-<div class="stat-grid"><div class="card stat-card"><div class="val">${S.words.length}</div><div class="lbl">کل کلمات</div></div><div class="card stat-card"><div class="val">${S.longTerm.length}</div><div class="lbl">حافظه بلندمدت</div></div><div class="card stat-card"><div class="val" style="color:var(--warning)">${dueCount}</div><div class="lbl">مرور امروز</div></div><div class="card stat-card"><div class="val">${todayH.reviewed}</div><div class="lbl">مرور شده امروز</div></div><div class="card stat-card"><div class="val" style="color:var(--success)">${todayH.correct}</div><div class="lbl">درست امروز</div></div><div class="card stat-card"><div class="val" style="color:var(--danger)">${todayH.wrong}</div><div class="lbl">نادرست امروز</div></div><div class="card stat-card"><div class="val">${S.stats.streak}</div><div class="lbl">روز متوالی</div></div><div class="card stat-card"><div class="val" style="color:var(--accent)">${S.stats.xp}</div><div class="lbl">امتیاز کل</div></div><div class="card stat-card"><div class="val" style="color:var(--success)">${accuracyPct}%</div><div class="lbl">دقت کل</div></div><div class="card stat-card"><div class="val" style="color:var(--accent2)">${masteredCount}</div><div class="lbl">تثبیت شده</div></div></div><div class="card" style="margin-bottom:16px;padding:24px"><h3 style="margin-bottom:12px">تقویم مرور (۵۲ هفته اخیر)</h3>${heatmapHtml}<div class="heatmap-legend"><span>کم</span><div class="heatmap-legend-cell heatmap-l0"></div><div class="heatmap-legend-cell heatmap-l1"></div><div class="heatmap-legend-cell heatmap-l2"></div><div class="heatmap-legend-cell heatmap-l3"></div><div class="heatmap-legend-cell heatmap-l4"></div><span>زیاد</span></div></div><div class="grid-2"><div class="card"><h3 style="margin-bottom:12px">توزیع جعبه‌ها</h3><canvas id="boxChart"></canvas></div><div class="card"><h3 style="margin-bottom:12px">۷ روز اخیر</h3><canvas id="weekChart"></canvas></div></div><div class="card" style="margin-top:16px"><h3 style="margin-bottom:12px">پیش‌بینی ۱۴ روز آینده</h3><canvas id="forecastChart"></canvas></div>`;
+<div class="stat-grid"><div class="card stat-card"><div class="val">${S.words.length}</div><div class="lbl">کل کلمات</div></div><div class="card stat-card"><div class="val">${S.longTerm.length}</div><div class="lbl">حافظه بلندمدت</div></div><div class="card stat-card"><div class="val" style="color:var(--warning)">${dueCount}</div><div class="lbl">مرور امروز</div></div><div class="card stat-card"><div class="val">${todayH.reviewed}</div><div class="lbl">مرور شده امروز</div></div><div class="card stat-card"><div class="val" style="color:var(--success)">${todayH.correct}</div><div class="lbl">درست امروز</div></div><div class="card stat-card"><div class="val" style="color:var(--danger)">${todayH.wrong}</div><div class="lbl">نادرست امروز</div></div><div class="card stat-card"><div class="val">${S.stats.streak}</div><div class="lbl">روز متوالی</div></div><div class="card stat-card"><div class="val" style="color:var(--accent)">${S.stats.xp}</div><div class="lbl">امتیاز کل</div></div><div class="card stat-card"><div class="val" style="color:var(--success)">${accuracyPct}%</div><div class="lbl">دقت کل</div></div><div class="card stat-card"><div class="val" style="color:var(--accent2)">${masteredCount}</div><div class="lbl">تثبیت شده</div></div><div class="card stat-card"><div class="val" style="font-size:1rem">${Math.round(new Blob([localStorage.getItem('leitner_pro')||'']).size/1024)}KB</div><div class="lbl">حجم داده</div></div></div><div class="card" style="margin-bottom:16px;padding:24px"><h3 style="margin-bottom:12px">تقویم مرور (۵۲ هفته اخیر)</h3>${heatmapHtml}<div class="heatmap-legend"><span>کم</span><div class="heatmap-legend-cell heatmap-l0"></div><div class="heatmap-legend-cell heatmap-l1"></div><div class="heatmap-legend-cell heatmap-l2"></div><div class="heatmap-legend-cell heatmap-l3"></div><div class="heatmap-legend-cell heatmap-l4"></div><span>زیاد</span></div></div><div class="grid-2"><div class="card"><h3 style="margin-bottom:12px">توزیع جعبه‌ها</h3><canvas id="boxChart"></canvas></div><div class="card"><h3 style="margin-bottom:12px">۷ روز اخیر</h3><canvas id="weekChart"></canvas></div></div><div class="card" style="margin-top:16px"><h3 style="margin-bottom:12px">پیش‌بینی ۱۴ روز آینده</h3><canvas id="forecastChart"></canvas></div><div class="card" style="margin-top:16px"><h3 style="margin-bottom:12px;color:var(--accent)">📅 پیش‌بینی مرور ۳۰ روز آینده <span style="font-size:.75rem;font-weight:400;color:var(--text2)">(${calTotalDue} کلمه کل)</span></h3><div style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px">${calPredictions.map(p=>{const pct=p.count/calMaxCount;const bg=pct>0.7?'var(--danger)':pct>0.3?'var(--warning)':pct>0?'var(--success)':'var(--bg)';const isToday=p.date===todayKey();return `<div style="text-align:center;padding:8px 4px;border-radius:10px;background:${pct>0?bg:'var(--bg)'};color:${pct>0.3?'#fff':'var(--text)'};border:${isToday?'2px solid var(--accent)':'1px solid var(--border)'};font-size:.75rem;min-height:60px;display:flex;flex-direction:column;justify-content:center"><div style="font-size:.65rem;opacity:.7">${p.day}</div><div style="font-weight:700;font-size:.9rem">${p.num}</div><div style="font-size:.7rem;margin-top:2px">${p.count>0?p.count+' کلمه':'—'}</div></div>`}).join('')}</div><div style="display:flex;gap:8px;justify-content:center;margin-top:12px;font-size:.75rem;color:var(--text2)"><span style="display:flex;align-items:center;gap:4px"><span style="width:12px;height:12px;border-radius:3px;background:var(--success);display:inline-block"></span> کم</span><span style="display:flex;align-items:center;gap:4px"><span style="width:12px;height:12px;border-radius:3px;background:var(--warning);display:inline-block"></span> متوسط</span><span style="display:flex;align-items:center;gap:4px"><span style="width:12px;height:12px;border-radius:3px;background:var(--danger);display:inline-block"></span> زیاد</span></div></div>`;
 
 if(boxChart){boxChart.destroy();boxChart=null}
 if(weekChart){weekChart.destroy();weekChart=null}
@@ -3857,7 +3938,7 @@ if(!quizState.card)genQuiz();
 const q=quizState.card;
 
 // Quiz type selector (8 modes)
-const typeBar=`<div class="quiz-type-bar" style="flex-wrap:wrap;gap:4px"><button type="button" class="btn btn-sm ${quizMode==='mcq'?'btn-primary':''}" data-qmode="mcq">چندگزینه‌ای</button><button type="button" class="btn btn-sm ${quizMode==='fill'?'btn-primary':''}" data-qmode="fill">تکمیلی</button><button type="button" class="btn btn-sm ${quizMode==='reverse'?'btn-primary':''}" data-qmode="reverse">معکوس</button><button type="button" class="btn btn-sm ${quizMode==='listen'?'btn-primary':''}" data-qmode="listen">شنیداری</button><button type="button" class="btn btn-sm ${quizMode==='antonym'?'btn-primary':''}" data-qmode="antonym">متضاد</button><button type="button" class="btn btn-sm ${quizMode==='sentfill'?'btn-primary':''}" data-qmode="sentfill">جمله</button><button type="button" class="btn btn-sm ${quizMode==='spell'?'btn-primary':''}" data-qmode="spell">املایی</button><button type="button" class="btn btn-sm ${quizMode==='defmatch'?'btn-primary':''}" data-qmode="defmatch">تعریف</button></div>`;
+const typeBar=`<div class="quiz-type-bar" style="flex-wrap:wrap;gap:4px"><button type="button" class="btn btn-sm ${quizMode==='mcq'?'btn-primary':''}" data-qmode="mcq">چندگزینه‌ای</button><button type="button" class="btn btn-sm ${quizMode==='fill'?'btn-primary':''}" data-qmode="fill">تکمیلی</button><button type="button" class="btn btn-sm ${quizMode==='reverse'?'btn-primary':''}" data-qmode="reverse">معکوس</button><button type="button" class="btn btn-sm ${quizMode==='listen'?'btn-primary':''}" data-qmode="listen">شنیداری</button><button type="button" class="btn btn-sm ${quizMode==='antonym'?'btn-primary':''}" data-qmode="antonym">متضاد</button><button type="button" class="btn btn-sm ${quizMode==='sentfill'?'btn-primary':''}" data-qmode="sentfill">جمله</button><button type="button" class="btn btn-sm ${quizMode==='spell'?'btn-primary':''}" data-qmode="spell">املایی</button><button type="button" class="btn btn-sm ${quizMode==='defmatch'?'btn-primary':''}" data-qmode="defmatch">تعریف</button><button type="button" class="btn btn-sm ${quizMode==='speed'?'btn-danger':''}" data-qmode="speed">⚡ مرور سریع</button></div>`;
 
 let questionHtml='';
 if(quizMode==='mcq'){
@@ -3877,6 +3958,8 @@ if(quizMode==='mcq'){
   questionHtml=`<button type="button" class="btn btn-ghost" id="quizListenBtn" style="font-size:2rem;margin-bottom:8px">🔊</button><div style="font-size:.85rem;color:var(--text2);margin-bottom:4px">ترجمه: <strong style="color:var(--accent)">${esc(q.translation)}</strong></div><div style="font-size:1.1rem;letter-spacing:4px;margin-bottom:16px;color:var(--text2);font-weight:600">${esc(scrambled)}</div><input type="text" class="quiz-input" id="quizFillInput" placeholder="کلمه صحیح را تایپ کنید..." ${quizState.answered?'disabled':''}><div id="quizFillFeedback" style="margin-top:12px" aria-live="assertive" role="alert"></div></div>`;
 }else if(quizMode==='defmatch'){
   questionHtml=`<div style="font-size:1rem;line-height:1.8;margin-bottom:16px;color:var(--accent);font-style:italic">${esc(quizState.quizText||q.coreMeaning||q.translation)}</div></div><div id="quizContainer" style="display:grid;gap:10px">${quizState.options.map((o,i)=>{let cls='btn btn-ghost quiz-option';let st='';if(quizState.answered){if(i===quizState.selected){cls+=o===q.word?' correct':' wrong'}else if(o===q.word){cls+=' correct';st='opacity:.7'}}return`<button type="button" class="${cls}" data-qi="${i}" style="justify-content:center;${st}" ${quizState.answered?'disabled':''}>${esc(o)}</button>`}).join('')}</div>`;
+}else if(quizMode==='speed'){
+  questionHtml=`<div id="speedTimer" style="font-size:2.2rem;font-weight:800;color:var(--accent);margin-bottom:12px">5</div><div style="font-size:1.6rem;font-weight:700;margin-bottom:16px">${esc(q.word)}</div><div id="quizContainer" style="display:grid;gap:10px">${quizState.options.map((o,i)=>{let cls='btn btn-ghost quiz-option';let st='';if(quizState.answered){if(i===quizState.selected){cls+=o===q.translation?' correct':' wrong'}else if(o===q.translation){cls+=' correct';st='opacity:.7'}}return`<button type="button" class="${cls}" data-qi="${i}" style="justify-content:center;${st}" ${quizState.answered?'disabled':''}>${esc(o)}</button>`}).join('')}</div>`;
 }
 
 // Quiz history display
@@ -3886,7 +3969,7 @@ if(S.quizStats&&S.quizStats.sessions.length>0){
   historyHtml=`<div style="margin-top:16px;padding:12px;background:var(--bg);border-radius:8px;text-align:right"><div style="font-size:.8rem;color:var(--text2);margin-bottom:8px">آخرین نتایج:</div>${recent.map(s=>{const pct=s.correct+s.wrong>0?Math.round(s.correct/(s.correct+s.wrong)*100):0;return`<div style="font-size:.75rem;color:var(--text);margin-bottom:2px">✓ ${s.correct} / ✗ ${s.wrong} (${pct}%) — ${new Date(s.date).toLocaleDateString('fa-IR')}</div>`}).join('')}</div>`;
 }
 
-c.innerHTML=`<div style="max-width:500px;margin:0 auto"><div class="card" style="text-align:center;margin-bottom:16px;padding:16px"><div style="color:var(--text2);font-size:.85rem;margin-bottom:8px">${quizMode==='reverse'?'ترجمه کدام کلمه است؟':quizMode==='antonym'?'کدام متضاد است؟':quizMode==='defmatch'?'کدام کلمه با تعریف مطابقت دارد؟':'ترجمه کدام گزینه درست است؟'}</div>${typeBar}<div class="card" style="text-align:center;padding:16px">${questionHtml}</div>${quizState.answered?`<div style="text-align:center;margin-top:12px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap"><button type="button" class="btn btn-primary" id="quizNext">سوال بعدی</button><button type="button" class="btn btn-ghost" id="quizUndo" style="font-size:.8rem">↩️ لغو پاسخ <span id="undoCountdown" style="color:var(--warning);font-size:.7rem"></span></button></div>`:''}<div style="text-align:center;margin-top:16px;color:var(--text2);font-size:.85rem">آمار: <span style="color:var(--success)">✓ ${quizCorrect}</span> / <span style="color:var(--danger)">✗ ${quizWrong}</span> | منبع: ${valid.length} کلمه</div>${historyHtml}</div>`;
+c.innerHTML=`<div style="max-width:500px;margin:0 auto"><div class="card" style="text-align:center;margin-bottom:16px;padding:16px"><div style="color:var(--text2);font-size:.85rem;margin-bottom:8px">${quizMode==='reverse'?'ترجمه کدام کلمه است؟':quizMode==='antonym'?'کدام متضاد است؟':quizMode==='defmatch'?'کدام کلمه با تعریف مطابقت دارد؟':quizMode==='speed'?'⚡ ۵ ثانیه وقت داری!':'ترجمه کدام گزینه درست است؟'}</div>${typeBar}<div class="card" style="text-align:center;padding:16px">${questionHtml}</div>${quizState.answered?`<div style="text-align:center;margin-top:12px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap"><button type="button" class="btn btn-primary" id="quizNext">سوال بعدی</button><button type="button" class="btn btn-ghost" id="quizUndo" style="font-size:.8rem">↩️ لغو پاسخ <span id="undoCountdown" style="color:var(--warning);font-size:.7rem"></span></button></div>`:''}<div style="text-align:center;margin-top:16px;color:var(--text2);font-size:.85rem">آمار: <span style="color:var(--success)">✓ ${quizCorrect}</span> / <span style="color:var(--danger)">✗ ${quizWrong}</span> | منبع: ${valid.length} کلمه</div>${historyHtml}</div>`;
 
 if(quizState.answered){
   const nextBtn=document.getElementById('quizNext');
@@ -3909,12 +3992,44 @@ if(quizState.answered){
 
 // Bind quiz type selector
 c.querySelectorAll('[data-qmode]').forEach(btn=>{
-  btn.onclick=()=>{quizMode=btn.dataset.qmode;quizState={card:null,options:[],answered:false,selected:-1,timer:null,quizText:''};quizSessionStreak=0;renderQuiz(c);initQuiz()}});
+  btn.onclick=()=>{if(quizState._speedInterval){clearInterval(quizState._speedInterval);quizState._speedInterval=null}quizMode=btn.dataset.qmode;quizState={card:null,options:[],answered:false,selected:-1,timer:null,quizText:''};quizSessionStreak=0;renderQuiz(c);initQuiz()}});
 
 // Fill-in-the-blank submit
 if(['fill','listen','sentfill','spell'].includes(quizMode)&&!quizState.answered){
   const input=document.getElementById('quizFillInput');
   if(input){input.focus();input.onkeydown=(e)=>{if(e.key==='Enter')checkFillAnswer()}}}
+
+// Speed mode timer
+if(quizMode==='speed'&&!quizState.answered){
+  const timerEl=document.getElementById('speedTimer');
+  let secondsLeft=5;
+  if(quizState._speedInterval){clearInterval(quizState._speedInterval)}
+  quizState._speedInterval=setInterval(()=>{
+    secondsLeft--;
+    if(timerEl)timerEl.textContent=secondsLeft;
+    if(timerEl)timerEl.style.color=secondsLeft<=2?'var(--danger)':'var(--accent)';
+    if(secondsLeft<=0){
+      clearInterval(quizState._speedInterval);quizState._speedInterval=null;
+      quizState.answered=true;quizState.selected=-1;
+      quizWrong++;
+      const w=quizState.card;
+      const idx=S.words.findIndex(x=>x.id===w.id);
+      if(idx>=0)fsrsNext(S.words[idx],1);
+      S.stats.reviewed++;S.stats.wrong++;
+      const dk=todayKey();if(!S.stats.history[dk])S.stats.history[dk]={reviewed:0,correct:0,wrong:0};S.stats.history[dk].reviewed++;S.stats.history[dk].wrong++;
+      if(S.quizStats.currentSession){S.quizStats.currentSession.wrong++}
+      quizSessionStreak=0;save();
+      const correctIdx=quizState.options.indexOf(w.translation);
+      document.querySelectorAll('.quiz-option').forEach(b=>{
+        if(parseInt(b.dataset.qi)===correctIdx){b.classList.add('correct')}
+        b.disabled=true;
+      });
+      const container=document.getElementById('quizContainer');
+      if(container){const msg=document.createElement('div');msg.style.cssText='color:var(--danger);font-size:.9rem;font-weight:600;margin-top:8px';msg.textContent='⏰ زمان تمام شد!';container.appendChild(msg)}
+      setTimeout(()=>{genQuiz();renderQuiz(document.getElementById('content'));initQuiz()},1200);
+    }
+  },1000);
+}
 
 // Listen button
 if(['listen','spell'].includes(quizMode)){
@@ -4157,6 +4272,14 @@ if(quizMode==='mcq'||quizMode==='reverse'){
   const seen=new Set([w.word]);
   for(let i=0;i<3&&others.length;i++){const rIdx=Math.floor(Math.random()*others.length);const r=others.splice(rIdx,1)[0];if(!seen.has(r.word)){opts.add(r.word);seen.add(r.word)}}
   quizState={card:w,options:[...opts].sort(()=>Math.random()-.5),answered:false,selected:-1,timer:null,quizText:definition||w.translation};
+}else if(quizMode==='speed'){
+  // Speed mode: same as MCQ but with timer
+  const opts=new Set();
+  opts.add(w.translation);
+  const distractors=S.words.filter(x=>x.id!==w.id&&x.translation&&x.translation.trim());
+  const seen=new Set([w.translation]);
+  for(let i=0;i<3&&distractors.length;i++){const rIdx=Math.floor(Math.random()*distractors.length);const r=distractors.splice(rIdx,1)[0];if(!seen.has(r.translation)){opts.add(r.translation);seen.add(r.translation)}}
+  quizState={card:w,options:[...opts].sort(()=>Math.random()-0.5),answered:false,selected:-1,timer:null,quizText:''};
 }else{
   // fill, listen
   quizState={card:w,options:[],answered:false,selected:-1,timer:null,quizText:''};
@@ -4185,8 +4308,11 @@ if(quizMode==='reverse'||quizMode==='defmatch'){
   isCorrect=quizState.options[idx]===quizState.card.translation;
 }
 handleQuizAnswer(isCorrect);
+// Clear speed timer if active
+if(quizMode==='speed'&&quizState._speedInterval){clearInterval(quizState._speedInterval);quizState._speedInterval=null}
 renderQuiz(document.getElementById('content'));
-quizState.timer=setTimeout(()=>{genQuiz();renderQuiz(document.getElementById('content'));initQuiz()},1500)}}
+const autoAdvanceMs=quizMode==='speed'?800:1500;
+quizState.timer=setTimeout(()=>{genQuiz();renderQuiz(document.getElementById('content'));initQuiz()},autoAdvanceMs)}}
 
 // ═══════════════════════════════════════════
 // AI CHAT PRO — Full-featured AI Chat (from ai_chat.html)
@@ -4899,7 +5025,7 @@ const DEFAULT_STATE = {
 };
 
 const MODELS = {
-  gemini: ['gemini-2.5-flash', 'gemini-2.5-pro', 'gemini-3-pro-image-preview', 'gemini-3.1-flash-image'],
+  gemini: ['gemini-2.5-flash', 'gemini-2.5-pro', 'gemini-3-pro-image-preview', 'gemini-3.1-flash-image', 'gemini-3.5-flash'],
   openrouter: ['google/gemini-2.5-flash', 'deepseek/deepseek-chat-v3.1', 'anthropic/claude-sonnet-4', 'openai/gpt-oss-20b:free'],
   groq: ['llama-3.3-70b-versatile', 'llama-3.1-8b-instant', 'mixtral-8x7b-32768'],
   pollinations: ['flux', 'flux-realism', 'flux-anime', 'flux-3d', 'turbo', 'kontext', 'nanobanana', 'seedream'],
@@ -5606,7 +5732,7 @@ async function callGemini(chat, wantsImage) {
   };
 
   // All current Gemini models support image output
-  const supportsImage = state.model.includes('gemini-2.5') || state.model.includes('gemini-3') || state.model.includes('image');
+  const supportsImage = state.model.includes('gemini-2.5') || state.model.includes('gemini-3') || state.model.includes('image') || state.model.includes('gemini-3.5');
   if (wantsImage || hasImageAttachment(chat)) {
     if (supportsImage) {
       body.generationConfig.responseModalities = ['TEXT', 'IMAGE'];
@@ -6264,11 +6390,421 @@ window.addEventListener('message',(event)=>{
       });
     }
     save();
-    toast(`آزمون انگلیسی تمام شد: ${data.results.correct}/${data.results.total}`,'success');
+    toast(`تعیین سطح تمام شد: ${data.results.correct}/${data.results.total}`,'success');
   }
 });
 
 // ═══════════════════════════════════════════
+// SPEED REVIEW — مرور سریع تایم‌دار
+// ═══════════════════════════════════════════
+let speedState={queue:[],idx:0,correct:0,wrong:0,done:false,timer:null,secondsLeft:5,totalTime:5,skipped:0};
+function renderSpeedReview(c){
+  // Always clear existing timer first to prevent duplicates
+  if(speedState.timer){clearInterval(speedState.timer);speedState.timer=null}
+  // Guard: only render if we're actually on speed review tab
+  if(currentTab!=='speedreview')return;
+  const due=getDue();
+  if(speedState.done){
+    const acc=speedState.queue.length?Math.round(speedState.correct/speedState.queue.length*100):0;
+    c.innerHTML=`<div class="card" style="max-width:400px;margin:40px auto;text-align:center"><h3 style="margin-bottom:16px">⚡ پایان مرور سریع</h3><div class="stat-grid"><div class="stat-card"><div class="val">${speedState.queue.length}</div><div class="lbl">کل</div></div><div class="stat-card"><div class="val" style="color:var(--success)">${speedState.correct}</div><div class="lbl">درست</div></div><div class="stat-card"><div class="val" style="color:var(--danger)">${speedState.wrong}</div><div class="lbl">نادرست</div></div><div class="stat-card"><div class="val">${acc}%</div><div class="lbl">دقت</div></div></div><div style="display:flex;gap:8px;justify-content:center;margin-top:16px"><button class="btn btn-primary" type="button" onclick="speedState={queue:[],idx:0,correct:0,wrong:0,done:false,timer:null,secondsLeft:5,totalTime:5,skipped:0};renderSpeedReview(document.getElementById('content'))">🔄 تلاش مجدد</button><button class="btn btn-ghost" type="button" onclick="currentTab='review';render()">بازگشت به مرور</button></div></div>`;
+    return;
+  }
+  if(!speedState.queue.length){
+    if(!due.length){c.innerHTML=`<div class="card" style="text-align:center;padding:60px"><div class="empty"><div class="icon">⚡</div><p>کارتی برای مرور سریع نیست</p><p style="font-size:.8rem;margin-top:8px;color:var(--text2)">ابتدا کلماتی اضافه کنید یا منتظر مرور بعدی باشید</p></div></div>`;return}
+    speedState.queue=due.slice(0,Math.min(20,due.length));
+    speedState.idx=0;speedState.correct=0;speedState.wrong=0;speedState.done=false;
+  }
+  if(speedState.idx>=speedState.queue.length){speedState.done=true;renderSpeedReview(c);return}
+  const w=speedState.queue[speedState.idx];
+  const prog=Math.round((speedState.idx/speedState.queue.length)*100);
+  // Build 4 options
+  const allWords=S.words.filter(x=>x.id!==w.id&&x.translation);
+  const wrongOpts=allWords.sort(()=>Math.random()-0.5).slice(0,3).map(x=>x.translation);
+  const options=[w.translation,...wrongOpts].sort(()=>Math.random()-0.5);
+  const correctIdx=options.indexOf(w.translation);
+  c.innerHTML=`<div style="max-width:500px;margin:0 auto">
+    <div class="flex" style="justify-content:space-between;margin-bottom:12px">
+      <span style="color:var(--text2)">${speedState.idx+1} از ${speedState.queue.length}</span>
+      <div class="flex" style="gap:8px;align-items:center">
+        <span style="color:var(--success);font-size:.85rem">✅ ${speedState.correct}</span>
+        <span style="color:var(--danger);font-size:.85rem">❌ ${speedState.wrong}</span>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" style="width:${prog}%"></div></div>
+    <div id="speedTimer" style="text-align:center;font-size:2rem;font-weight:800;margin:16px 0;color:var(--accent)">${speedState.totalTime}</div>
+    <div class="card" style="text-align:center;margin-bottom:16px">
+      <div style="font-size:1.8rem;font-weight:700;margin-bottom:16px">${esc(w.word)}</div>
+      <div style="display:grid;gap:8px">
+        ${options.map((opt,i)=>`<button type="button" class="speed-opt" data-idx="${i}" style="padding:14px;border-radius:12px;border:2px solid var(--border);background:var(--card);color:var(--text);font:inherit;font-size:.95rem;cursor:pointer;transition:all .2s">${esc(opt)}</button>`).join('')}
+      </div>
+    </div>
+  </div>`;
+  // Timer
+  speedState.secondsLeft=speedState.totalTime;
+  const timerEl=document.getElementById('speedTimer');
+  if(speedState.timer)clearInterval(speedState.timer);
+  speedState.timer=setInterval(()=>{
+    speedState.secondsLeft--;
+    if(timerEl)timerEl.textContent=speedState.secondsLeft;
+    if(timerEl)timerEl.style.color=speedState.secondsLeft<=2?'var(--danger)':'var(--accent)';
+    if(speedState.secondsLeft<=0){
+      clearInterval(speedState.timer);speedState.timer=null;
+      // Auto-fail
+      speedState.wrong++;
+      const idx=S.words.findIndex(x=>x.id===w.id);
+      if(idx>=0)fsrsNext(S.words[idx],1);
+      S.stats.reviewed++;S.stats.wrong++;
+      const dk=todayKey();if(!S.stats.history[dk])S.stats.history[dk]={reviewed:0,correct:0,wrong:0};S.stats.history[dk].reviewed++;S.stats.history[dk].wrong++;
+      save();
+      // Highlight correct
+      document.querySelectorAll('.speed-opt').forEach(b=>{
+        if(parseInt(b.dataset.idx)===correctIdx){b.style.background='var(--success)';b.style.color='#fff';b.style.borderColor='var(--success)'}
+        b.disabled=true;
+      });
+      setTimeout(()=>{speedState.idx++;renderSpeedReview(c)},800);
+    }
+  },1000);
+  // Option click
+  document.querySelectorAll('.speed-opt').forEach(btn=>{
+    btn.onclick=()=>{
+      if(speedState.timer){clearInterval(speedState.timer);speedState.timer=null}
+      const oi=parseInt(btn.dataset.idx);
+      const isCorrect=oi===correctIdx;
+      if(isCorrect){
+        btn.style.background='var(--success)';btn.style.color='#fff';btn.style.borderColor='var(--success)';
+        speedState.correct++;
+        const idx=S.words.findIndex(x=>x.id===w.id);
+        if(idx>=0)fsrsNext(S.words[idx],4);
+        S.stats.reviewed++;S.stats.correct++;S.stats.xp+=5;
+      }else{
+        btn.style.background='var(--danger)';btn.style.color='#fff';btn.style.borderColor='var(--danger)';
+        const correctBtn=document.querySelector(`.speed-opt[data-idx="${correctIdx}"]`);
+        if(correctBtn){correctBtn.style.background='var(--success)';correctBtn.style.color='#fff';correctBtn.style.borderColor='var(--success)'}
+        speedState.wrong++;
+        const idx=S.words.findIndex(x=>x.id===w.id);
+        if(idx>=0)fsrsNext(S.words[idx],1);
+        S.stats.reviewed++;S.stats.wrong++;
+      }
+      const dk=todayKey();if(!S.stats.history[dk])S.stats.history[dk]={reviewed:0,correct:0,wrong:0};S.stats.history[dk].reviewed++;if(isCorrect)S.stats.history[dk].correct++;else S.stats.history[dk].wrong++;
+      save();
+      document.querySelectorAll('.speed-opt').forEach(b=>b.disabled=true);
+      setTimeout(()=>{speedState.idx++;renderSpeedReview(c)},600);
+    };
+  });
+}
+
+// ═══════════════════════════════════════════
+// LISTENING MODE — تمرین شنیداری
+// ═══════════════════════════════════════════
+let listenState={queue:[],idx:0,correct:0,wrong:0,done:false,revealed:false};
+function renderListening(c){
+  const due=getDue();
+  if(listenState.done){
+    const acc=listenState.queue.length?Math.round(listenState.correct/listenState.queue.length*100):0;
+    c.innerHTML=`<div class="card" style="max-width:400px;margin:40px auto;text-align:center"><h3 style="margin-bottom:16px">🎧 پایان تمرین شنیداری</h3><div class="stat-grid"><div class="stat-card"><div class="val">${listenState.queue.length}</div><div class="lbl">کل</div></div><div class="stat-card"><div class="val" style="color:var(--success)">${listenState.correct}</div><div class="lbl">درست</div></div><div class="stat-card"><div class="val" style="color:var(--danger)">${listenState.wrong}</div><div class="lbl">نادرست</div></div><div class="stat-card"><div class="val">${acc}%</div><div class="lbl">دقت</div></div></div><div style="display:flex;gap:8px;justify-content:center;margin-top:16px"><button class="btn btn-primary" type="button" onclick="listenState={queue:[],idx:0,correct:0,wrong:0,done:false,revealed:false};renderListening(document.getElementById('content'))">🔄 تلاش مجدد</button><button class="btn btn-ghost" type="button" onclick="currentTab='review';render()">بازگشت</button></div></div>`;
+    return;
+  }
+  if(!listenState.queue.length){
+    const pool=S.words.length?S.words:due;
+    if(!pool.length){c.innerHTML=`<div class="card" style="text-align:center;padding:60px"><div class="empty"><div class="icon">🎧</div><p>کلمه‌ای برای تمرین شنیداری نیست</p></div></div>`;return}
+    listenState.queue=pool.sort(()=>Math.random()-0.5).slice(0,Math.min(15,pool.length));
+    listenState.idx=0;listenState.correct=0;listenState.wrong=0;listenState.done=false;
+  }
+  if(listenState.idx>=listenState.queue.length){listenState.done=true;renderListening(c);return}
+  const w=listenState.queue[listenState.idx];
+  const prog=Math.round((listenState.idx/listenState.queue.length)*100);
+  c.innerHTML=`<div style="max-width:500px;margin:0 auto">
+    <div class="flex" style="justify-content:space-between;margin-bottom:12px">
+      <span style="color:var(--text2)">${listenState.idx+1} از ${listenState.queue.length}</span>
+      <div class="flex" style="gap:8px">
+        <span style="color:var(--success);font-size:.85rem">✅ ${listenState.correct}</span>
+        <span style="color:var(--danger);font-size:.85rem">❌ ${listenState.wrong}</span>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" style="width:${prog}%"></div></div>
+    <div class="card" style="text-align:center;padding:40px">
+      <button type="button" class="btn btn-primary" id="listenPlayBtn" style="font-size:2rem;padding:20px 40px;border-radius:20px;margin-bottom:20px">🔊 گوش بده</button>
+      <div style="margin-bottom:16px">
+        <input type="text" class="input" id="listenInput" placeholder="بنویس چی شنیدی..." style="max-width:300px;font-size:1.1rem;text-align:center;direction:ltr" autocomplete="off" autocapitalize="off" spellcheck="false">
+      </div>
+      <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+        <button type="button" class="btn btn-success" id="listenCheckBtn">بررسی ✓</button>
+        <button type="button" class="btn btn-ghost" id="listenSkipBtn">رد شدن →</button>
+        <button type="button" class="btn btn-ghost" id="listenShowBtn">نمایش جواب 👁</button>
+      </div>
+      <div id="listenFeedback" style="margin-top:16px;display:none"></div>
+    </div>
+  </div>`;
+  const input=document.getElementById('listenInput');
+  const playBtn=document.getElementById('listenPlayBtn');
+  const feedback=document.getElementById('listenFeedback');
+  // Play audio
+  function playWord(){speakWord(w.word)}
+  playBtn.onclick=playWord;
+  setTimeout(playWord,300);
+  input.focus();
+  // Check
+  document.getElementById('listenCheckBtn').onclick=()=>{
+    const userAnswer=input.value.trim().toLowerCase();
+    const correct=w.word.toLowerCase();
+    const isCorrect=userAnswer===correct;
+    listenState.revealed=true;
+    if(isCorrect){
+      listenState.correct++;
+      feedback.style.display='block';
+      feedback.innerHTML='<div style="color:var(--success);font-size:1.1rem;font-weight:700">✅ درست! «'+esc(w.word)+'» = '+esc(w.translation)+'</div>';
+      const idx=S.words.findIndex(x=>x.id===w.id);
+      if(idx>=0)fsrsNext(S.words[idx],5);
+      S.stats.reviewed++;S.stats.correct++;S.stats.xp+=8;
+    }else{
+      listenState.wrong++;
+      feedback.style.display='block';
+      feedback.innerHTML='<div style="color:var(--danger);font-size:1rem;font-weight:600">❌ نادرست! جواب صحیح: <strong>'+esc(w.word)+'</strong> = '+esc(w.translation)+'</div>';
+      const idx=S.words.findIndex(x=>x.id===w.id);
+      if(idx>=0)fsrsNext(S.words[idx],1);
+      S.stats.reviewed++;S.stats.wrong++;
+    }
+    const dk=todayKey();if(!S.stats.history[dk])S.stats.history[dk]={reviewed:0,correct:0,wrong:0};S.stats.history[dk].reviewed++;if(isCorrect)S.stats.history[dk].correct++;else S.stats.history[dk].wrong++;
+    save();
+    input.disabled=true;
+    setTimeout(()=>{listenState.idx++;listenState.revealed=false;renderListening(c)},1500);
+  };
+  // Enter key
+  input.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();document.getElementById('listenCheckBtn').click()}};
+  // Skip
+  document.getElementById('listenSkipBtn').onclick=()=>{
+    listenState.idx++;listenState.revealed=false;renderListening(c);
+  };
+  // Show answer
+  document.getElementById('listenShowBtn').onclick=()=>{
+    listenState.revealed=true;listenState.wrong++;
+    feedback.style.display='block';
+    feedback.innerHTML='<div style="color:var(--warning);font-size:1rem">👁 جواب: <strong>'+esc(w.word)+'</strong> = '+esc(w.translation)+'</div>';
+    const idx=S.words.findIndex(x=>x.id===w.id);
+    if(idx>=0)fsrsNext(S.words[idx],2);
+    S.stats.reviewed++;S.stats.wrong++;
+    const dk=todayKey();if(!S.stats.history[dk])S.stats.history[dk]={reviewed:0,correct:0,wrong:0};S.stats.history[dk].reviewed++;S.stats.history[dk].wrong++;
+    save();
+    input.disabled=true;
+    setTimeout(()=>{listenState.idx++;listenState.revealed=false;renderListening(c)},1500);
+  };
+}
+
+// ═══════════════════════════════════════════
+// WORD WEB — نقشه ذهنی واژگان
+// ═══════════════════════════════════════════
+function renderWordWeb(c){
+  if(!S.words.length){c.innerHTML=`<div class="card" style="text-align:center;padding:60px"><div class="empty"><div class="icon">🗺️</div><p>کلمه‌ای برای نمایش نقشه نیست</p></div></div>`;return}
+  c.innerHTML=`<div style="margin-bottom:16px"><div class="flex" style="gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px">
+    <input type="text" class="input" id="webSearch" placeholder="🔍 کلمه‌ای جستجو کنید..." style="max-width:300px">
+    <select class="input" id="webWordSelect" style="max-width:250px">${S.words.map((w,i)=>`<option value="${i}">${esc(w.word)} — ${esc(w.translation||'')}</option>`).join('')}</select>
+  </div></div>
+  <div class="card" style="padding:0;overflow:hidden;position:relative">
+    <canvas id="webCanvas" width="800" height="500" style="width:100%;height:500px;display:block;cursor:grab"></canvas>
+    <div id="webTooltip" style="display:none;position:absolute;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 14px;font-size:.82rem;box-shadow:var(--shadow);pointer-events:none;z-index:10;max-width:200px"></div>
+  </div>`;
+  const canvas=document.getElementById('webCanvas');
+  const ctx=canvas.getContext('2d');
+  const tooltip=document.getElementById('webTooltip');
+  const dpr=window.devicePixelRatio||1;
+  canvas.width=canvas.offsetWidth*dpr;
+  canvas.height=500*dpr;
+  ctx.scale(dpr,dpr);
+  const W=canvas.offsetWidth;
+  const H=500;
+  let nodes=[];
+  let edges=[];
+  let hoveredNode=null;
+  let dragNode=null;
+  let dragOff={x:0,y:0};
+  function buildGraph(wordIdx){
+    nodes=[];edges=[];
+    const w=S.words[wordIdx];
+    if(!w)return;
+    // Center node
+    nodes.push({id:w.id,word:w.word,trans:w.translation||'',x:W/2,y:H/2,r:40,color:'var(--accent)',isCenter:true});
+    // Synonyms
+    (w.synonyms||[]).forEach((s,i)=>{
+      const angle=(i/(w.synonyms.length||1))*Math.PI*2-Math.PI/2;
+      const dist=150;
+      nodes.push({id:'syn_'+i,word:s,trans:'',x:W/2+Math.cos(angle)*dist,y:H/2+Math.sin(angle)*dist,r:28,color:'var(--success)'});
+      edges.push({from:w.id,to:'syn_'+i,color:'var(--success)',label:'مترادف'});
+    });
+    // Antonyms
+    (w.antonyms||[]).forEach((a,i)=>{
+      const angle=((i+(w.synonyms||[]).length)/((w.synonyms||[]).length+(w.antonyms||[]).length||1))*Math.PI*2-Math.PI/2;
+      const dist=150;
+      nodes.push({id:'ant_'+i,word:a,trans:'',x:W/2+Math.cos(angle)*dist,y:H/2+Math.sin(angle)*dist,r:28,color:'var(--danger)'});
+      edges.push({from:w.id,to:'ant_'+i,color:'var(--danger)',label:'متضاد'});
+    });
+    // Word family
+    const family=[...(w.wordFamily||[])].slice(0,6);
+    family.forEach((f,i)=>{
+      const angle=(i/(family.length||1))*Math.PI*2+Math.PI/4;
+      const dist=220;
+      nodes.push({id:'fam_'+i,word:f,trans:'',x:W/2+Math.cos(angle)*dist,y:H/2+Math.sin(angle)*dist,r:24,color:'var(--warning)'});
+      edges.push({from:w.id,to:'fam_'+i,color:'var(--warning)',label:'خانواده'});
+    });
+  }
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    // Draw edges
+    edges.forEach(e=>{
+      const from=nodes.find(n=>n.id===e.from);
+      const to=nodes.find(n=>n.id===e.to);
+      if(!from||!to)return;
+      ctx.beginPath();ctx.moveTo(from.x,from.y);ctx.lineTo(to.x,to.y);
+      ctx.strokeStyle=getComputedStyle(document.documentElement).getPropertyValue(e.color.replace('var(','').replace(')',''))||'#6c5ce7';
+      ctx.lineWidth=2;ctx.setLineDash([5,5]);ctx.stroke();ctx.setLineDash([]);
+      // Edge label
+      const mx=(from.x+to.x)/2,my=(from.y+to.y)/2;
+      ctx.fillStyle=getComputedStyle(document.documentElement).getPropertyValue('--text2')||'#8b90a5';
+      ctx.font='10px Vazirmatn';ctx.textAlign='center';ctx.fillText(e.label,mx,my-6);
+    });
+    // Draw nodes
+    nodes.forEach(n=>{
+      const isHovered=hoveredNode===n;
+      ctx.beginPath();ctx.arc(n.x,n.y,n.r+(isHovered?4:0),0,Math.PI*2);
+      const col=getComputedStyle(document.documentElement).getPropertyValue(n.color.replace('var(','').replace(')',''))||'#6c5ce7';
+      ctx.fillStyle=col;ctx.fill();
+      ctx.strokeStyle=isHovered?'#fff':col;ctx.lineWidth=isHovered?3:1;ctx.stroke();
+      // Text
+      ctx.fillStyle='#fff';ctx.font=(n.isCenter?'bold 14px':'12px')+' Vazirmatn';ctx.textAlign='center';ctx.textBaseline='middle';
+      const displayText=n.word.length>12?n.word.slice(0,10)+'...':n.word;
+      ctx.fillText(displayText,n.x,n.y);
+    });
+  }
+  buildGraph(0);draw();
+  // Mouse events
+  canvas.onmousemove=e=>{
+    const rect=canvas.getBoundingClientRect();
+    const mx=e.clientX-rect.left;const my=e.clientY-rect.top;
+    hoveredNode=null;
+    for(const n of nodes){
+      const dx=mx-n.x,dy=my-n.y;
+      if(dx*dx+dy*dy<=n.r*n.r){hoveredNode=n;break}
+    }
+    canvas.style.cursor=hoveredNode?'pointer':'grab';
+    if(hoveredNode){
+      tooltip.style.display='block';
+      tooltip.style.left=Math.min(mx+12,W-200)+'px';
+      tooltip.style.top=(my-40)+'px';
+      tooltip.innerHTML='<strong>'+esc(hoveredNode.word)+'</strong>'+(hoveredNode.trans?'<br>'+esc(hoveredNode.trans):'');
+    }else{tooltip.style.display='none'}
+    if(dragNode){
+      dragNode.x=mx-dragOff.x;dragNode.y=my-dragOff.y;
+      draw();
+    }
+  };
+  canvas.onmousedown=e=>{
+    if(hoveredNode){dragNode=hoveredNode;const rect=canvas.getBoundingClientRect();dragOff={x:e.clientX-rect.left-dragNode.x,y:e.clientY-rect.top-dragNode.y};canvas.style.cursor='grabbing'}
+  };
+  canvas.onmouseup=()=>{dragNode=null;canvas.style.cursor='grab'};
+  canvas.onmouseleave=()=>{dragNode=null;hoveredNode=null;tooltip.style.display='none';draw()};
+  // Select word
+  const select=document.getElementById('webWordSelect');
+  select.onchange=()=>{buildGraph(parseInt(select.value));draw()};
+  const search=document.getElementById('webSearch');
+  search.oninput=()=>{
+    const q=search.value.trim().toLowerCase();
+    if(!q)return;
+    const idx=S.words.findIndex(w=>w.word.toLowerCase().includes(q)||((w.translation||'').toLowerCase().includes(q)));
+    if(idx>=0){select.value=idx;buildGraph(idx);draw()}
+  };
+}
+
+// ═══════════════════════════════════════════
+// SMART CALENDAR — تقویم مرور هوشمند
+// ═══════════════════════════════════════════
+function renderCalendar(c){
+  const today=new Date();
+  const predictions=[];
+  for(let d=0;d<30;d++){
+    const date=new Date(today);date.setDate(date.getDate()+d);
+    const dateStr=date.toISOString().slice(0,10);
+    let count=0;
+    S.words.forEach(w=>{
+      if(!w.due)return;
+      const dueDate=w.due.slice(0,10);
+      if(dueDate===dateStr)count++;
+    });
+    predictions.push({date:dateStr,count,day:date.toLocaleDateString('fa-IR',{weekday:'short'}),num:date.getDate()});
+  }
+  const totalDue=predictions.reduce((s,p)=>s+p.count,0);
+  const maxCount=Math.max(1,...predictions.map(p=>p.count));
+  c.innerHTML=`<div style="max-width:700px;margin:0 auto">
+    <div class="stat-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:20px">
+      <div class="stat-card"><div class="val" style="color:var(--accent)">${getDue().length}</div><div class="lbl">قابل مرور امروز</div></div>
+      <div class="stat-card"><div class="val" style="color:var(--success)">${totalDue}</div><div class="lbl">کل مرور ۳۰ روز</div></div>
+      <div class="stat-card"><div class="val" style="color:var(--warning)">${S.words.length}</div><div class="lbl">کل کلمات</div></div>
+    </div>
+    <div class="card">
+      <h3 style="margin-bottom:16px;color:var(--accent)">📅 پیش‌بینی مرور ۳۰ روز آینده</h3>
+      <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px">
+        ${predictions.map(p=>{
+          const pct=p.count/maxCount;
+          const bg=pct>0.7?'var(--danger)':pct>0.3?'var(--warning)':pct>0?'var(--success)':'var(--bg)';
+          const isToday=p.date===todayKey();
+          return `<div style="text-align:center;padding:8px 4px;border-radius:10px;background:${pct>0?bg:'var(--bg)'};color:${pct>0.3?'#fff':'var(--text)'};border:${isToday?'2px solid var(--accent)':'1px solid var(--border)'};font-size:.75rem;min-height:60px;display:flex;flex-direction:column;justify-content:center">
+            <div style="font-size:.65rem;opacity:.7">${p.day}</div>
+            <div style="font-weight:700;font-size:.9rem">${p.num}</div>
+            <div style="font-size:.7rem;margin-top:2px">${p.count>0?p.count+' کلمه':'—'}</div>
+          </div>`;
+        }).join('')}
+      </div>
+      <div style="display:flex;gap:8px;justify-content:center;margin-top:16px;font-size:.75rem;color:var(--text2)">
+        <span style="display:flex;align-items:center;gap:4px"><span style="width:12px;height:12px;border-radius:3px;background:var(--success);display:inline-block"></span> کم</span>
+        <span style="display:flex;align-items:center;gap:4px"><span style="width:12px;height:12px;border-radius:3px;background:var(--warning);display:inline-block"></span> متوسط</span>
+        <span style="display:flex;align-items:center;gap:4px"><span style="width:12px;height:12px;border-radius:3px;background:var(--danger);display:inline-block"></span> زیاد</span>
+      </div>
+    </div>
+    <div class="card" style="margin-top:16px">
+      <h3 style="margin-bottom:12px;color:var(--accent)">📊 نمودار پیش‌بینی</h3>
+      <div style="display:flex;align-items:flex-end;gap:4px;height:150px;padding:10px 0">
+        ${predictions.slice(0,14).map(p=>{
+          const h=Math.max(4,p.count/maxCount*130);
+          const bg=p.count>maxCount*0.7?'var(--danger)':p.count>maxCount*0.3?'var(--warning)':'var(--accent)';
+          return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:2px">
+            <div style="font-size:.6rem;color:var(--text2)">${p.count||''}</div>
+            <div style="width:100%;height:${h}px;background:${bg};border-radius:4px 4px 0 0;transition:height .3s"></div>
+            <div style="font-size:.55rem;color:var(--text2);writing-mode:vertical-rl;transform:rotate(180deg);height:30px;overflow:hidden">${p.day}</div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>
+  </div>`;
+}
+
+// ═══════════════════════════════════════════
+// DAILY CHALLENGE — چالش روزانه
+// ═══════════════════════════════════════════
+function getDailyChallenge(){
+  const dk=todayKey();
+  const history=S.stats.history[dk]||{reviewed:0,correct:0,wrong:0};
+  const streak=S.stats.streak||0;
+  const dailyGoal=20; // Default daily goal
+  const progress=Math.min(100,Math.round(history.reviewed/dailyGoal*100));
+  const completed=history.reviewed>=dailyGoal;
+  return {history,streak,dailyGoal,progress,completed,reviewed:history.reviewed,correct:history.correct,wrong:history.wrong};
+}
+// Expose daily challenge in sidebar or as a banner
+function renderDailyChallengeWidget(){
+  const dc=getDailyChallenge();
+  return `<div style="padding:12px 16px;background:linear-gradient(135deg,var(--accent),#764ba2);border-radius:12px;margin:8px 10px;color:#fff">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+      <span style="font-size:.82rem;font-weight:600">🏆 چالش روزانه</span>
+      <span style="font-size:.75rem;opacity:.8">🔥 ${dc.streak} روز</span>
+    </div>
+    <div style="height:6px;background:rgba(255,255,255,.2);border-radius:3px;overflow:hidden;margin-bottom:6px">
+      <div style="height:100%;width:${dc.progress}%;background:#fff;border-radius:3px;transition:width .5s"></div>
+    </div>
+    <div style="font-size:.72rem;display:flex;justify-content:space-between;opacity:.9">
+      <span>${dc.reviewed}/${dc.dailyGoal} کلمه</span>
+      <span>${dc.completed?'✅ تکمیل شد!':'⏳ '+dc.progress+'%'}</span>
+    </div>
+  </div>`;
+}
+
 function renderAbout(c){
 c.innerHTML=`<div style="max-width:700px;margin:0 auto">
   <div style="text-align:center;background:linear-gradient(135deg,var(--accent),#764ba2);color:#fff;padding:48px 32px;border-radius:20px;margin-bottom:28px;box-shadow:0 16px 48px rgba(108,92,231,.35)">
@@ -6282,20 +6818,32 @@ c.innerHTML=`<div style="max-width:700px;margin:0 auto">
     <h3 style="margin-bottom:12px;color:var(--accent)">🆕 ویژگی‌های جدید نسخه ۳.۸.۱</h3>
     <div style="display:grid;gap:8px;margin-bottom:16px">
       <div style="padding:10px 14px;background:var(--bg);border-radius:8px;border-right:3px solid var(--accent)">
-        <strong style="font-size:.9rem">📚 تمرین و توضیح کلمه</strong>
-        <p style="color:var(--text2);font-size:.8rem;margin-top:4px">بخش جدید در کارت مرور با دو تب: توضیحات (مثال، مترادف، متضاد، ترفند حفظ کردن، نکته استفاده) و آزمون (سوال چندگزینه‌ای خودکار از معنی، مترادف و متضاد).</p>
+        <strong style="font-size:.9rem">⚡ مرور سریع (Speed Review)</strong>
+        <p style="color:var(--text2);font-size:.8rem;margin-top:4px">مرور تایم‌دار با شمارش معکوس ۵ ثانیه‌ای. اگر جواب ندهید خودکار نادرست حساب می‌شود. عالی برای مرور حجم بالا در زمان کم.</p>
       </div>
       <div style="padding:10px 14px;background:var(--bg);border-radius:8px;border-right:3px solid var(--success)">
-        <strong style="font-size:.9rem">🧠 ترفند حفظ کردن خودکار</strong>
-        <p style="color:var(--text2);font-size:.8rem;margin-top:4px">تحلیل پیشوندها (un-, re-, dis-...) و پسوندها (-tion, -ness, -able...) با توضیح فارسی. انجمن حرف اول. تقسیم کلمات بلند. قافیه‌های مشابه.</p>
+        <strong style="font-size:.9rem">🎧 تمرین شنیداری (Listening Mode)</strong>
+        <p style="color:var(--text2);font-size:.8rem;margin-top:4px">کلمه فقط خوانده می‌شود (بدون متن). باید بنویسید چه شنیدید. تلفظ و املاء را همزمان تمرین می‌کند.</p>
       </div>
       <div style="padding:10px 14px;background:var(--bg);border-radius:8px;border-right:3px solid var(--warning)">
-        <strong style="font-size:.9rem">🎯 آزمون خودکار کلمه</strong>
-        <p style="color:var(--text2);font-size:.8rem;margin-top:4px">۴ نوع سوال چندگزینه‌ای: معنی کلمه، شناسایی کلمه از روی معنی، مترادف و متضاد. فیدبک فوری با رنگ سبز/قرمز. نمایش پاسخ صحیح. نتیجه با درصد و تلاش مجدد.</p>
+        <strong style="font-size:.9rem">🗺️ نقشه ذهنی واژگان (Word Web)</strong>
+        <p style="color:var(--text2);font-size:.8rem;margin-top:4px">نمایش بصری ارتباط کلمات روی بوم (Canvas). مترادف‌ها، متضادها و خانواده واژگانی با رنگ‌های مختلف. قابلیت drag & drop گره‌ها.</p>
       </div>
       <div style="padding:10px 14px;background:var(--bg);border-radius:8px;border-right:3px solid var(--danger)">
+        <strong style="font-size:.9rem">📅 تقویم مرور هوشمند</strong>
+        <p style="color:var(--text2);font-size:.8rem;margin-top:4px">پیش‌بینی ۳۰ روز آینده با نمودار میله‌ای. نمایش تعداد کلمات قابل مرور هر روز با رنگ‌بندی سبز/زرد/قرمز.</p>
+      </div>
+      <div style="padding:10px 14px;background:var(--bg);border-radius:8px;border-right:3px solid var(--accent)">
+        <strong style="font-size:.9rem">🏆 چالش روزانه</strong>
+        <p style="color:var(--text2);font-size:.8rem;margin-top:4px">هدف روزانه ۲۰ کلمه با نوار پیشرفت در سایدبار. نمایش streak (روزهای متوالی). انگیزه برای مرور منظم هر روز.</p>
+      </div>
+      <div style="padding:10px 14px;background:var(--bg);border-radius:8px;border-right:3px solid var(--success)">
+        <strong style="font-size:.9rem">📚 تمرین و توضیح کلمه</strong>
+        <p style="color:var(--text2);font-size:.8rem;margin-top:4px">بخش جدید در کارت مرور با دو تب: توضیحات (مثال، مترادف، متضاد، ترفند حفظ کردن، نکته استفاده) و آزمون (سوال چندگزینه‌ای خودکار).</p>
+      </div>
+      <div style="padding:10px 14px;background:var(--bg);border-radius:8px;border-right:3px solid var(--warning)">
         <strong style="font-size:.9rem">🤖 چت هوش مصنوعی — نسخه کامل</strong>
-        <p style="color:var(--text2);font-size:.8rem;margin-top:4px">بازنویسی کامل با ۵ ارائه‌دهنده (Gemini، OpenRouter، Groq، Pollinations، Puter). پشتیبانی چند کلید API با چرخش خودکار. تب‌های چت متعدد. ضمیمه تصویر (پیست، درگ‌اَنددراپ). تولید و ویرایش تصویر. خروجی TXT/JSON. تم تاریک/روشن.</p>
+        <p style="color:var(--text2);font-size:.8rem;margin-top:4px">بازنویسی کامل با ۵ ارائه‌دهنده. پشتیبانی چند کلید API. تب‌های چت متعدد. ضمیمه تصویر. تولید و ویرایش تصویر. خروجی TXT/JSON.</p>
       </div>
     </div>
   </div>
@@ -6310,8 +6858,13 @@ c.innerHTML=`<div style="max-width:700px;margin:0 auto">
       <div style="padding:8px 12px;background:var(--bg);border-radius:8px;font-size:.85rem">📄 خواننده PDF با پاپ‌آپ ترجمه خودکار</div>
       <div style="padding:8px 12px;background:var(--bg);border-radius:8px;font-size:.85rem">🌐 ترجمه خودکار با ۱۳ زبان و فرهنگ لغت</div>
       <div style="padding:8px 12px;background:var(--bg);border-radius:8px;font-size:.85rem">🎮 آزمون هوشمند ۸ حالتی با به‌روزرسانی خودکار لایتنر</div>
-      <div style="padding:8px 12px;background:var(--bg);border-radius:8px;font-size:.85rem">🎯 آزمون انگلیسی با ارتباط مستقیم با لایتنر</div>
-      <div style="padding:8px 12px;background:var(--bg);border-radius:8px;font-size:.85rem">📚 تمرین و توضیح کلمه (ترفند حفظ + آزمون)</div>
+      <div style="padding:8px 12px;background:var(--bg);border-radius:8px;font-size:.85rem">🎯 تعیین سطح با ارتباط مستقیم با لایتنر</div>
+      <div style="padding:8px 12px;background:var(--bg);border-radius:8px;font-size:.85rem">⚡ مرور سریع تایم‌دار</div>
+      <div style="padding:8px 12px;background:var(--bg);border-radius:8px;font-size:.85rem">🎧 تمرین شنیداری (املاء)</div>
+      <div style="padding:8px 12px;background:var(--bg);border-radius:8px;font-size:.85rem">🗺️ نقشه ذهنی واژگان</div>
+      <div style="padding:8px 12px;background:var(--bg);border-radius:8px;font-size:.85rem">📅 تقویم مرور هوشمند</div>
+      <div style="padding:8px 12px;background:var(--bg);border-radius:8px;font-size:.85rem">🏆 چالش روزانه با streak</div>
+      <div style="padding:8px 12px;background:var(--bg);border-radius:8px;font-size:.85rem">📚 تمرین و توضیح کلمه</div>
       <div style="padding:8px 12px;background:var(--bg);border-radius:8px;font-size:.85rem">🤖 چت هوش مصنوعی ۵ ارائه‌دهنده</div>
       <div style="padding:8px 12px;background:var(--bg);border-radius:8px;font-size:.85rem">📰 خواندن پیشرفته با تحلیل متن و PDF</div>
       <div style="padding:8px 12px;background:var(--bg);border-radius:8px;font-size:.85rem">🗂️ مدیریت دسته‌ها و گروه‌های واژگانی</div>
@@ -6373,12 +6926,31 @@ c.innerHTML=`<div style="max-width:700px;margin:0 auto">
   </div>
 
   <div class="card" style="margin-bottom:16px">
+    <h3 style="margin-bottom:12px;color:var(--accent)">🔗 ارتباط با ما</h3>
+    <div style="display:grid;gap:8px">
+      <a href="http://readner.eu.cc/" target="_blank" style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--bg);border-radius:10px;color:var(--text);text-decoration:none;transition:all .2s">
+        <span style="font-size:1.3rem">🌐</span>
+        <div><div style="font-weight:600;font-size:.9rem">وبسایت</div><div style="font-size:.75rem;color:var(--text2)">readner.eu.cc</div></div>
+      </a>
+      <a href="https://t.me/MyLeitner" target="_blank" style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--bg);border-radius:10px;color:var(--text);text-decoration:none;transition:all .2s">
+        <span style="font-size:1.3rem">💬</span>
+        <div><div style="font-weight:600;font-size:.9rem">تلگرام</div><div style="font-size:.75rem;color:var(--text2)">@MyLeitner</div></div>
+      </a>
+      <a href="https://github.com/niksiratforex-ux/litreader" target="_blank" style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--bg);border-radius:10px;color:var(--text);text-decoration:none;transition:all .2s">
+        <span style="font-size:1.3rem">💻</span>
+        <div><div style="font-weight:600;font-size:.9rem">گیت‌هاب</div><div style="font-size:.75rem;color:var(--text2)">github.com/niksiratforex-ux/litreader</div></div>
+      </a>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:16px">
     <h3 style="margin-bottom:12px;color:var(--accent)">🛡️ حریم خصوصی</h3>
     <p style="color:var(--text2);font-size:.85rem;line-height:1.8">تمام داده‌ها در مرورگر شما ذخیره می‌شوند و هرگز به سرور ارسال نمی‌شوند. API Key شما فقط در localStorage مرورگر ذخیره می‌شود. ترجمه از API عمومی رایگان انجام می‌شود. پشتیبان خودکار در IndexedDB نگهداری می‌شود.</p>
   </div>
 
   <div style="text-align:center;padding:20px;color:var(--text2);font-size:.8rem">
     <p>ساخته شده با ❤️ برای یادگیری بهتر واژگان</p>
+    <p style="margin-top:4px"><a href="http://readner.eu.cc/" target="_blank" style="color:var(--accent);text-decoration:none">readner.eu.cc</a> · <a href="https://t.me/MyLeitner" target="_blank" style="color:var(--accent);text-decoration:none">@MyLeitner</a></p>
     <p style="margin-top:4px;opacity:.6">Leitner Pro v3.8.1 — FSRS Algorithm</p>
   </div>
 </div>`}
