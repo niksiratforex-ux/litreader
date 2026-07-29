@@ -917,6 +917,7 @@ function tierLabel(t){return t===1?'پرکاربرد':t===2?'رایج':t===3?'م
 // ═══════════════════════════════════════════
 // TOAST
 // ═══════════════════════════════════════════
+function trackWordAdded(){var dk=todayKey();if(!S.stats.history[dk])S.stats.history[dk]={reviewed:0,correct:0,wrong:0};if(!S.stats.history[dk].added)S.stats.history[dk].added=0;S.stats.history[dk].added++}
 function toast(msg,type='info'){
 const c=document.getElementById('toasts');
 const t=document.createElement('div');
@@ -944,7 +945,7 @@ function speakWord(word,lang){
   if(!word||!window.speechSynthesis)return;
   window.speechSynthesis.cancel();
   const u=new SpeechSynthesisUtterance(word);
-  u.lang=lang||'en-US';u.rate=0.85;
+  u.lang=lang||'en-US';u.rate=S&&S.settings&&S.settings.speechRate?S.settings.speechRate:0.85;
   window.speechSynthesis.speak(u)}
 
 function decodeHtmlEntities(str){
@@ -1342,7 +1343,7 @@ async function renderTransPopup(word,rect){
     const allSynonyms=dictResult?dictResult.meanings.flatMap(m=>m.synonyms):[];
     const pos=dictResult&&dictResult.meanings[0]?dictResult.meanings[0].partOfSpeech:'';
     S.words.push(createCard({word:displayWord,translation:persianResult||'',ipa:ipaText,definitions:allDefs,examples:allExamples,synonyms:allSynonyms,partOfSpeech:pos,audioUs:dictResult?dictResult.audioUs||'':'',audioBr:dictResult?dictResult.audioBr||'':''}));
-    save();
+    trackWordAdded();save();
     toast(displayWord+' به لایتنر اضافه شد','success');
     const addBtn=document.getElementById('transAddBtn');
     if(addBtn){addBtn.disabled=true;addBtn.textContent='✅ در کتابخانه موجود است'}
@@ -1470,6 +1471,8 @@ card.onkeydown=e=>{if(e.key===' '||e.key==='Enter'){e.preventDefault();card.oncl
 ratingBar.onclick=(e)=>{const btn=e.target.closest('[data-rate]');if(!btn||reviewRatingPending)return;rateReview(parseInt(btn.dataset.rate))};
 const reviewSpeakBtn=document.getElementById('reviewSpeakBtn');
 if(reviewSpeakBtn)reviewSpeakBtn.onclick=(e)=>{e.stopPropagation();speakWord(w.word)};
+// Auto-pronounce if enabled
+if(S.settings.autoPronounce){setTimeout(function(){speakWord(w.word,S.settings.speechRate?'en-US':'en-US')},300)};
 // Word Drill — تمرین و توضیح کلمه
 const wordDrillBtn=document.getElementById('wordDrillBtn');
 if(wordDrillBtn){
@@ -3511,6 +3514,15 @@ function bindReadingEvents(c,doc){
       showReadingWordDetail(word,span,doc);
     };
   }
+  // Close word detail popup when clicking anywhere outside it
+  if(window._readingClickOutside)document.removeEventListener('click',window._readingClickOutside);
+  window._readingClickOutside=function(e){
+    var wdPopup=document.getElementById('readingWordDetail');
+    if(!wdPopup||!wdPopup.classList.contains('visible'))return;
+    if(e.target.closest('.reading-word-detail')||e.target.closest('.reading-word'))return;
+    wdPopup.classList.remove('visible');
+  };
+  document.addEventListener('click',window._readingClickOutside);
   c.querySelectorAll('[data-vword]').forEach(function(item){
     item.onclick=function(){readingSearchQuery=item.dataset.vword;readingViewMode='raw';renderReading(c)};
   });
@@ -3784,7 +3796,7 @@ async function showReadingWordDetail(word,spanEl,doc){
       source:'reading-mode'
     };
     S.words.push(createCard(cardData));
-    save();toast(word+' به لایتنر اضافه شد','success');popup.classList.remove('visible');renderReading(document.getElementById('content'));
+    trackWordAdded();save();toast(word+' به لایتنر اضافه شد','success');popup.classList.remove('visible');renderReading(document.getElementById('content'));
   };
   // Add to Long-term button
   var ltBtn=document.getElementById('rdAddLT');
@@ -4412,11 +4424,12 @@ const calTotalDue=calPredictions.reduce((s,p)=>s+p.count,0);
 const calMaxCount=Math.max(1,...calPredictions.map(p=>p.count));
 
 c.innerHTML=`<div class="card" style="margin-bottom:16px;text-align:center;padding:20px"><div style="font-size:2.5rem;margin-bottom:4px">${levelInfo.icon}</div><div style="font-size:1.2rem;font-weight:700;color:var(--accent)">${levelInfo.name}</div><div style="font-size:.85rem;color:var(--text2);margin:6px 0">${levelInfo.xp} امتیاز</div>${levelInfo.next?`<div style="max-width:300px;margin:0 auto"><div style="height:8px;background:var(--border);border-radius:4px;overflow:hidden"><div style="height:100%;width:${levelInfo.progress}%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:4px;transition:width .5s"></div></div><div style="font-size:.75rem;color:var(--text2);margin-top:4px">${levelInfo.next.icon} ${levelInfo.next.name}: ${levelInfo.next.min-levelInfo.xp} امتیاز دیگر</div></div>`:'<div style="font-size:.85rem;color:var(--warning)">حداکثر سطح رسیده!</div>'}</div>
-<div class="stat-grid"><div class="card stat-card"><div class="val">${S.words.length}</div><div class="lbl">کل کلمات</div></div><div class="card stat-card"><div class="val">${S.longTerm.length}</div><div class="lbl">حافظه بلندمدت</div></div><div class="card stat-card"><div class="val" style="color:var(--warning)">${dueCount}</div><div class="lbl">مرور امروز</div></div><div class="card stat-card"><div class="val">${todayH.reviewed}</div><div class="lbl">مرور شده امروز</div></div><div class="card stat-card"><div class="val" style="color:var(--success)">${todayH.correct}</div><div class="lbl">درست امروز</div></div><div class="card stat-card"><div class="val" style="color:var(--danger)">${todayH.wrong}</div><div class="lbl">نادرست امروز</div></div><div class="card stat-card"><div class="val">${S.stats.streak}</div><div class="lbl">روز متوالی</div></div><div class="card stat-card"><div class="val" style="color:var(--accent)">${S.stats.xp}</div><div class="lbl">امتیاز کل</div></div><div class="card stat-card"><div class="val" style="color:var(--success)">${accuracyPct}%</div><div class="lbl">دقت کل</div></div><div class="card stat-card"><div class="val" style="color:var(--accent2)">${masteredCount}</div><div class="lbl">تثبیت شده</div></div><div class="card stat-card"><div class="val" style="font-size:1rem">${Math.round(new Blob([localStorage.getItem('leitner_pro')||'']).size/1024)}KB</div><div class="lbl">حجم داده</div></div></div><div class="card" style="margin-bottom:16px;padding:24px"><h3 style="margin-bottom:12px">تقویم مرور (۵۲ هفته اخیر)</h3>${heatmapHtml}<div class="heatmap-legend"><span>کم</span><div class="heatmap-legend-cell heatmap-l0"></div><div class="heatmap-legend-cell heatmap-l1"></div><div class="heatmap-legend-cell heatmap-l2"></div><div class="heatmap-legend-cell heatmap-l3"></div><div class="heatmap-legend-cell heatmap-l4"></div><span>زیاد</span></div></div><div class="grid-2"><div class="card"><h3 style="margin-bottom:12px">توزیع جعبه‌ها</h3><canvas id="boxChart"></canvas></div><div class="card"><h3 style="margin-bottom:12px">۷ روز اخیر</h3><canvas id="weekChart"></canvas></div></div><div class="card" style="margin-top:16px"><h3 style="margin-bottom:12px">پیش‌بینی ۱۴ روز آینده</h3><canvas id="forecastChart"></canvas></div><div class="card" style="margin-top:16px"><h3 style="margin-bottom:12px;color:var(--accent)">📅 پیش‌بینی مرور ۳۰ روز آینده <span style="font-size:.75rem;font-weight:400;color:var(--text2)">(${calTotalDue} کلمه کل)</span></h3><div style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px">${calPredictions.map(p=>{const pct=p.count/calMaxCount;const bg=pct>0.7?'var(--danger)':pct>0.3?'var(--warning)':pct>0?'var(--success)':'var(--bg)';const isToday=p.date===todayKey();return `<div style="text-align:center;padding:8px 4px;border-radius:10px;background:${pct>0?bg:'var(--bg)'};color:${pct>0.3?'#fff':'var(--text)'};border:${isToday?'2px solid var(--accent)':'1px solid var(--border)'};font-size:.75rem;min-height:60px;display:flex;flex-direction:column;justify-content:center"><div style="font-size:.65rem;opacity:.7">${p.day}</div><div style="font-weight:700;font-size:.9rem">${p.num}</div><div style="font-size:.7rem;margin-top:2px">${p.count>0?p.count+' کلمه':'—'}</div></div>`}).join('')}</div><div style="display:flex;gap:8px;justify-content:center;margin-top:12px;font-size:.75rem;color:var(--text2)"><span style="display:flex;align-items:center;gap:4px"><span style="width:12px;height:12px;border-radius:3px;background:var(--success);display:inline-block"></span> کم</span><span style="display:flex;align-items:center;gap:4px"><span style="width:12px;height:12px;border-radius:3px;background:var(--warning);display:inline-block"></span> متوسط</span><span style="display:flex;align-items:center;gap:4px"><span style="width:12px;height:12px;border-radius:3px;background:var(--danger);display:inline-block"></span> زیاد</span></div></div>`;
+<div class="stat-grid"><div class="card stat-card"><div class="val">${S.words.length}</div><div class="lbl">کل کلمات</div></div><div class="card stat-card"><div class="val">${S.longTerm.length}</div><div class="lbl">حافظه بلندمدت</div></div><div class="card stat-card"><div class="val" style="color:var(--warning)">${dueCount}</div><div class="lbl">مرور امروز</div></div><div class="card stat-card"><div class="val">${todayH.reviewed}</div><div class="lbl">مرور شده امروز</div></div><div class="card stat-card"><div class="val" style="color:var(--success)">${todayH.correct}</div><div class="lbl">درست امروز</div></div><div class="card stat-card"><div class="val" style="color:var(--danger)">${todayH.wrong}</div><div class="lbl">نادرست امروز</div></div><div class="card stat-card"><div class="val">${S.stats.streak}</div><div class="lbl">روز متوالی</div></div><div class="card stat-card"><div class="val" style="color:var(--accent)">${S.stats.xp}</div><div class="lbl">امتیاز کل</div></div><div class="card stat-card"><div class="val" style="color:var(--success)">${accuracyPct}%</div><div class="lbl">دقت کل</div></div><div class="card stat-card"><div class="val" style="color:var(--accent2)">${masteredCount}</div><div class="lbl">تثبیت شده</div></div><div class="card stat-card"><div class="val" style="font-size:1rem">${Math.round(new Blob([localStorage.getItem('leitner_pro')||'']).size/1024)}KB</div><div class="lbl">حجم داده</div></div></div><div class="card" style="margin-bottom:16px;padding:24px"><h3 style="margin-bottom:12px">تقویم مرور (۵۲ هفته اخیر)</h3>${heatmapHtml}<div class="heatmap-legend"><span>کم</span><div class="heatmap-legend-cell heatmap-l0"></div><div class="heatmap-legend-cell heatmap-l1"></div><div class="heatmap-legend-cell heatmap-l2"></div><div class="heatmap-legend-cell heatmap-l3"></div><div class="heatmap-legend-cell heatmap-l4"></div><span>زیاد</span></div></div><div class="grid-2"><div class="card"><h3 style="margin-bottom:12px">توزیع جعبه‌ها</h3><canvas id="boxChart"></canvas></div><div class="card"><h3 style="margin-bottom:12px">۷ روز اخیر</h3><canvas id="weekChart"></canvas></div></div><div class="card" style="margin-top:16px"><h3 style="margin-bottom:12px">پیش‌بینی ۱۴ روز آینده</h3><canvas id="forecastChart"></canvas></div><div class="card" style="margin-top:16px"><h3 style="margin-bottom:12px">📈 نمودار پیشرفت ۳۰ روز اخیر</h3><canvas id="progressChart"></canvas></div><div class="card" style="margin-top:16px"><h3 style="margin-bottom:12px;color:var(--accent)">📅 پیش‌بینی مرور ۳۰ روز آینده <span style="font-size:.75rem;font-weight:400;color:var(--text2)">(${calTotalDue} کلمه کل)</span></h3><div style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px">${calPredictions.map(p=>{const pct=p.count/calMaxCount;const bg=pct>0.7?'var(--danger)':pct>0.3?'var(--warning)':pct>0?'var(--success)':'var(--bg)';const isToday=p.date===todayKey();return `<div style="text-align:center;padding:8px 4px;border-radius:10px;background:${pct>0?bg:'var(--bg)'};color:${pct>0.3?'#fff':'var(--text)'};border:${isToday?'2px solid var(--accent)':'1px solid var(--border)'};font-size:.75rem;min-height:60px;display:flex;flex-direction:column;justify-content:center"><div style="font-size:.65rem;opacity:.7">${p.day}</div><div style="font-weight:700;font-size:.9rem">${p.num}</div><div style="font-size:.7rem;margin-top:2px">${p.count>0?p.count+' کلمه':'—'}</div></div>`}).join('')}</div><div style="display:flex;gap:8px;justify-content:center;margin-top:12px;font-size:.75rem;color:var(--text2)"><span style="display:flex;align-items:center;gap:4px"><span style="width:12px;height:12px;border-radius:3px;background:var(--success);display:inline-block"></span> کم</span><span style="display:flex;align-items:center;gap:4px"><span style="width:12px;height:12px;border-radius:3px;background:var(--warning);display:inline-block"></span> متوسط</span><span style="display:flex;align-items:center;gap:4px"><span style="width:12px;height:12px;border-radius:3px;background:var(--danger);display:inline-block"></span> زیاد</span></div></div>`;
 
 if(boxChart){boxChart.destroy();boxChart=null}
 if(weekChart){weekChart.destroy();weekChart=null}
 if(forecastChart){forecastChart.destroy();forecastChart=null}
+var progressChart=null;if(window._progressChart){window._progressChart.destroy();window._progressChart=null}
 const labels=Object.keys(boxDist).filter(k=>boxDist[k]>0).map(k=>'جعبه '+k);
 const data=Object.keys(boxDist).filter(k=>boxDist[k]>0).map(k=>boxDist[k]);
 const isDark=S.settings.theme==='dark';
@@ -4424,7 +4437,11 @@ const isDark=S.settings.theme==='dark';
 const weekDays=[];const weekData=[];
 for(let i=6;i>=0;i--){const d=new Date(Date.now()-i*MS_PER_DAY).toISOString().slice(0,10);weekDays.push(d.slice(5));weekData.push((S.stats.history[d]||{}).reviewed||0)}
 weekChart=new Chart(document.getElementById('weekChart'),{type:'line',data:{labels:weekDays,datasets:[{data:weekData,borderColor:'#6c5ce7',backgroundColor:'rgba(108,92,231,.2)',fill:true,tension:.4,pointRadius:4}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{ticks:{color:isDark?'#9aa0b0':'#5f6577'},grid:{display:false}},y:{ticks:{color:isDark?'#9aa0b0':'#5f6577'},grid:{color:isDark?'#333645':'#e0e3e8'}}}}});
-forecastChart=new Chart(document.getElementById('forecastChart'),{type:'bar',data:{labels:forecastData.labels,datasets:[{label:'کارت‌های قابل مرور',data:forecastData.data,backgroundColor:'rgba(253,203,110,.5)',borderColor:'#fdcb6e',borderWidth:1,borderRadius:4}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{ticks:{color:isDark?'#9aa0b0':'#5f6577'},grid:{display:false}},y:{ticks:{color:isDark?'#9aa0b0':'#5f6577',stepSize:1},grid:{color:isDark?'#333645':'#e0e3e8'},beginAtZero:true}}}})})()
+forecastChart=new Chart(document.getElementById('forecastChart'),{type:'bar',data:{labels:forecastData.labels,datasets:[{label:'کارت‌های قابل مرور',data:forecastData.data,backgroundColor:'rgba(253,203,110,.5)',borderColor:'#fdcb6e',borderWidth:1,borderRadius:4}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{ticks:{color:isDark?'#9aa0b0':'#5f6577'},grid:{display:false}},y:{ticks:{color:isDark?'#9aa0b0':'#5f6577',stepSize:1},grid:{color:isDark?'#333645':'#e0e3e8'},beginAtZero:true}}}});
+// Progress chart: 30-day word additions + reviews
+var progressDays=[];var progressAdded=[];var progressReviewed=[];
+for(var pi=29;pi>=0;pi--){var pd=new Date(Date.now()-pi*MS_PER_DAY).toISOString().slice(0,10);progressDays.push(pd.slice(5));var ph=S.stats.history[pd]||{};progressAdded.push(ph.added||0);progressReviewed.push(ph.reviewed||0)}
+window._progressChart=new Chart(document.getElementById('progressChart'),{type:'line',data:{labels:progressDays,datasets:[{label:'کلمات اضافه‌شده',data:progressAdded,borderColor:'#00b894',backgroundColor:'rgba(0,184,148,.15)',fill:true,tension:.3,pointRadius:3},{label:'کلمات مرورشده',data:progressReviewed,borderColor:'#6c5ce7',backgroundColor:'rgba(108,92,231,.15)',fill:true,tension:.3,pointRadius:3}]},options:{responsive:true,interaction:{mode:'index',intersect:false},plugins:{legend:{labels:{color:isDark?'#c8cad8':'#333'}}},scales:{x:{ticks:{color:isDark?'#9aa0b0':'#5f6577',maxRotation:45},grid:{display:false}},y:{ticks:{color:isDark?'#9aa0b0':'#5f6577'},grid:{color:isDark?'#333645':'#e0e3e8'},beginAtZero:true}}}})})()
 
 // Submit score and render leaderboard
 submitScore();
@@ -6970,6 +6987,8 @@ h+='<div><label style="display:block;font-size:.85rem;color:var(--text2);margin-
 h+='<div><label style="display:block;font-size:.85rem;color:var(--text2);margin-bottom:4px">زبان مقصد</label><select class="input" id="setTargetLang">'+langOptsTarget+'</select></div>';
 h+='<div><label style="display:block;font-size:.85rem;color:var(--text2);margin-bottom:4px">سرعت تلفظ</label>';
 h+='<select class="input" id="setSpeechRate"><option value="0.6"'+(s.speechRate===0.6?' selected':'')+'>آهسته</option><option value="0.85"'+(!s.speechRate||s.speechRate===0.85?' selected':'')+'>عادی</option><option value="1"'+(s.speechRate===1?' selected':'')+'>سریع</option><option value="1.3"'+(s.speechRate===1.3?' selected':'')+'>خیلی سریع</option></select></div>';
+h+='<div class="flex" style="margin-top:8px"><label style="font-size:.85rem;color:var(--text2)">🔊 تلفظ خودکار هنگام مرور</label><input type="checkbox" id="setAutoPronounce"'+(s.autoPronounce?' checked':'')+' style="accent-color:var(--accent)"></div>';
+h+='<div style="font-size:.75rem;color:var(--text2);margin-top:4px">کلمه هنگام نمایش کارت مرور خودکار خوانده می‌شود</div>';
 h+='</div></div>';
 // ── Card Template ──
 h+='<div class="card" style="margin-bottom:16px"><h3 style="margin-bottom:16px">🎴 قالب کارت مرور</h3>';
@@ -7050,6 +7069,7 @@ c.innerHTML=h;
 document.getElementById('setSourceLang').onchange=function(e){S.settings.sourceLang=e.target.value;save()};
 document.getElementById('setTargetLang').onchange=function(e){S.settings.targetLang=e.target.value;save()};
 document.getElementById('setSpeechRate').onchange=function(e){S.settings.speechRate=parseFloat(e.target.value);save()};
+document.getElementById('setAutoPronounce').onchange=function(e){S.settings.autoPronounce=e.target.checked;save()};
 // Daily goal
 var goalSlider=document.getElementById('setDailyGoal');
 goalSlider.oninput=function(){document.getElementById('dailyGoalVal').textContent=this.value};
@@ -8052,6 +8072,8 @@ c.innerHTML=`<div style="max-width:700px;margin:0 auto">
       <div style="padding:8px 12px;background:var(--bg);border-radius:8px;font-size:.85rem">🗂️ مدیریت دسته‌ها و گروه‌های واژگانی</div>
       <div style="padding:8px 12px;background:var(--bg);border-radius:8px;font-size:.85rem">🏆 سیستم امتیاز و سطح‌بندی</div>
       <div style="padding:8px 12px;background:var(--bg);border-radius:8px;font-size:.85rem">📊 آمار و نمودار با تقویم مرور و پیش‌بینی</div>
+      <div style="padding:8px 12px;background:var(--bg);border-radius:8px;font-size:.85rem">📈 نمودار پیشرفت ۳۰ روزه (اضافه‌شده + مرورشده)</div>
+      <div style="padding:8px 12px;background:var(--bg);border-radius:8px;font-size:.85rem">🔊 تلفظ خودکار هنگام مرور (تنظیمات)</div>
       <div style="padding:8px 12px;background:var(--bg);border-radius:8px;font-size:.85rem">🔊 تلفظ صوتی آمریکایی و بریتیشی</div>
       <div style="padding:8px 12px;background:var(--bg);border-radius:8px;font-size:.85rem">📱 PWA قابل نصب و آفلاین</div>
       <div style="padding:8px 12px;background:var(--bg);border-radius:8px;font-size:.85rem">🌙 حالت تاریک و روشن</div>
@@ -8084,6 +8106,8 @@ c.innerHTML=`<div style="max-width:700px;margin:0 auto">
         <div style="font-size:.82rem;color:var(--text2)">• تنظیمات آزمون (تعداد سؤال، پاسخ فوری، فقط ناشناخته‌ها)</div>
         <div style="font-size:.82rem;color:var(--text2)">• مدیریت دسته‌بندی‌ها: افزودن، تغییر نام، حذف</div>
         <div style="font-size:.82rem;color:var(--text2)">• جدول میانبرهای کیبورد و سرعت تلفظ قابل تنظیم</div>
+        <div style="font-size:.82rem;color:var(--text2)">• 📈 نمودار پیشرفت ۳۰ روز اخیر (کلمات اضافه‌شده و مرورشده)</div>
+        <div style="font-size:.82rem;color:var(--text2)">• 🔊 تلفظ خودکار کلمه هنگام نمایش کارت مرور (قابل فعال/غیرفعال در تنظیمات)</div>
       </div>
     </details>
     <details style="margin-bottom:10px">
