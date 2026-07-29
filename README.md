@@ -130,26 +130,7 @@
 2. "Add to Home Screen" را بزنید
 3. از برنامه مثل یک اپلیکیشن استفاده کنید
 
----
 
-## 📁 ساختار پروژه
-
-```
-reader/
-├── leitner Pro 3.6.html    # برنامه اصلی لایتنر (فایل واحد)
-├── VocabForge.py            # سورس برنامه تولید فلشکارت
-├── VocabForge.exe           # فایل اجرایی (standalone)
-├── GRE Flashcard Maker.py   # نسخه قبلی تولید فلشکارت
-├── PDF Flashcard Maker.py   # ابزار تبدیل PDF به DOCX
-├── create_flashcards.py     # اسکریپت تولید فلشکارت
-├── build.py                 # اسکریپت ساخت EXE
-├── create_icon.py           # تولید آیکون برنامه
-├── 4000/                    # فایل‌های PDF واژگان
-├── word_cache.json          # کش تعاریف
-└── translation_cache.json   # کش ترجمه‌ها
-```
-
----
 
 ## 🔧 نیازمندی‌ها
 
