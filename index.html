@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>برنامه مرور لایتنر — نسخه ۳.۸.۱</title>
+<title>برنامه مرور لایتنر — نسخه ۳.۸.۲</title>
 <link rel="manifest" href='data:application/json,{"name":"برنامه مرور لایتنر","short_name":"لایتنر","start_url":"./leitner.html","display":"standalone","background_color":"#0f1117","theme_color":"#6c5ce7","description":"مرور هوشمند واژگان","icons":[{"src":"data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Crect width=%27100%27 height=%27100%27 rx=%2720%27 fill=%27%236c5ce7%27/%3E%3Ctext x=%2750%27 y=%2768%27 text-anchor=%27middle%27 font-size=%2750%27 fill=%27white%27%3E📖%3C/text%3E%3C/svg%3E","sizes":"192x192","type":"image/svg+xml"}]}'>
 <meta name="theme-color" content="#6c5ce7">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -7040,7 +7040,7 @@ h+='</div></div>';
 h+='<div class="card"><h3 style="margin-bottom:12px">💾 ذخیره‌سازی و امنیت</h3>';
 h+='<p style="color:var(--text2);font-size:.85rem;line-height:1.8">داده‌ها در مرورگر شما ذخیره می‌شوند و هرگز به سرور ارسال نمی‌شوند. پشتیبان خودکار در IndexedDB نگهداری می‌شود. حریم خصوصی شما کاملاً حفظ می‌شود.</p>';
 h+='<div style="margin-top:12px;padding:10px;background:var(--bg);border-radius:10px;font-size:.8rem;color:var(--text2)">';
-h+='<div>📦 نسخه: <strong>۳.۸.۱</strong></div>';
+h+='<div>📦 نسخه: <strong>۳.۸.۲</strong></div>';
 h+='<div>💾 حجم داده: <strong>'+dataSize+' KB</strong></div>';
 h+='<div>📊 کل کلمات: <strong>'+(S.words.length+S.longTerm.length)+'</strong></div>';
 h+='<div>🕐 آخرین مرور: <strong>'+(S.stats.lastReviewDate?fmtDate(S.stats.lastReviewDate):'—')+'</strong></div>';
@@ -7984,40 +7984,48 @@ c.innerHTML=`<div style="max-width:700px;margin:0 auto">
   <div style="text-align:center;background:linear-gradient(135deg,var(--accent),#764ba2);color:#fff;padding:48px 32px;border-radius:20px;margin-bottom:28px;box-shadow:0 16px 48px rgba(108,92,231,.35)">
     <div style="font-size:3.5rem;margin-bottom:14px">📚</div>
     <h2 style="font-size:2rem;margin-bottom:10px;font-weight:800">برنامه مرور هوشمند واژگان لایتنر</h2>
-    <p style="opacity:.95;font-size:1.05rem;font-weight:500">نسخه 3.8.1 - Leitner Pro</p>
+    <p style="opacity:.95;font-size:1.05rem;font-weight:500">نسخه 3.8.2 - Leitner Pro</p>
     <p style="opacity:.8;font-size:.9rem;margin-top:6px">الگوریتم: FSRS (Free Spaced Repetition Scheduler)</p>
   </div>
 
   <div class="card" style="margin-bottom:16px;border:2px solid var(--accent)">
-    <h3 style="margin-bottom:12px;color:var(--accent)">🆕 ویژگی‌های جدید نسخه ۳.۸.۱</h3>
+    <h3 style="margin-bottom:12px;color:var(--accent)">🆕 ویژگی‌های جدید نسخه ۳.۸.۲</h3>
     <div style="display:grid;gap:8px;margin-bottom:16px">
-      <div style="padding:10px 14px;background:var(--bg);border-radius:8px;border-right:3px solid var(--accent)">
-        <strong style="font-size:.9rem">⚡ مرور سریع (Speed Review)</strong>
-        <p style="color:var(--text2);font-size:.8rem;margin-top:4px">مرور تایم‌دار با شمارش معکوس ۵ ثانیه‌ای. اگر جواب ندهید خودکار نادرست حساب می‌شود. عالی برای مرور حجم بالا در زمان کم.</p>
-      </div>
-      <div style="padding:10px 14px;background:var(--bg);border-radius:8px;border-right:3px solid var(--success)">
-        <strong style="font-size:.9rem">🎧 تمرین شنیداری (Listening Mode)</strong>
-        <p style="color:var(--text2);font-size:.8rem;margin-top:4px">کلمه فقط خوانده می‌شود (بدون متن). باید بنویسید چه شنیدید. تلفظ و املاء را همزمان تمرین می‌کند.</p>
-      </div>
-      <div style="padding:10px 14px;background:var(--bg);border-radius:8px;border-right:3px solid var(--warning)">
-        <strong style="font-size:.9rem">🗺️ نقشه ذهنی واژگان (Word Web)</strong>
-        <p style="color:var(--text2);font-size:.8rem;margin-top:4px">نمایش بصری ارتباط کلمات روی بوم (Canvas). مترادف‌ها، متضادها و خانواده واژگانی با رنگ‌های مختلف. قابلیت drag & drop گره‌ها.</p>
-      </div>
-      <div style="padding:10px 14px;background:var(--bg);border-radius:8px;border-right:3px solid var(--danger)">
-        <strong style="font-size:.9rem">📅 تقویم مرور هوشمند</strong>
-        <p style="color:var(--text2);font-size:.8rem;margin-top:4px">پیش‌بینی ۳۰ روز آینده با نمودار میله‌ای. نمایش تعداد کلمات قابل مرور هر روز با رنگ‌بندی سبز/زرد/قرمز.</p>
+            <div style="padding:10px 14px;background:var(--bg);border-radius:8px;border-right:3px solid var(--accent)">
+        <strong style="font-size:.9rem">📊 پنل اطلاعات قابل مخفی در بخش خواندن</strong>
+        <p style="color:var(--text2);font-size:.8rem;margin-top:4px">دکمه toggle برای نمایش/مخفی کردن پنل آمار متن. اطلاعات جدید: زمان مطالعه، درصد واژگان شناخته‌شده، طولانی‌ترین کلمه.</p>
       </div>
       <div style="padding:10px 14px;background:var(--bg);border-radius:8px;border-right:3px solid var(--accent)">
-        <strong style="font-size:.9rem">🏆 چالش روزانه</strong>
-        <p style="color:var(--text2);font-size:.8rem;margin-top:4px">هدف روزانه ۲۰ کلمه با نوار پیشرفت در سایدبار. نمایش streak (روزهای متوالی). انگیزه برای مرور منظم هر روز.</p>
+        <strong style="font-size:.9rem">⚙️ گزینه‌های نمایش خواندن</strong>
+        <p style="color:var(--text2);font-size:.8rem;margin-top:4px">تنظیم فونت، فاصله خطوط، ۵ تم رنگی محتوا. خروجی TXT، کپی متن، آمار تفصیلی.</p>
       </div>
       <div style="padding:10px 14px;background:var(--bg);border-radius:8px;border-right:3px solid var(--success)">
-        <strong style="font-size:.9rem">📚 تمرین و توضیح کلمه</strong>
-        <p style="color:var(--text2);font-size:.8rem;margin-top:4px">بخش جدید در کارت مرور با دو تب: توضیحات (مثال، مترادف، متضاد، ترفند حفظ کردن، نکته استفاده) و آزمون (سوال چندگزینه‌ای خودکار).</p>
+        <strong style="font-size:.9rem">🔍 ترجمه دقیق معنی کلمه</strong>
+        <p style="color:var(--text2);font-size:.8rem;margin-top:4px">ترجمه تعریف انگلیسی به جای ترجمه مستقیم کلمه. واکشی هوشمند دیتای موجود در کتابخانه.</p>
+      </div>
+      <div style="padding:10px 14px;background:var(--bg);border-radius:8px;border-right:3px solid var(--success)">
+        <strong style="font-size:.9rem">🔄 بروزرسانی هوشمند فیلدهای خالی</strong>
+        <p style="color:var(--text2);font-size:.8rem;margin-top:4px">فقط فیلدهای خالی از API پر می‌شوند. دکمه بروزرسانی برای ذخیره تغییرات.</p>
+      </div>
+      <div style="padding:10px 14px;background:var(--bg);border-radius:8px;border-right:3px solid var(--accent)">
+        <strong style="font-size:.9rem">📄 ناوبری پیشرفته صفحات خواندن</strong>
+        <p style="color:var(--text2);font-size:.8rem;margin-top:4px">دکمه اول/آخر صفحه، اسلایدر، رفتن به صفحه دلخواه، میانبرهای کیبورد.</p>
+      </div>
+      <div style="padding:10px 14px;background:var(--bg);border-radius:8px;border-right:3px solid var(--accent)">
+        <strong style="font-size:.9rem">🗺️ نقشه واژگان v2</strong>
+        <p style="color:var(--text2);font-size:.8rem;margin-top:4px">۵ حالت نمایش. ۴ نوع رنگ‌بندی. زوم و پن. فیلتر مترادف/متضاد/خانواده. خروجی PNG.</p>
+      </div>
+      <div style="padding:10px 14px;background:var(--bg);border-radius:8px;border-right:3px solid var(--success)">
+        <strong style="font-size:.9rem">💾 خروجی‌های جدید</strong>
+        <p style="color:var(--text2);font-size:.8rem;margin-top:4px">CSV، Anki، چاپ لیست، آمار تفصیلی، نمودار مصرف حافظه.</p>
+      </div>
+      <div style="padding:10px 14px;background:var(--bg);border-radius:8px;border-right:3px solid var(--accent)">
+        <strong style="font-size:.9rem">⚙️ تنظیمات جدید</strong>
+        <p style="color:var(--text2);font-size:.8rem;margin-top:4px">اهداف روزانه، تنظیمات آزمون، مدیریت دسته‌بندی‌ها، میانبرهای کیبورد، سرعت تلفظ.</p>
       </div>
       <div style="padding:10px 14px;background:var(--bg);border-radius:8px;border-right:3px solid var(--warning)">
         <strong style="font-size:.9rem">🤖 چت هوش مصنوعی — نسخه کامل</strong>
-        <p style="color:var(--text2);font-size:.8rem;margin-top:4px">بازنویسی کامل با ۵ ارائه‌دهنده. پشتیبانی چند کلید API. تب‌های چت متعدد. ضمیمه تصویر. تولید و ویرایش تصویر. خروجی TXT/JSON.</p>
+        <p style="color:var(--text2);font-size:.8rem;margin-top:4px">بازنویسی کامل با ۵ ارائه‌دهنده. پشتیبانی چند کلید API. تب‌های چت متعدد. ضمیمه تصویر.</p>
       </div>
     </div>
   </div>
@@ -8055,6 +8063,29 @@ c.innerHTML=`<div style="max-width:700px;margin:0 auto">
 
   <div class="card" style="margin-bottom:16px">
     <h3 style="margin-bottom:12px;color:var(--accent)">📋 تغییرات نسخه‌های قبلی</h3>
+    <details open style="margin-bottom:10px">
+      <summary style="cursor:pointer;font-size:.9rem;font-weight:600;color:var(--text);padding:8px 0">🆕 نسخه ۳.۸.۲ — بهبود بخش خواندن و نقشه واژگان ▾</summary>
+      <div style="display:grid;gap:6px;margin-top:8px;padding:10px;background:var(--bg);border-radius:10px">
+        <div style="font-size:.82rem;color:var(--text2)">• پنل اطلاعات قابل مخفی در بخش خواندن با دکمه toggle</div>
+        <div style="font-size:.82rem;color:var(--text2)">• اطلاعات جدید: زمان مطالعه، درصد واژگان شناخته‌شده، طولانی‌ترین کلمه، توزیع فراوانی</div>
+        <div style="font-size:.82rem;color:var(--text2)">• گزینه‌های نمایش: فونت، فاصله خطوط، ۵ تم رنگی محتوا</div>
+        <div style="font-size:.82rem;color:var(--text2)">• ترجمه دقیق: تعریف انگلیسی به فارسی به جای ترجمه مستقیم کلمه</div>
+        <div style="font-size:.82rem;color:var(--text2)">• واکشی هوشمند دیتای موجود در کتابخانه هنگام کلیک روی کلمه</div>
+        <div style="font-size:.82rem;color:var(--text2)">• بروزرسانی هوشمند فیلدهای خالی با دکمه اختصاصی</div>
+        <div style="font-size:.82rem;color:var(--text2)">• رفع مشکل تشخیص کلمات متصل (word1,word2 → دو کلمه جدا)</div>
+        <div style="font-size:.82rem;color:var(--text2)">• ناوبری پیشرفته صفحات: اول/آخر، اسلایدر، رفتن به صفحه دلخواه</div>
+        <div style="font-size:.82rem;color:var(--text2)">• میانبرهای کیبورد برای جابجایی صفحات (←→ Home End)</div>
+        <div style="font-size:.82rem;color:var(--text2)">• نقشه واژگان v2: ۵ حالت نمایش، ۴ نوع رنگ‌بندی، زوم و پن</div>
+        <div style="font-size:.82rem;color:var(--text2)">• نقشه واژگان: فیلتر مترادف/متضاد/خانواده، خروجی PNG، تمام‌صفحه</div>
+        <div style="font-size:.82rem;color:var(--text2)">• خروجی CSV با فیلتر دسته‌بندی و خروجی Anki (TSV)</div>
+        <div style="font-size:.82rem;color:var(--text2)">• چاپ لیست واژگان و خروجی آمار تفصیلی</div>
+        <div style="font-size:.82rem;color:var(--text2)">• نمودار مصرف حافظه مرورگر در بخش خروجی</div>
+        <div style="font-size:.82rem;color:var(--text2)">• اهداف روزانه با نمودار پیشرفت در تنظیمات</div>
+        <div style="font-size:.82rem;color:var(--text2)">• تنظیمات آزمون (تعداد سؤال، پاسخ فوری، فقط ناشناخته‌ها)</div>
+        <div style="font-size:.82rem;color:var(--text2)">• مدیریت دسته‌بندی‌ها: افزودن، تغییر نام، حذف</div>
+        <div style="font-size:.82rem;color:var(--text2)">• جدول میانبرهای کیبورد و سرعت تلفظ قابل تنظیم</div>
+      </div>
+    </details>
     <details style="margin-bottom:10px">
       <summary style="cursor:pointer;font-size:.9rem;font-weight:600;color:var(--text);padding:8px 0">نسخه ۳.۸ — چت هوش مصنوعی و تحلیل تصویر ▾</summary>
       <div style="display:grid;gap:6px;margin-top:8px;padding:10px;background:var(--bg);border-radius:10px">
@@ -8125,7 +8156,7 @@ c.innerHTML=`<div style="max-width:700px;margin:0 auto">
   <div style="text-align:center;padding:20px;color:var(--text2);font-size:.8rem">
     <p>ساخته شده با ❤️ برای یادگیری بهتر واژگان</p>
     <p style="margin-top:4px"><a href="http://readner.eu.cc/" target="_blank" style="color:var(--accent);text-decoration:none">readner.eu.cc</a> · <a href="https://t.me/MyLeitner" target="_blank" style="color:var(--accent);text-decoration:none">@MyLeitner</a></p>
-    <p style="margin-top:4px;opacity:.6">Leitner Pro v3.8.1 — FSRS Algorithm</p>
+    <p style="margin-top:4px;opacity:.6">Leitner Pro v3.8.2 — FSRS Algorithm</p>
   </div>
 </div>`}
 
