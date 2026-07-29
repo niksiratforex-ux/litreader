@@ -3106,7 +3106,7 @@ function tokenizeText(text){
 }
 function extractCleanWords(text){
   // Extract only clean alphabetic words (no punctuation) for analysis
-  return text.split(/[\s,.:;!?'"\-\(\)\[\]\{}\]]+/).map(function(w){return normalizeWordLookup(w)}).filter(function(w){return w&&w.length>=2});
+  return text.match(/[a-zA-Z]+(?:'[a-zA-Z]+)*/g)||[];
 }
 
 // ── Document Model Builder ─────────────────
@@ -4164,7 +4164,7 @@ const dataSize=(new Blob([localStorage.getItem(LS_KEY)||'']).size/1024).toFixed(
 const catCount=S.categories.length;
 const lastBackup=S.stats.lastReviewDate?fmtDate(S.stats.lastReviewDate):'—';
 c.innerHTML=`<div class="card" style="margin-bottom:16px"><h3 style="margin-bottom:16px">📊 خلاصه داده‌ها</h3><div class="stat-grid"><div class="stat-card"><div class="val">${S.words.length}</div><div class="lbl">کلمه لایتنر</div></div><div class="stat-card"><div class="val">${S.longTerm.length}</div><div class="lbl">حافظه بلندمدت</div></div><div class="stat-card"><div class="val">${catCount}</div><div class="lbl">دسته‌بندی</div></div><div class="stat-card"><div class="val">${S.stats.reviewed}</div><div class="lbl">کل مرورها</div></div><div class="stat-card"><div class="val" style="font-size:1.1rem">${dataSize} KB</div><div class="lbl">حجم داده</div></div><div class="stat-card"><div class="val" style="font-size:.9rem">${lastBackup}</div><div class="lbl">آخرین مرور</div></div></div></div><div class="card" style="margin-bottom:16px"><h3 style="margin-bottom:12px">💾 پشتیبان‌گیری JSON</h3><p style="color:var(--text2);margin-bottom:16px;font-size:.9rem">تمام کلمات، حافظه بلندمدت، آمار و تنظیمات در یک فایل JSON ذخیره می‌شود.</p><div class="flex"><button type="button" class="btn btn-primary" id="exportBtn">دانلود پشتیبان (${S.words.length+S.longTerm.length} کلمه)</button><button type="button" class="btn btn-ghost" id="exportBackupBtn">بازیابی از پشتیبان خودکار</button></div></div><div class="card" style="margin-bottom:16px;border:1px solid var(--accent)"><h3 style="margin-bottom:12px;color:var(--accent)">🕐 پشتیبان‌های خودکار (بازگشت به گذشته)</h3><p style="color:var(--text2);margin-bottom:12px;font-size:.85rem">تا ۱۰ نسخه پشتیبان خودکار نگهداری می‌شود. هر ۲۰ بار ذخیره، یک نسخه جدید ایجاد می‌شود.</p><div id="snapshotList" style="max-height:300px;overflow-y:auto"><p style="color:var(--text2);font-size:.85rem">در حال بارگذاری...</p></div></div><div class="card" style="margin-bottom:16px;border:1px solid var(--accent)"><h3 style="margin-bottom:12px;color:var(--accent)">🔗 اشتراک‌گذاری دسته</h3><p style="color:var(--text2);font-size:.85rem;margin-bottom:12px">دسته‌های واژگانی خود را با دیگران به اشتراک بگذارید.</p><div style="display:grid;gap:8px"><div class="flex"><select class="input" id="shareDeckSelect" style="max-width:250px"><option value="">همه کلمات</option>'+S.categories.map(c=>'<option value="'+esc(c)+'">'+esc(c)+' ('+S.words.filter(w=>w.category===c).length+')</option>').join('')+'</select><button type="button" class="btn btn-primary btn-sm" id="shareDeckBtn">دانلود دسته</button><button type="button" class="btn btn-ghost btn-sm" id="shareDeckLinkBtn">کپی لینک</button></div><div class="flex"><input type="file" id="importSharedDeckInput" accept=".json" style="display:none"><button type="button" class="btn btn-ghost btn-sm" onclick="document.getElementById('importSharedDeckInput').click()">📂 وارد کردن دسته مشترک</button><input class="input" id="importSharedDeckUrl" placeholder="لینک دسته مشترک..." style="max-width:300px"><button type="button" class="btn btn-ghost btn-sm" id="importSharedDeckUrlBtn">دریافت از لینک</button></div></div></div><div class="card" style="margin-bottom:16px"><h3 style="margin-bottom:12px">📂 بازیابی از فایل</h3>
-<p style="color:var(--text2);margin-bottom:12px;font-size:.85rem">فایل پشتیبان JSON قبلی را برای بازیابی انتخاب کنید.</p><div class="flex"><input type="file" id="importJsonInput" accept=".json" style="display:none"><button type="button" class="btn btn-ghost" onclick="document.getElementById('importJsonInput').click()">انتخاب فایل پشتیبان</button></div></div><div class="card" style="margin-bottom:16px;border:1px solid var(--warning)"><p style="color:var(--warning);font-size:.85rem">توصیه: به‌صورت دوره‌ای از داده‌ها پشتیبان‌گیری کنید تا در صورت پاک شدن مرورگر اطلاعات از بین نرود. پشتیبان خودکار در IndexedDB ذخیره می‌شود.</p></div><div class="card" style="border:2px solid var(--danger)"><h3 style="margin-bottom:12px;color:var(--danger)">⚠️ پاکسازی کامل</h3><p style="color:var(--text2);margin-bottom:16px;font-size:.9rem">تمام داده‌ها شامل ${S.words.length} کلمه لایتنر، ${S.longTerm.length} کلمه حافظه بلندمدت و آمار پاک می‌شود. این عمل غیرقابل بازگشت است.</p><button type="button" class="btn btn-danger" id="resetBtn">پاکسازی کامل</button></div>`;
+<p style="color:var(--text2);margin-bottom:12px;font-size:.85rem">فایل پشتیبان JSON قبلی را برای بازیابی انتخاب کنید.</p><div class="flex"><input type="file" id="importJsonInput" accept=".json" style="display:none"><button type="button" class="btn btn-ghost" onclick="document.getElementById('importJsonInput').click()">انتخاب فایل پشتیبان</button></div></div><div class="card" style="margin-bottom:16px;border:1px solid var(--warning)"><p style="color:var(--warning);font-size:.85rem">توصیه: به‌صورت دوره‌ای از داده‌ها پشتیبان‌گیری کنید تا در صورت پاک شدن مرورگر اطلاعات از بین نرود. پشتیبان خودکار در IndexedDB ذخیره می‌شود.</p></div><div class="card" style="margin-bottom:16px"><h3 style="margin-bottom:12px">📊 خروجی فرمت‌های مختلف</h3><p style="color:var(--text2);font-size:.85rem;margin-bottom:12px">خروجی بگیرید با فرمت‌های مختلف برای استفاده در برنامه‌های دیگر.</p><div style="display:grid;gap:8px"><div class="flex" style="flex-wrap:wrap"><select class="input" id="exportCsvCat" style="max-width:200px;font-size:.85rem"><option value="">همه دسته‌ها</option>${S.categories.map(c=>'<option value="'+esc(c)+'">'+esc(c)+'</option>').join('')}</select><button type="button" class="btn btn-ghost" id="exportCsvBtn">📄 خروجی CSV</button><button type="button" class="btn btn-ghost" id="exportAnkiBtn">📇 خروجی Anki</button><button type="button" class="btn btn-ghost" id="exportPrintBtn">🖨️ چاپ لیست</button></div><button type="button" class="btn btn-ghost btn-sm" id="exportStatsBtn">📊 خروجی آمار تفصیلی</button></div></div><div class="card" style="margin-bottom:16px"><h3 style="margin-bottom:12px">💾 مصرف حافظه</h3><div id="storageMeter"></div></div><div class="card" style="border:2px solid var(--danger)"><h3 style="margin-bottom:12px;color:var(--danger)">⚠️ پاکسازی کامل</h3><p style="color:var(--text2);margin-bottom:16px;font-size:.9rem">تمام داده‌ها شامل ${S.words.length} کلمه لایتنر، ${S.longTerm.length} کلمه حافظه بلندمدت و آمار پاک می‌شود. این عمل غیرقابل بازگشت است.</p><button type="button" class="btn btn-danger" id="resetBtn">پاکسازی کامل</button></div>`;
 document.getElementById('exportBtn').onclick=()=>{const blob=new Blob([exportStateSnapshot()],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='leitner-backup-'+todayKey()+'.json';a.click();URL.revokeObjectURL(url);toast('پشتیبان دانلود شد — '+S.words.length+' لایتنر، '+S.longTerm.length+' حافظه بلندمدت','success')};
 // Load and render snapshot list
 (async()=>{
@@ -4270,7 +4270,112 @@ if(importUrlBtn)importUrlBtn.onclick=async()=>{
   }catch(e){toast('خطا در دریافت لینک','error')}
 };
 
-document.getElementById('resetBtn').onclick=()=>{if(confirm('آیا مطمئن هستید؟ تمام '+S.words.length+' کلمه لایتنر و '+S.longTerm.length+' کلمه حافظه بلندمدت پاک خواهد شد!')){S=defaultState();save();toast('تمام داده‌ها پاک شد','success');render()}}}
+document.getElementById('resetBtn').onclick=()=>{if(confirm('آیا مطمئن هستید؟ تمام '+S.words.length+' کلمه لایتنر و '+S.longTerm.length+' کلمه حافظه بلندمدت پاک خواهد شد!')){S=defaultState();save();toast('تمام داده‌ها پاک شد','success');render()}};
+// ── CSV Export ──
+var csvBtn=document.getElementById('exportCsvBtn');
+if(csvBtn)csvBtn.onclick=function(){
+  var cat=document.getElementById('exportCsvCat')?document.getElementById('exportCsvCat').value:'';
+  var words=cat?S.words.filter(function(w){return w.category===cat}):S.words;
+  var allWords=words.concat(S.longTerm);
+  var rows=[['Word','Translation','IPA','Part of Speech','Box','Category','Definitions','Examples','Synonyms','Frequency Tier','Last Reviewed','Next Review']];
+  allWords.forEach(function(w){
+    rows.push([
+      w.word,
+      w.translation||'',
+      w.ipa||'',
+      w.partOfSpeech||'',
+      w.box||0,
+      w.category||'',
+      (w.definitions||[]).join('; '),
+      (w.examples||[]).join('; '),
+      (w.synonyms||[]).join(', '),
+      tierLabel(getFrequencyTier(w.word)),
+      w.lastReviewedAt?fmtDate(w.lastReviewedAt):'',
+      w.nextReviewDate?fmtDate(w.nextReviewDate):''
+    ]);
+  });
+  var csv=rows.map(function(r){return r.map(function(c){return '"'+String(c).replace(/"/g,'""')+'"'}).join(',')}).join('\n');
+  var blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');a.href=url;a.download='leitner-words-'+todayKey()+'.csv';a.click();URL.revokeObjectURL(url);
+  toast(rows.length-1+' کلمه خروجی CSV شد','success');
+};
+// ── Anki CSV Export ──
+var ankiBtn=document.getElementById('exportAnkiBtn');
+if(ankiBtn)ankiBtn.onclick=function(){
+  var allWords=S.words.concat(S.longTerm);
+  var rows=['#separator:tab','#html:true','#columns:Front\tBack\tTags'];
+  allWords.forEach(function(w){
+    var front='<b>'+esc(w.word)+'</b>'+(w.ipa?' <span style="color:gray">/'+esc(w.ipa)+'/</span>':'')+(w.partOfSpeech?' <span style="color:blue">('+esc(w.partOfSpeech)+')</span>':'');
+    var back='<div style="font-size:1.2em;color:green;font-weight:bold">'+esc(w.translation||'')+'</div>';
+    if(w.definitions&&w.definitions.length)back+='<hr>'+(w.definitions.slice(0,3).map(function(d){return '<div>• '+esc(typeof d==='string'?d:d.definition||'')+'</div>'}).join(''));
+    if(w.examples&&w.examples.length)back+='<hr>'+(w.examples.slice(0,2).map(function(ex){return '<div style="font-style:italic;color:gray">"'+esc(ex)+'"</div>'}).join(''));
+    var tags=[w.category||'default','box'+(w.box||0)];
+    rows.push(front+'\t'+back+'\t'+tags.join(' '));
+  });
+  var blob=new Blob([rows.join('\n')],{type:'text/tab-separated-values;charset=utf-8'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');a.href=url;a.download='leitner-anki-'+todayKey()+'.tsv';a.click();URL.revokeObjectURL(url);
+  toast(allWords.length+' کلمه فرمت Anki خروجی شد','success');
+};
+// ── Print-friendly export ──
+var printBtn=document.getElementById('exportPrintBtn');
+if(printBtn)printBtn.onclick=function(){
+  var allWords=S.words.concat(S.longTerm).sort(function(a,b){return a.word.localeCompare(b.word)});
+  var html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>لایتنر - لیست واژگان</title><style>body{font-family:Arial,sans-serif;padding:20px;direction:rtl}table{width:100%;border-collapse:collapse;margin-top:20px}th,td{border:1px solid #ddd;padding:8px;text-align:right;font-size:12px}th{background:#6c5ce7;color:white}tr:nth-child(even){background:#f9f9f9}.box{display:inline-block;width:20px;height:20px;border-radius:50%;text-align:center;line-height:20px;font-size:10px;color:white;font-weight:bold}@media print{.no-print{display:none}}</style></head><body><h1>📖 لیست واژگان لایتنر</h1><p>تاریخ: '+new Date().toLocaleDateString('fa-IR')+' | کل: '+allWords.length+' کلمه</p><table><tr><th>#</th><th>کلمه</th><th>معنی</th><th>IPA</th><th>جعبه</th><th>دسته</th><th>تعریف</th></tr>';
+  allWords.forEach(function(w,i){
+    var boxColor=['#e17055','#fdcb6e','#ffeaa7','#55efc4','#00b894','#00cec9','#0984e3','#6c5ce7','#e84393','#fd79a8','#a29bfe'][Math.min(w.box||0,10)];
+    html+='<tr><td>'+(i+1)+'</td><td><b>'+esc(w.word)+'</b>'+(w.ipa?' <small>/'+esc(w.ipa)+'/</small>':'')+'</td><td style="color:green">'+esc(w.translation||'')+'</td><td>'+esc(w.partOfSpeech||'')+'</td><td><span class="box" style="background:'+boxColor+'">'+(w.box||0)+'</span></td><td>'+esc(w.category||'')+'</td><td style="font-size:11px">'+(w.definitions||[]).slice(0,2).map(function(d){return esc(typeof d==='string'?d:d.definition||'')}).join('<br>')+'</td></tr>';
+  });
+  html+='</table><p style="margin-top:20px;text-align:center;color:gray">ساخته شده با لایتنر پرو</p></body></html>';
+  var win=window.open('','_blank');
+  win.document.write(html);win.document.close();
+  setTimeout(function(){win.print()},500);
+  toast('پنجره چاپ باز شد','success');
+};
+// ── Statistics export ──
+var statsExportBtn=document.getElementById('exportStatsBtn');
+if(statsExportBtn)statsExportBtn.onclick=function(){
+  var statsData={
+    exportDate:new Date().toISOString(),
+    totalWords:S.words.length,
+    totalLongTerm:S.longTerm.length,
+    totalCategories:S.categories.length,
+    categories:S.categories,
+    reviewStats:S.stats,
+    quizStats:S.quizStats,
+    categoryBreakdown:{},
+    boxDistribution:{},
+    frequencyDistribution:{t1:0,t2:0,t3:0,advanced:0}
+  };
+  S.categories.forEach(function(cat){
+    statsData.categoryBreakdown[cat]=S.words.filter(function(w){return w.category===cat}).length;
+  });
+  for(var i=0;i<=10;i++)statsData.boxDistribution['box'+i]=S.words.filter(function(w){return(w.box||0)===i}).length;
+  S.words.forEach(function(w){
+    var t=getFrequencyTier(w.word);
+    if(t===1)statsData.frequencyDistribution.t1++;
+    else if(t===2)statsData.frequencyDistribution.t2++;
+    else if(t===3)statsData.frequencyDistribution.t3++;
+    else statsData.frequencyDistribution.advanced++;
+  });
+  var blob=new Blob([JSON.stringify(statsData,null,2)],{type:'application/json'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');a.href=url;a.download='leitner-stats-'+todayKey()+'.json';a.click();URL.revokeObjectURL(url);
+  toast('آمار خروجی گرفته شد','success');
+};
+// ── Storage meter ──
+var meterEl=document.getElementById('storageMeter');
+if(meterEl){
+  var usedKB=(new Blob([localStorage.getItem(LS_KEY)||'']).size/1024);
+  var maxKB=5120; // 5MB typical localStorage limit
+  var pct=Math.min(100,Math.round(usedKB/maxKB*100));
+  var color=pct>80?'var(--danger)':pct>50?'var(--warning)':'var(--success)';
+  meterEl.innerHTML='<div style="display:flex;justify-content:space-between;font-size:.8rem;margin-bottom:4px"><span>💾 حافظه مرورگر</span><span style="color:'+color+'">'+usedKB.toFixed(1)+' KB از ~5 MB</span></div>'
+    +'<div class="progress-bar"><div class="progress-fill" style="width:'+pct+'%;background:'+color+'"></div></div>'
+    +'<div style="font-size:.7rem;color:var(--text2);margin-top:4px">'+pct+'% استفاده شده'+(pct>80?' — ⚠️ نزدیک حد مجاز':'')+'</div>';
+}
+}
 
 // ═══════════════════════════════════════════
 // 7. STATISTICS (with heatmap + forecast)
@@ -6831,46 +6936,189 @@ function init() {
 window._aiChatInit = init;
 init();
 })();
-  }
 }
-function renderSettings(c){
-const s=S.settings;
-const langOpts=Object.entries(LANGUAGES).map(([code,label])=>`<option value="${code}"${code===s.sourceLang?' selected':''}>${label}</option>`).join('');
-const langOptsTarget=Object.entries(LANGUAGES).map(([code,label])=>`<option value="${code}"${code===s.targetLang?' selected':''}>${label}</option>`).join('');
-const dataSize=(new Blob([localStorage.getItem(LS_KEY)||'']).size/1024).toFixed(1);
-c.innerHTML=`<div class="card" style="margin-bottom:16px"><h3 style="margin-bottom:16px">🌐 تنظیمات ترجمه</h3><div style="display:grid;gap:12px;max-width:400px"><div><label style="display:block;font-size:.85rem;color:var(--text2);margin-bottom:4px">زبان مبدأ</label><select class="input" id="setSourceLang">${langOpts}</select></div><div><label style="display:block;font-size:.85rem;color:var(--text2);margin-bottom:4px">زبان مقصد</label><select class="input" id="setTargetLang">${langOptsTarget}</select></div></div></div><div class="card" style="margin-bottom:16px"><h3 style="margin-bottom:16px">🎴 قالب کارت مرور</h3><p style="color:var(--text2);font-size:.85rem;margin-bottom:12px">انتخاب کنید چه اطلاعاتی روی کارت مرور نمایش داده شود.</p><div style="display:grid;gap:8px;max-width:400px"><label style="display:flex;align-items:center;gap:8px;font-size:.85rem;cursor:pointer"><input type="checkbox" id="tmplShowIpa" ${(S.settings.cardTemplate||{}).showIpa!==false?'checked':''} style="accent-color:var(--accent)"> نویسه‌گردانی (IPA)</label><label style="display:flex;align-items:center;gap:8px;font-size:.85rem;cursor:pointer"><input type="checkbox" id="tmplShowExamples" ${(S.settings.cardTemplate||{}).showExamples!==false?'checked':''} style="accent-color:var(--accent)"> مثال‌ها</label><label style="display:flex;align-items:center;gap:8px;font-size:.85rem;cursor:pointer"><input type="checkbox" id="tmplShowSynonyms" ${(S.settings.cardTemplate||{}).showSynonyms!==false?'checked':''} style="accent-color:var(--accent)"> مترادف‌ها</label><label style="display:flex;align-items:center;gap:8px;font-size:.85rem;cursor:pointer"><input type="checkbox" id="tmplShowAntonyms" ${(S.settings.cardTemplate||{}).showAntonyms!==false?'checked':''} style="accent-color:var(--accent)"> متضادها</label><label style="display:flex;align-items:center;gap:8px;font-size:.85rem;cursor:pointer"><input type="checkbox" id="tmplShowFamily" ${(S.settings.cardTemplate||{}).showFamily!==false?'checked':''} style="accent-color:var(--accent)"> خانواده واژگانی</label><label style="display:flex;align-items:center;gap:8px;font-size:.85rem;cursor:pointer"><input type="checkbox" id="tmplShowCollocations" ${(S.settings.cardTemplate||{}).showCollocations!==false?'checked':''} style="accent-color:var(--accent)"> همنشینی‌ها</label></div></div><div class="card" style="margin-bottom:16px"><h3 style="margin-bottom:16px">🔔 یادآوری روزانه</h3><p style="color:var(--text2);font-size:.85rem;margin-bottom:12px">اگر کارتی برای مرور دارید، یادآوری دریافت کنید.</p><div style="display:grid;gap:12px;max-width:400px"><div class="flex"><label style="font-size:.85rem;color:var(--text2)">فعال‌سازی یادآوری</label><input type="checkbox" id="setNotif" ${s.notifications?'checked':''} style="accent-color:var(--accent)"></div><div><label style="display:block;font-size:.85rem;color:var(--text2);margin-bottom:4px">ساعت یادآوری</label><input type="time" class="input" id="setNotifTime" value="${s.notificationTime||'09:00'}" style="max-width:200px"></div></div></div><div class="card" style="margin-bottom:16px"><h3 style="margin-bottom:16px">♿ دسترسی‌پذیری</h3><div style="display:grid;gap:12px;max-width:400px"><div><label style="display:block;font-size:.85rem;color:var(--text2);margin-bottom:4px">اندازه فونت</label><select class="input" id="setFontSize"><option value="small"${S.settings.fontSize==='small'?' selected':''}>کوچک (14px)</option><option value="normal"${!S.settings.fontSize||S.settings.fontSize==='normal'?' selected':''}>عادی (16px)</option><option value="large"${S.settings.fontSize==='large'?' selected':''}>بزرگ (18px)</option><option value="xlarge"${S.settings.fontSize==='xlarge'?' selected':''}>خیلی بزرگ (20px)</option></select></div><div class="flex"><label style="font-size:.85rem;color:var(--text2)">حالت کنتراست بالا</label><input type="checkbox" id="setHighContrast" ${S.settings.theme==='high-contrast'?'checked':''} style="accent-color:var(--accent)"></div><div class="flex"><label style="font-size:.85rem;color:var(--text2)">کاهش حرکت (انیمیشن)</label><input type="checkbox" id="setReduceMotion" ${S.settings.reduceMotion?'checked':''} style="accent-color:var(--accent)"></div></div></div><div class="card" style="margin-bottom:16px"><h3 style="margin-bottom:16px">🎨 پوسته</h3><div class="stat-grid" style="margin-bottom:0"><div class="stat-card"><div class="val">${s.theme==='dark'?'🌙':'☀️'}</div><div class="lbl">${s.theme==='dark'?'تاریک':'روشن'}</div></div><div class="stat-card"><div class="val">${dataSize} KB</div><div class="lbl">حجم داده</div></div><div class="stat-card"><div class="val">${S.words.length+S.longTerm.length}</div><div class="lbl">کل کلمات</div></div><div class="stat-card"><div class="val">${S.stats.reviewed}</div><div class="lbl">کل مرورها</div></div></div></div><div class="card"><h3 style="margin-bottom:12px">💾 ذخیره‌سازی و امنیت</h3><p style="color:var(--text2);font-size:.85rem;line-height:1.8">داده‌ها در مرورگر شما ذخیره می‌شوند و هرگز به سرور ارسال نمی‌شوند. پشتیبان خودکار در IndexedDB نگهداری می‌شود. حریم خصوصی شما کاملاً حفظ می‌شود.</p></div>`;
-document.getElementById('setSourceLang').onchange=e=>{S.settings.sourceLang=e.target.value;save()};
-document.getElementById('setTargetLang').onchange=e=>{S.settings.targetLang=e.target.value;save()};
-// Accessibility settings
-// Card template settings
-if(!S.settings.cardTemplate)S.settings.cardTemplate={showIpa:true,showExamples:true,showSynonyms:true,showAntonyms:true,showFamily:true,showCollocations:true};
-['tmplShowIpa','tmplShowExamples','tmplShowSynonyms','tmplShowAntonyms','tmplShowFamily','tmplShowCollocations'].forEach(id=>{
-  const el=document.getElementById(id);
-  if(el)el.onchange=function(){
-    const key=id.replace('tmplShow','show');
-    S.settings.cardTemplate[key]=this.checked;
-    save();
-  };
-});
+}
 
-document.getElementById('setFontSize').onchange=e=>{S.settings.fontSize=e.target.value;document.documentElement.setAttribute('data-fontsize',e.target.value);save()};
-document.getElementById('setHighContrast').onchange=e=>{
+function renderSettings(c){
+var s=S.settings;
+var langOpts=Object.entries(LANGUAGES).map(function(e){return '<option value="'+e[0]+'"'+(e[0]===s.sourceLang?' selected':'')+'>'+e[1]+'</option>'}).join('');
+var langOptsTarget=Object.entries(LANGUAGES).map(function(e){return '<option value="'+e[0]+'"'+(e[0]===s.targetLang?' selected':'')+'>'+e[1]+'</option>'}).join('');
+var dataSize=(new Blob([localStorage.getItem(LS_KEY)||'']).size/1024).toFixed(1);
+var dailyGoal=s.dailyGoal||20;
+var reviewLimit=s.reviewLimit||50;
+var h='';
+// ── Daily Goals ──
+h+='<div class="card" style="margin-bottom:16px"><h3 style="margin-bottom:16px">🎯 اهداف روزانه</h3>';
+h+='<div style="display:grid;gap:16px;max-width:450px">';
+h+='<div><label style="display:block;font-size:.85rem;color:var(--text2);margin-bottom:6px">هدف کلمات جدید در روز: <strong style="color:var(--accent)" id="dailyGoalVal">'+dailyGoal+'</strong></label>';
+h+='<input type="range" id="setDailyGoal" min="5" max="100" step="5" value="'+dailyGoal+'" style="width:100%;accent-color:var(--accent)">';
+h+='<div style="display:flex;justify-content:space-between;font-size:.7rem;color:var(--text2)"><span>۵</span><span>۱۰۰</span></div></div>';
+h+='<div><label style="display:block;font-size:.85rem;color:var(--text2);margin-bottom:6px">سقف مرور در هر جلسه: <strong style="color:var(--accent)" id="reviewLimitVal">'+reviewLimit+'</strong></label>';
+h+='<input type="range" id="setReviewLimit" min="10" max="200" step="10" value="'+reviewLimit+'" style="width:100%;accent-color:var(--accent)">';
+h+='<div style="display:flex;justify-content:space-between;font-size:.7rem;color:var(--text2)"><span>۱۰</span><span>۲۰۰</span></div></div>';
+var todayReviewed=S.stats.history[todayKey()]?S.stats.history[todayKey()].reviewed:0;
+h+='<div style="padding:10px;background:var(--bg);border-radius:10px;text-align:center">';
+h+='<div style="font-size:.8rem;color:var(--text2);margin-bottom:4px">📊 وضعیت امروز</div>';
+h+='<div style="font-size:1.5rem;font-weight:700;color:var(--accent)">'+todayReviewed+'</div>';
+h+='<div class="progress-bar" style="margin-top:6px"><div class="progress-fill" style="width:'+Math.min(100,Math.round(todayReviewed/dailyGoal*100))+'%"></div></div>';
+h+='<div style="font-size:.7rem;color:var(--text2);margin-top:4px">'+Math.min(100,Math.round(todayReviewed/dailyGoal*100))+'% از هدف روزانه</div>';
+h+='</div></div></div>';
+// ── Translation ──
+h+='<div class="card" style="margin-bottom:16px"><h3 style="margin-bottom:16px">🌐 تنظیمات ترجمه</h3>';
+h+='<div style="display:grid;gap:12px;max-width:400px">';
+h+='<div><label style="display:block;font-size:.85rem;color:var(--text2);margin-bottom:4px">زبان مبدأ</label><select class="input" id="setSourceLang">'+langOpts+'</select></div>';
+h+='<div><label style="display:block;font-size:.85rem;color:var(--text2);margin-bottom:4px">زبان مقصد</label><select class="input" id="setTargetLang">'+langOptsTarget+'</select></div>';
+h+='<div><label style="display:block;font-size:.85rem;color:var(--text2);margin-bottom:4px">سرعت تلفظ</label>';
+h+='<select class="input" id="setSpeechRate"><option value="0.6"'+(s.speechRate===0.6?' selected':'')+'>آهسته</option><option value="0.85"'+(!s.speechRate||s.speechRate===0.85?' selected':'')+'>عادی</option><option value="1"'+(s.speechRate===1?' selected':'')+'>سریع</option><option value="1.3"'+(s.speechRate===1.3?' selected':'')+'>خیلی سریع</option></select></div>';
+h+='</div></div>';
+// ── Card Template ──
+h+='<div class="card" style="margin-bottom:16px"><h3 style="margin-bottom:16px">🎴 قالب کارت مرور</h3>';
+h+='<p style="color:var(--text2);font-size:.85rem;margin-bottom:12px">انتخاب کنید چه اطلاعاتی روی کارت مرور نمایش داده شود.</p>';
+h+='<div style="display:grid;gap:8px;max-width:400px">';
+var tmplItems=[['tmplShowIpa','showIpa','نویسه‌گردانی (IPA)'],['tmplShowExamples','showExamples','مثال‌ها'],['tmplShowSynonyms','showSynonyms','مترادف‌ها'],['tmplShowAntonyms','showAntonyms','متضادها'],['tmplShowFamily','showFamily','خانواده واژگانی'],['tmplShowCollocations','showCollocations','همنشینی‌ها']];
+tmplItems.forEach(function(item){
+  var checked=(S.settings.cardTemplate||{})[item[1]]!==false;
+  h+='<label style="display:flex;align-items:center;gap:8px;font-size:.85rem;cursor:pointer"><input type="checkbox" id="'+item[0]+'"'+(checked?' checked':'')+' style="accent-color:var(--accent)"> '+item[2]+'</label>';
+});
+h+='</div></div>';
+// ── Quiz Settings ──
+h+='<div class="card" style="margin-bottom:16px"><h3 style="margin-bottom:16px">❓ تنظیمات آزمون</h3>';
+h+='<div style="display:grid;gap:12px;max-width:400px">';
+h+='<div><label style="display:block;font-size:.85rem;color:var(--text2);margin-bottom:4px">تعداد سؤال آزمون</label>';
+h+='<select class="input" id="setQuizCount"><option value="10"'+((s.quizCount||10)===10?' selected':'')+'>۱۰</option><option value="20"'+(s.quizCount===20?' selected':'')+'>۲۰</option><option value="30"'+(s.quizCount===30?' selected':'')+'>۳۰</option><option value="50"'+(s.quizCount===50?' selected':'')+'>۵۰</option></select></div>';
+h+='<div class="flex"><label style="font-size:.85rem;color:var(--text2)">نمایش پاسخ فوری</label><input type="checkbox" id="setQuizInstant"'+(s.quizInstantFeedback?' checked':'')+' style="accent-color:var(--accent)"></div>';
+h+='<div class="flex"><label style="font-size:.85rem;color:var(--text2)">آزمون فقط کلمات ناشناخته</label><input type="checkbox" id="setQuizUnknownOnly"'+(s.quizUnknownOnly?' checked':'')+' style="accent-color:var(--accent)"></div>';
+h+='</div></div>';
+// ── Notification ──
+h+='<div class="card" style="margin-bottom:16px"><h3 style="margin-bottom:16px">🔔 یادآوری روزانه</h3>';
+h+='<p style="color:var(--text2);font-size:.85rem;margin-bottom:12px">اگر کارتی برای مرور دارید، یادآوری دریافت کنید.</p>';
+h+='<div style="display:grid;gap:12px;max-width:400px">';
+h+='<div class="flex"><label style="font-size:.85rem;color:var(--text2)">فعال‌سازی یادآوری</label><input type="checkbox" id="setNotif"'+(s.notifications?' checked':'')+' style="accent-color:var(--accent)"></div>';
+h+='<div><label style="display:block;font-size:.85rem;color:var(--text2);margin-bottom:4px">ساعت یادآوری</label><input type="time" class="input" id="setNotifTime" value="'+(s.notificationTime||'09:00')+'" style="max-width:200px"></div>';
+h+='</div></div>';
+// ── Accessibility ──
+h+='<div class="card" style="margin-bottom:16px"><h3 style="margin-bottom:16px">♿ دسترسی‌پذیری</h3>';
+h+='<div style="display:grid;gap:12px;max-width:400px">';
+h+='<div><label style="display:block;font-size:.85rem;color:var(--text2);margin-bottom:4px">اندازه فونت</label>';
+h+='<select class="input" id="setFontSize"><option value="small"'+(S.settings.fontSize==='small'?' selected':'')+'>کوچک (14px)</option><option value="normal"'+(!S.settings.fontSize||S.settings.fontSize==='normal'?' selected':'')+'>عادی (16px)</option><option value="large"'+(S.settings.fontSize==='large'?' selected':'')+'>بزرگ (18px)</option><option value="xlarge"'+(S.settings.fontSize==='xlarge'?' selected':'')+'>خیلی بزرگ (20px)</option></select></div>';
+h+='<div class="flex"><label style="font-size:.85rem;color:var(--text2)">حالت کنتراست بالا</label><input type="checkbox" id="setHighContrast"'+(S.settings.theme==='high-contrast'?' checked':'')+' style="accent-color:var(--accent)"></div>';
+h+='<div class="flex"><label style="font-size:.85rem;color:var(--text2)">کاهش حرکت (انیمیشن)</label><input type="checkbox" id="setReduceMotion"'+(S.settings.reduceMotion?' checked':'')+' style="accent-color:var(--accent)"></div>';
+h+='</div></div>';
+// ── Theme & Info ──
+h+='<div class="card" style="margin-bottom:16px"><h3 style="margin-bottom:16px">🎨 پوسته</h3>';
+h+='<div class="stat-grid" style="margin-bottom:0">';
+h+='<div class="stat-card"><div class="val">'+(s.theme==='dark'?'🌙':'☀️')+'</div><div class="lbl">'+(s.theme==='dark'?'تاریک':'روشن')+'</div></div>';
+h+='<div class="stat-card"><div class="val">'+dataSize+' KB</div><div class="lbl">حجم داده</div></div>';
+h+='<div class="stat-card"><div class="val">'+(S.words.length+S.longTerm.length)+'</div><div class="lbl">کل کلمات</div></div>';
+h+='<div class="stat-card"><div class="val">'+S.stats.reviewed+'</div><div class="lbl">کل مرورها</div></div>';
+h+='</div></div>';
+// ── Category Management ──
+h+='<div class="card" style="margin-bottom:16px"><h3 style="margin-bottom:16px">📁 مدیریت دسته‌بندی‌ها</h3>';
+h+='<div id="catManager" style="max-height:300px;overflow-y:auto;margin-bottom:12px">';
+S.categories.forEach(function(cat){
+  var count=S.words.filter(function(w){return w.category===cat}).length;
+  h+='<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-bottom:1px solid var(--border);gap:8px">';
+  h+='<div><strong>'+esc(cat)+'</strong> <span style="color:var(--text2);font-size:.78rem">('+count+' کلمه)</span></div>';
+  h+='<div style="display:flex;gap:4px">';
+  h+='<button type="button" class="btn btn-ghost btn-sm" data-cat-rename="'+esc(cat)+'" style="font-size:.7rem">✏️</button>';
+  if(cat!=='پیش‌فرض')h+='<button type="button" class="btn btn-ghost btn-sm" data-cat-delete="'+esc(cat)+'" style="font-size:.7rem;color:var(--danger)">🗑️</button>';
+  h+='</div></div>';
+});
+h+='</div>';
+h+='<div class="flex"><input type="text" class="input" id="newCatInput" placeholder="نام دسته جدید..." style="max-width:200px;font-size:.85rem"><button type="button" class="btn btn-primary btn-sm" id="addCatBtn">افزودن</button></div>';
+h+='</div>';
+// ── Keyboard Shortcuts ──
+h+='<div class="card" style="margin-bottom:16px"><h3 style="margin-bottom:16px">⌨️ میانبرهای کیبورد</h3>';
+h+='<div style="display:grid;grid-template-columns:auto 1fr;gap:6px 16px;font-size:.85rem">';
+var shortcuts=[['Space / Enter','برگشت کارت'],['۱ / ۲ / ۳ / ۴','امتیازدهی'],['← / →','جابجایی صفحه (خواندن)'],['Home / End','صفحه اول/آخر'],['+ / -','زوم (نقشه واژگان)'],['Esc','بستن پاپ‌آپ']];
+shortcuts.forEach(function(s){
+  h+='<div style="padding:4px 10px;background:var(--bg);border-radius:6px;font-family:monospace;font-size:.8rem;text-align:center">'+s[0]+'</div>';
+  h+='<div style="color:var(--text2)">'+s[1]+'</div>';
+});
+h+='</div></div>';
+// ── Storage & Security ──
+h+='<div class="card"><h3 style="margin-bottom:12px">💾 ذخیره‌سازی و امنیت</h3>';
+h+='<p style="color:var(--text2);font-size:.85rem;line-height:1.8">داده‌ها در مرورگر شما ذخیره می‌شوند و هرگز به سرور ارسال نمی‌شوند. پشتیبان خودکار در IndexedDB نگهداری می‌شود. حریم خصوصی شما کاملاً حفظ می‌شود.</p>';
+h+='<div style="margin-top:12px;padding:10px;background:var(--bg);border-radius:10px;font-size:.8rem;color:var(--text2)">';
+h+='<div>📦 نسخه: <strong>۳.۸.۱</strong></div>';
+h+='<div>💾 حجم داده: <strong>'+dataSize+' KB</strong></div>';
+h+='<div>📊 کل کلمات: <strong>'+(S.words.length+S.longTerm.length)+'</strong></div>';
+h+='<div>🕐 آخرین مرور: <strong>'+(S.stats.lastReviewDate?fmtDate(S.stats.lastReviewDate):'—')+'</strong></div>';
+h+='</div></div>';
+c.innerHTML=h;
+// ── Event Bindings ──
+document.getElementById('setSourceLang').onchange=function(e){S.settings.sourceLang=e.target.value;save()};
+document.getElementById('setTargetLang').onchange=function(e){S.settings.targetLang=e.target.value;save()};
+document.getElementById('setSpeechRate').onchange=function(e){S.settings.speechRate=parseFloat(e.target.value);save()};
+// Daily goal
+var goalSlider=document.getElementById('setDailyGoal');
+goalSlider.oninput=function(){document.getElementById('dailyGoalVal').textContent=this.value};
+goalSlider.onchange=function(){S.settings.dailyGoal=parseInt(this.value);save()};
+// Review limit
+var limitSlider=document.getElementById('setReviewLimit');
+limitSlider.oninput=function(){document.getElementById('reviewLimitVal').textContent=this.value};
+limitSlider.onchange=function(){S.settings.reviewLimit=parseInt(this.value);save()};
+// Card template
+if(!S.settings.cardTemplate)S.settings.cardTemplate={showIpa:true,showExamples:true,showSynonyms:true,showAntonyms:true,showFamily:true,showCollocations:true};
+tmplItems.forEach(function(item){
+  var el=document.getElementById(item[0]);
+  if(el)el.onchange=function(){S.settings.cardTemplate[item[1]]=this.checked;save()};
+});
+// Quiz settings
+document.getElementById('setQuizCount').onchange=function(e){S.settings.quizCount=parseInt(e.target.value);save()};
+document.getElementById('setQuizInstant').onchange=function(e){S.settings.quizInstantFeedback=e.target.checked;save()};
+document.getElementById('setQuizUnknownOnly').onchange=function(e){S.settings.quizUnknownOnly=e.target.checked;save()};
+// Accessibility
+document.getElementById('setFontSize').onchange=function(e){S.settings.fontSize=e.target.value;document.documentElement.setAttribute('data-fontsize',e.target.value);save()};
+document.getElementById('setHighContrast').onchange=function(e){
   if(e.target.checked){S.settings.theme='high-contrast';document.documentElement.setAttribute('data-theme','high-contrast')}
   else{S.settings.theme='dark';document.documentElement.setAttribute('data-theme','dark')}
   applyTheme();save();
 };
-document.getElementById('setReduceMotion').onchange=e=>{S.settings.reduceMotion=e.target.checked;save()};
-
-document.getElementById('setNotif').onchange=async e=>{
+document.getElementById('setReduceMotion').onchange=function(e){S.settings.reduceMotion=e.target.checked;save()};
+// Notifications
+document.getElementById('setNotif').onchange=async function(e){
   if(e.target.checked){
     if('Notification' in window){
-      const perm=await Notification.requestPermission();
+      var perm=await Notification.requestPermission();
       if(perm==='granted'){S.settings.notifications=true;save();toast('یادآوری فعال شد','success')}
       else{e.target.checked=false;toast('اجازه اعلان داده نشد','error')}
     }else{e.target.checked=false;toast('مرورگر از اعلان پشتیبانی نمی‌کند','error')}
   }else{S.settings.notifications=false;save()}
 };
-document.getElementById('setNotifTime').onchange=e=>{S.settings.notificationTime=e.target.value;save()};
+document.getElementById('setNotifTime').onchange=function(e){S.settings.notificationTime=e.target.value;save()};
+// Category management
+document.getElementById('addCatBtn').onclick=function(){
+  var input=document.getElementById('newCatInput');
+  var name=input.value.trim();
+  if(!name){toast('نام دسته را وارد کنید','error');return}
+  if(S.categories.includes(name)){toast('این دسته از قبل وجود دارد','error');return}
+  S.categories.push(name);save();toast('دسته «'+name+'» اضافه شد','success');renderSettings(c);
+};
+document.getElementById('newCatInput').onkeydown=function(e){if(e.key==='Enter')document.getElementById('addCatBtn').click()};
+document.querySelectorAll('[data-cat-rename]').forEach(function(btn){
+  btn.onclick=function(){
+    var oldName=btn.dataset.catRename;
+    var newName=prompt('نام جدید دسته:',oldName);
+    if(!newName||newName.trim()===oldName)return;
+    newName=newName.trim();
+    if(S.categories.includes(newName)){toast('این دسته از قبل وجود دارد','error');return}
+    var idx=S.categories.indexOf(oldName);
+    if(idx>=0)S.categories[idx]=newName;
+    S.words.forEach(function(w){if(w.category===oldName)w.category=newName});
+    save();toast('دسته به «'+newName+'» تغییر نام یافت','success');renderSettings(c);
+  };
+});
+document.querySelectorAll('[data-cat-delete]').forEach(function(btn){
+  btn.onclick=function(){
+    var cat=btn.dataset.catDelete;
+    var count=S.words.filter(function(w){return w.category===cat}).length;
+    if(!confirm('حذف دسته «'+cat+'»؟ '+count+' کلمه به «پیش‌فرض» منتقل می‌شوند.'))return;
+    S.words.forEach(function(w){if(w.category===cat)w.category='پیش‌فرض'});
+    S.categories=S.categories.filter(function(c){return c!==cat});
+    save();toast('دسته «'+cat+'» حذف شد','success');renderSettings(c);
+  };
+});
 }
 
 // ═══════════════════════════════════════════
@@ -7116,126 +7364,527 @@ function renderListening(c){
 }
 
 // ═══════════════════════════════════════════
-// WORD WEB — نقشه ذهنی واژگان
+// WORD WEB v2 — نقشه ذهنی واژگان پیشرفته
 // ═══════════════════════════════════════════
+let webState={mode:'mindmap',colorBy:'category',showSynonyms:true,showAntonyms:true,showFamily:true,showDefinitions:false,zoom:1,panX:0,panY:0,fullscreen:false,selectedWord:null,physics:true};
 function renderWordWeb(c){
-  if(!S.words.length){c.innerHTML=`<div class="card" style="text-align:center;padding:60px"><div class="empty"><div class="icon">🗺️</div><p>کلمه‌ای برای نمایش نقشه نیست</p></div></div>`;return}
-  c.innerHTML=`<div style="margin-bottom:16px"><div class="flex" style="gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px">
-    <input type="text" class="input" id="webSearch" placeholder="🔍 کلمه‌ای جستجو کنید..." style="max-width:300px">
-    <select class="input" id="webWordSelect" style="max-width:250px">${S.words.map((w,i)=>`<option value="${i}">${esc(w.word)} — ${esc(w.translation||'')}</option>`).join('')}</select>
-  </div></div>
-  <div class="card" style="padding:0;overflow:hidden;position:relative">
-    <canvas id="webCanvas" width="800" height="500" style="width:100%;height:500px;display:block;cursor:grab"></canvas>
-    <div id="webTooltip" style="display:none;position:absolute;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 14px;font-size:.82rem;box-shadow:var(--shadow);pointer-events:none;z-index:10;max-width:200px"></div>
-  </div>`;
-  const canvas=document.getElementById('webCanvas');
-  const ctx=canvas.getContext('2d');
-  const tooltip=document.getElementById('webTooltip');
-  const dpr=window.devicePixelRatio||1;
-  canvas.width=canvas.offsetWidth*dpr;
-  canvas.height=500*dpr;
-  ctx.scale(dpr,dpr);
-  const W=canvas.offsetWidth;
-  const H=500;
-  let nodes=[];
-  let edges=[];
-  let hoveredNode=null;
-  let dragNode=null;
-  let dragOff={x:0,y:0};
-  function buildGraph(wordIdx){
+  if(!S.words.length){c.innerHTML='<div class="card" style="text-align:center;padding:60px"><div class="empty"><div class="icon">🗺️</div><p>کلمه‌ای برای نمایش نقشه نیست</p></div></div>';return}
+  var h='';
+  h+='<div style="margin-bottom:12px">';
+  // Top toolbar
+  h+='<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:10px">';
+  h+='<input type="text" class="input" id="webSearch" placeholder="🔍 جستجو..." style="max-width:220px;font-size:.85rem;padding:8px 12px">';
+  h+='<select class="input" id="webWordSelect" style="max-width:220px;font-size:.85rem;padding:8px 12px">';
+  S.words.forEach(function(w,i){h+='<option value="'+i+'">'+esc(w.word)+(w.translation?' — '+esc(w.translation):'')+'</option>'});
+  h+='</select>';
+  h+='<div class="sep" style="height:24px"></div>';
+  // View mode buttons
+  h+='<button type="button" class="btn btn-sm '+(webState.mode==='mindmap'?'btn-primary':'btn-ghost')+'" data-wmode="mindmap" title="نقشه ذهنی">🧠</button>';
+  h+='<button type="button" class="btn btn-sm '+(webState.mode==='force'?'btn-primary':'btn-ghost')+'" data-wmode="force" title="گراف نیرویی">⚛️</button>';
+  h+='<button type="button" class="btn btn-sm '+(webState.mode==='radial'?'btn-primary':'btn-ghost')+'" data-wmode="radial" title="شعاعی">🎯</button>';
+  h+='<button type="button" class="btn btn-sm '+(webState.mode==='cluster'?'btn-primary':'btn-ghost')+'" data-wmode="cluster" title="خوشه‌بندی دسته‌بندی">📦</button>';
+  h+='<button type="button" class="btn btn-sm '+(webState.mode==='tier'?'btn-primary':'btn-ghost')+'" data-wmode="tier" title="خوشه‌بندی فراوانی">📊</button>';
+  h+='<div class="sep" style="height:24px"></div>';
+  // Color by
+  h+='<select class="input" id="webColorBy" style="max-width:140px;font-size:.8rem;padding:6px 10px">';
+  h+='<option value="category"'+(webState.colorBy==='category'?' selected':'')+'>رنگ: دسته‌بندی</option>';
+  h+='<option value="tier"'+(webState.colorBy==='tier'?' selected':'')+'>رنگ: فراوانی</option>';
+  h+='<option value="box"'+(webState.colorBy==='box'?' selected':'')+'>رنگ: جعبه</option>';
+  h+='<option value="mastery"'+(webState.colorBy==='mastery'?' selected':'')+'>رنگ: تسلط</option>';
+  h+='</select>';
+  h+='<div class="sep" style="height:24px"></div>';
+  // Filters
+  h+='<button type="button" class="btn btn-sm '+(webState.showSynonyms?'btn-success':'btn-ghost')+'" id="webToggleSyn" title="مترادف‌ها">🔄</button>';
+  h+='<button type="button" class="btn btn-sm '+(webState.showAntonyms?'btn-danger':'btn-ghost')+'" id="webToggleAnt" title="متضادها">⚡</button>';
+  h+='<button type="button" class="btn btn-sm '+(webState.showFamily?'btn-ghost':'btn-ghost')+'" id="webToggleFam" title="خانواده" style='+(webState.showFamily?'border-color:var(--warning)':'')+'>🌳</button>';
+  h+='<div class="sep" style="height:24px"></div>';
+  h+='<button type="button" class="btn btn-ghost btn-sm" id="webZoomIn" title="بزرگنمایی">＋</button>';
+  h+='<button type="button" class="btn btn-ghost btn-sm" id="webZoomOut" title="کوچک‌نمایی">−</button>';
+  h+='<button type="button" class="btn btn-ghost btn-sm" id="webReset" title="بازنشانی">↺</button>';
+  h+='<button type="button" class="btn btn-ghost btn-sm" id="webExportPng" title="خروجی PNG">📷</button>';
+  h+='<button type="button" class="btn btn-ghost btn-sm" id="webFullscreen" title="تمام صفحه">⛶</button>';
+  h+='</div>';
+  // Stats bar
+  h+='<div id="webStats" style="font-size:.75rem;color:var(--text2);display:flex;gap:12px;margin-bottom:8px"></div>';
+  h+='</div>';
+  h+='<div class="card" id="webCard" style="padding:0;overflow:hidden;position:relative;'+(webState.fullscreen?'position:fixed;inset:0;z-index:500;border-radius:0':'')+'">';
+  h+='<canvas id="webCanvas" style="width:100%;display:block;cursor:grab;background:var(--bg)"></canvas>';
+  h+='<div id="webTooltip" style="display:none;position:absolute;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 14px;font-size:.82rem;box-shadow:var(--shadow);pointer-events:none;z-index:10;max-width:250px;direction:ltr;text-align:left"></div>';
+  h+='</div>';
+  c.innerHTML=h;
+  webInitCanvas(c);
+}
+function webInitCanvas(c){
+  var canvas=document.getElementById('webCanvas');
+  if(!canvas)return;
+  var ctx=canvas.getContext('2d');
+  var tooltip=document.getElementById('webTooltip');
+  var card=document.getElementById('webCard');
+  var dpr=window.devicePixelRatio||1;
+  var W,H;
+  function resizeCanvas(){
+    W=canvas.offsetWidth;
+    H=webState.fullscreen?window.innerHeight-80:Math.max(500,Math.min(700,window.innerHeight-200));
+    canvas.width=W*dpr;canvas.height=H*dpr;
+    canvas.style.height=H+'px';
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+  }
+  resizeCanvas();
+  var nodes=[],edges=[],hoveredNode=null,dragNode=null,dragOff={x:0,y:0},isPanning=false,panStart={x:0,y:0};
+  var selectedIdx=parseInt(document.getElementById('webWordSelect').value)||0;
+  // Color palettes
+  // High-saturation colors that work with white text
+  var catColors=['#6c5ce7','#00897b','#d84315','#6a1b9a','#0277bd','#ad1457','#00838f','#4e342e','#37474f','#283593'];
+  var tierColors={1:'#00897b',2:'#6c5ce7',3:'#e65100',0:'#b71c1c'};
+  var boxColors=['#b71c1c','#d84315','#e65100','#f57f17','#558b2f','#00897b','#0277bd','#283593','#6a1b9a','#ad1457','#4e342e'];
+  // Calculate contrasting text color for a background
+  function getTextColor(bg){
+    var r=parseInt(bg.slice(1,3),16),g=parseInt(bg.slice(3,5),16),b=parseInt(bg.slice(5,7),16);
+    var lum=(0.299*r+0.587*g+0.114*b)/255;
+    return lum>0.55?'#1a1a2e':'#ffffff';
+  }
+  function getNodeColor(n){
+    if(n.isCenter)return '#6c5ce7';
+    if(webState.colorBy==='tier')return tierColors[n.tier]||'#6c5ce7';
+    if(webState.colorBy==='box')return boxColors[Math.min(n.box||0,10)]||'#6c5ce7';
+    if(webState.colorBy==='mastery'){
+      if(n.mastery>=80)return '#00897b';
+      if(n.mastery>=50)return '#e65100';
+      if(n.mastery>=20)return '#d84315';
+      return '#455a64';
+    }
+    return catColors[n.catIdx%catColors.length]||'#6c5ce7';
+  }
+  function buildGraph(){
     nodes=[];edges=[];
-    const w=S.words[wordIdx];
+    var w=S.words[selectedIdx];
     if(!w)return;
+    var cx=W/2+webState.panX,cy=H/2+webState.panY;
+    var catIdx=S.categories.indexOf(w.category);
     // Center node
-    nodes.push({id:w.id,word:w.word,trans:w.translation||'',x:W/2,y:H/2,r:40,color:'var(--accent)',isCenter:true});
+    nodes.push({id:w.id,word:w.word,trans:w.translation||'',x:cx,y:cy,r:42,isCenter:true,tier:getFrequencyTier(w.word),box:w.box,catIdx:catIdx>=0?catIdx:0,mastery:w.reps>0?Math.min(100,Math.round(w.reps*10)):0,defs:w.definitions||[]});
+    var synCount=0,antCount=0,famCount=0;
     // Synonyms
-    (w.synonyms||[]).forEach((s,i)=>{
-      const angle=(i/(w.synonyms.length||1))*Math.PI*2-Math.PI/2;
-      const dist=150;
-      nodes.push({id:'syn_'+i,word:s,trans:'',x:W/2+Math.cos(angle)*dist,y:H/2+Math.sin(angle)*dist,r:28,color:'var(--success)'});
-      edges.push({from:w.id,to:'syn_'+i,color:'var(--success)',label:'مترادف'});
-    });
+    if(webState.showSynonyms){
+      (w.synonyms||[]).slice(0,8).forEach(function(s,i){
+        var angle=(i/(Math.max(w.synonyms.length,1)))*Math.PI*2-Math.PI/2;
+        var dist=160*webState.zoom;
+        var sid='syn_'+i;
+        nodes.push({id:sid,word:s,trans:'',x:cx+Math.cos(angle)*dist,y:cy+Math.sin(angle)*dist,r:Math.max(30,28*webState.zoom),tier:getFrequencyTier(s),box:0,catIdx:1,mastery:0,defs:[]});
+        edges.push({from:w.id,to:sid,color:'#00b894',label:'مترادف',dash:true});
+        synCount++;
+      });
+    }
     // Antonyms
-    (w.antonyms||[]).forEach((a,i)=>{
-      const angle=((i+(w.synonyms||[]).length)/((w.synonyms||[]).length+(w.antonyms||[]).length||1))*Math.PI*2-Math.PI/2;
-      const dist=150;
-      nodes.push({id:'ant_'+i,word:a,trans:'',x:W/2+Math.cos(angle)*dist,y:H/2+Math.sin(angle)*dist,r:28,color:'var(--danger)'});
-      edges.push({from:w.id,to:'ant_'+i,color:'var(--danger)',label:'متضاد'});
-    });
+    if(webState.showAntonyms){
+      (w.antonyms||[]).slice(0,6).forEach(function(a,i){
+        var total=(webState.showSynonyms?(w.synonyms||[]).length:0)+(w.antonyms||[]).length;
+        var angle=((i+(webState.showSynonyms?(w.synonyms||[]).length:0))/Math.max(total,1))*Math.PI*2-Math.PI/2;
+        var dist=160*webState.zoom;
+        var aid='ant_'+i;
+        nodes.push({id:aid,word:a,trans:'',x:cx+Math.cos(angle)*dist,y:cy+Math.sin(angle)*dist,r:Math.max(30,28*webState.zoom),tier:getFrequencyTier(a),box:0,catIdx:2,mastery:0,defs:[]});
+        edges.push({from:w.id,to:aid,color:'#e17055',label:'متضاد',dash:true});
+        antCount++;
+      });
+    }
     // Word family
-    const family=[...(w.wordFamily||[])].slice(0,6);
-    family.forEach((f,i)=>{
-      const angle=(i/(family.length||1))*Math.PI*2+Math.PI/4;
-      const dist=220;
-      nodes.push({id:'fam_'+i,word:f,trans:'',x:W/2+Math.cos(angle)*dist,y:H/2+Math.sin(angle)*dist,r:24,color:'var(--warning)'});
-      edges.push({from:w.id,to:'fam_'+i,color:'var(--warning)',label:'خانواده'});
+    if(webState.showFamily){
+      var family=getMorphologicalFamily(w.word).slice(0,8);
+      family.forEach(function(f,i){
+        var angle=(i/family.length)*Math.PI*2+Math.PI/4;
+        var dist=240*webState.zoom;
+        var fid='fam_'+i;
+        nodes.push({id:fid,word:f,trans:'',x:cx+Math.cos(angle)*dist,y:cy+Math.sin(angle)*dist,r:Math.max(26,22*webState.zoom),tier:getFrequencyTier(f),box:0,catIdx:3,mastery:0,defs:[]});
+        edges.push({from:w.id,to:fid,color:'#fdcb6e',label:'خانواده',dash:false});
+        famCount++;
+      });
+    }
+    // Definitions as sub-nodes
+    if(webState.showDefinitions&&w.definitions&&w.definitions.length){
+      w.definitions.slice(0,4).forEach(function(d,i){
+        var def=typeof d==='string'?d:(d.definition||'');
+        if(!def)return;
+        var angle=(i/4)*Math.PI*2+Math.PI/2;
+        var dist=300*webState.zoom;
+        var did='def_'+i;
+        var shortDef=def.length>40?def.slice(0,37)+'...':def;
+        nodes.push({id:did,word:shortDef,trans:'',x:cx+Math.cos(angle)*dist,y:cy+Math.sin(angle)*dist,r:Math.max(24,20*webState.zoom),tier:0,box:0,catIdx:4,mastery:0,defs:[],isDef:true});
+        edges.push({from:w.id,to:did,color:'#0984e3',label:'تعریف',dash:true});
+      });
+    }
+    // Update stats
+    var statsEl=document.getElementById('webStats');
+    if(statsEl)statsEl.innerHTML='<span>🔵 '+nodes.length+' گره</span><span>🔗 '+edges.length+' اتصال</span><span>🔄 '+synCount+' مترادف</span><span>⚡ '+antCount+' متضاد</span><span>🌳 '+famCount+' خانواده</span>';
+  }
+  // Force-directed layout simulation
+  var simRunning=false;
+  function simulate(){
+    if(!webState.physics||webState.mode==='mindmap'){simRunning=false;return}
+    simRunning=true;
+    var alpha=0.3;
+    for(var iter=0;iter<3;iter++){
+      // Repulsion between all nodes
+      for(var i=0;i<nodes.length;i++){
+        for(var j=i+1;j<nodes.length;j++){
+          var dx=nodes[j].x-nodes[i].x;
+          var dy=nodes[j].y-nodes[i].y;
+          var dist=Math.sqrt(dx*dx+dy*dy)||1;
+          var force=2000/(dist*dist);
+          var fx=dx/dist*force*alpha;
+          var fy=dy/dist*force*alpha;
+          if(!nodes[i].isCenter&&!dragNode){nodes[i].x-=fx;nodes[i].y-=fy}
+          if(!nodes[j].isCenter&&!dragNode){nodes[j].x+=fx;nodes[j].y+=fy}
+        }
+      }
+      // Attraction along edges
+      edges.forEach(function(e){
+        var a=nodes.find(function(n){return n.id===e.from});
+        var b=nodes.find(function(n){return n.id===e.to});
+        if(!a||!b)return;
+        var dx=b.x-a.x,dy=b.y-a.y;
+        var dist=Math.sqrt(dx*dx+dy*dy)||1;
+        var targetDist=webState.mode==='radial'?200*webState.zoom:150*webState.zoom;
+        var force=(dist-targetDist)*0.05*alpha;
+        var fx=dx/dist*force;
+        var fy=dy/dist*force;
+        if(!b.isCenter&&dragNode!==b){b.x-=fx;b.y-=fy}
+        if(!a.isCenter&&dragNode!==a){a.x+=fx;a.y+=fy}
+      });
+      // Center gravity
+      var cx2=W/2+webState.panX,cy2=H/2+webState.panY;
+      nodes.forEach(function(n){
+        if(n.isCenter||dragNode===n)return;
+        n.x+=(cx2-n.x)*0.01;
+        n.y+=(cy2-n.y)*0.01;
+      });
+      // Boundary clamping
+      nodes.forEach(function(n){
+        n.x=Math.max(n.r,Math.min(W-n.r,n.x));
+        n.y=Math.max(n.r,Math.min(H-n.r,n.y));
+      });
+    }
+    draw();
+    if(simRunning)requestAnimationFrame(simulate);
+  }
+  // Cluster layout
+  function applyClusterLayout(){
+    var groups={};
+    nodes.forEach(function(n){
+      if(n.isCenter)return;
+      var key=n.catIdx||0;
+      if(!groups[key])groups[key]=[];
+      groups[key].push(n);
+    });
+    var groupKeys=Object.keys(groups);
+    var cx2=W/2+webState.panX,cy2=H/2+webState.panY;
+    groupKeys.forEach(function(gi,idx){
+      var angle=(idx/groupKeys.length)*Math.PI*2-Math.PI/2;
+      var gDist=180*webState.zoom;
+      var gx=cx2+Math.cos(angle)*gDist;
+      var gy=cy2+Math.sin(angle)*gDist;
+      groups[gi].forEach(function(n,i){
+        var a2=(i/groups[gi].length)*Math.PI*2;
+        var d2=60*webState.zoom;
+        n.x=gx+Math.cos(a2)*d2;
+        n.y=gy+Math.sin(a2)*d2;
+      });
+    });
+  }
+  function applyTierLayout(){
+    var tiers=[[],[],[],[]];
+    nodes.forEach(function(n){
+      if(n.isCenter)return;
+      tiers[n.tier||0].push(n);
+    });
+    var cx2=W/2+webState.panX,cy2=H/2+webState.panY;
+    var labels=['پیشرفته','مفید','رایج','پرکاربرد'];
+    tiers.forEach(function(tier,idx){
+      var angle=(idx/4)*Math.PI*2-Math.PI/2;
+      var gDist=(120+idx*50)*webState.zoom;
+      var gx=cx2+Math.cos(angle)*gDist;
+      var gy=cy2+Math.sin(angle)*gDist;
+      tier.forEach(function(n,i){
+        var a2=(i/tier.length)*Math.PI*2;
+        var d2=50*webState.zoom;
+        n.x=gx+Math.cos(a2)*d2;
+        n.y=gy+Math.sin(a2)*d2;
+      });
     });
   }
   function draw(){
     ctx.clearRect(0,0,W,H);
+    // Draw grid dots
+    ctx.fillStyle=getComputedStyle(document.documentElement).getPropertyValue('--border')||'#2a2e42';
+    for(var gx=0;gx<W;gx+=30){for(var gy=0;gy<H;gy+=30){ctx.beginPath();ctx.arc(gx,gy,1,0,Math.PI*2);ctx.fill()}}
     // Draw edges
-    edges.forEach(e=>{
-      const from=nodes.find(n=>n.id===e.from);
-      const to=nodes.find(n=>n.id===e.to);
+    edges.forEach(function(e){
+      var from=nodes.find(function(n){return n.id===e.from});
+      var to=nodes.find(function(n){return n.id===e.to});
       if(!from||!to)return;
       ctx.beginPath();ctx.moveTo(from.x,from.y);ctx.lineTo(to.x,to.y);
-      ctx.strokeStyle=getComputedStyle(document.documentElement).getPropertyValue(e.color.replace('var(','').replace(')',''))||'#6c5ce7';
-      ctx.lineWidth=2;ctx.setLineDash([5,5]);ctx.stroke();ctx.setLineDash([]);
-      // Edge label
-      const mx=(from.x+to.x)/2,my=(from.y+to.y)/2;
-      ctx.fillStyle=getComputedStyle(document.documentElement).getPropertyValue('--text2')||'#8b90a5';
-      ctx.font='10px Vazirmatn';ctx.textAlign='center';ctx.fillText(e.label,mx,my-6);
+      ctx.strokeStyle=e.color||'#6c5ce7';
+      ctx.lineWidth=e.dash?2:2.5;
+      if(e.dash)ctx.setLineDash([5,5]);
+      ctx.stroke();ctx.setLineDash([]);
+      // Edge label with background
+      var mx=(from.x+to.x)/2,my=(from.y+to.y)/2;
+      ctx.font='10px Vazirmatn';ctx.textAlign='center';
+      var labelW=ctx.measureText(e.label).width+10;
+      ctx.fillStyle='rgba(26,29,43,.85)';
+      ctx.beginPath();
+      if(ctx.roundRect){ctx.roundRect(mx-labelW/2,my-16,labelW,18,4)}
+      else{ctx.rect(mx-labelW/2,my-16,labelW,18)}
+      ctx.fill();
+      ctx.fillStyle='#c8cad8';
+      ctx.fillText(e.label,mx,my-4);
     });
     // Draw nodes
-    nodes.forEach(n=>{
-      const isHovered=hoveredNode===n;
+    nodes.forEach(function(n){
+      var isHovered=hoveredNode===n;
+      var col=n.isCenter?'#6c5ce7':getNodeColor(n);
+      // Glow for center
+      if(n.isCenter){
+        ctx.beginPath();ctx.arc(n.x,n.y,n.r+8,0,Math.PI*2);
+        ctx.fillStyle='rgba(108,92,231,.15)';ctx.fill();
+      }
+      // Node circle
       ctx.beginPath();ctx.arc(n.x,n.y,n.r+(isHovered?4:0),0,Math.PI*2);
-      const col=getComputedStyle(document.documentElement).getPropertyValue(n.color.replace('var(','').replace(')',''))||'#6c5ce7';
       ctx.fillStyle=col;ctx.fill();
-      ctx.strokeStyle=isHovered?'#fff':col;ctx.lineWidth=isHovered?3:1;ctx.stroke();
-      // Text
-      ctx.fillStyle='#fff';ctx.font=(n.isCenter?'bold 14px':'12px')+' Vazirmatn';ctx.textAlign='center';ctx.textBaseline='middle';
-      const displayText=n.word.length>12?n.word.slice(0,10)+'...':n.word;
-      ctx.fillText(displayText,n.x,n.y);
+      ctx.strokeStyle=isHovered?'#fff':(n.isCenter?'#a29bfe':col);
+      ctx.lineWidth=isHovered?3:1.5;ctx.stroke();
+      // Mastery ring
+      if(n.mastery>0&&!n.isCenter){
+        ctx.beginPath();ctx.arc(n.x,n.y,n.r+2,-Math.PI/2,-Math.PI/2+Math.PI*2*(n.mastery/100));
+        ctx.strokeStyle='rgba(255,255,255,.5)';ctx.lineWidth=3;ctx.stroke();
+      }
+      // Text with contrasting color
+      var textColor=n.isCenter?'#fff':getTextColor(col);
+      ctx.fillStyle=textColor;
+      ctx.font=(n.isCenter?'bold 14px':n.isDef?'10px':'12px')+' Vazirmatn';
+      ctx.textAlign='center';ctx.textBaseline='middle';
+      // Text shadow for better readability
+      ctx.save();
+      ctx.shadowColor=textColor==='#fff'?'rgba(0,0,0,.5)':'rgba(255,255,255,.3)';
+      ctx.shadowBlur=3;
+      var maxChars=n.isCenter?14:n.r>26?12:n.r>20?9:7;
+      var txt=n.word.length>maxChars?n.word.slice(0,maxChars-1)+'…':n.word;
+      ctx.fillText(txt,n.x,n.y);
+      ctx.restore();
     });
   }
-  buildGraph(0);draw();
-  // Mouse events
-  canvas.onmousemove=e=>{
-    const rect=canvas.getBoundingClientRect();
-    const mx=e.clientX-rect.left;const my=e.clientY-rect.top;
+  buildGraph();
+  // Initial layout
+  if(webState.mode==='cluster')applyClusterLayout();
+  else if(webState.mode==='tier')applyTierLayout();
+  else if(webState.mode==='radial'){
+    nodes.forEach(function(n,i){
+      if(n.isCenter)return;
+      var angle=(i/nodes.length)*Math.PI*2;
+      var dist=180*webState.zoom;
+      n.x=W/2+webState.panX+Math.cos(angle)*dist;
+      n.y=H/2+webState.panY+Math.sin(angle)*dist;
+    });
+  }
+  draw();
+  if(webState.mode==='force')simulate();
+  // ── Mouse events ──
+  canvas.onmousemove=function(e){
+    var rect=canvas.getBoundingClientRect();
+    var mx=e.clientX-rect.left,my=e.clientY-rect.top;
+    // Transform mouse coords for zoom/pan
+    var tmx=(mx-webState.panX),tmy=(my-webState.panY);
     hoveredNode=null;
-    for(const n of nodes){
-      const dx=mx-n.x,dy=my-n.y;
+    for(var ni=0;ni<nodes.length;ni++){
+      var n=nodes[ni];
+      var dx=mx-n.x,dy=my-n.y;
       if(dx*dx+dy*dy<=n.r*n.r){hoveredNode=n;break}
     }
-    canvas.style.cursor=hoveredNode?'pointer':'grab';
+    canvas.style.cursor=hoveredNode?'pointer':(isPanning?'grabbing':'grab');
     if(hoveredNode){
       tooltip.style.display='block';
-      tooltip.style.left=Math.min(mx+12,W-200)+'px';
-      tooltip.style.top=(my-40)+'px';
-      tooltip.innerHTML='<strong>'+esc(hoveredNode.word)+'</strong>'+(hoveredNode.trans?'<br>'+esc(hoveredNode.trans):'');
+      tooltip.style.left=Math.min(mx+12,W-250)+'px';
+      tooltip.style.top=(my-50)+'px';
+      var tt='<strong style="font-size:1rem">'+esc(hoveredNode.word)+'</strong>';
+      if(hoveredNode.trans)tt+='<br><span style="color:var(--success)">'+esc(hoveredNode.trans)+'</span>';
+      if(hoveredNode.tier)tt+='<br><span style="font-size:.75rem;color:var(--accent)">📊 '+tierLabel(hoveredNode.tier)+'</span>';
+      if(hoveredNode.box)tt+='<br><span style="font-size:.75rem">📦 جعبه '+hoveredNode.box+'</span>';
+      if(hoveredNode.mastery)tt+='<br><span style="font-size:.75rem">📈 تسلط '+hoveredNode.mastery+'%</span>';
+      tooltip.innerHTML=tt;
     }else{tooltip.style.display='none'}
     if(dragNode){
       dragNode.x=mx-dragOff.x;dragNode.y=my-dragOff.y;
-      draw();
+      if(!simRunning)draw();
+    }
+    if(isPanning&&!dragNode){
+      var pdx=mx-panStart.x,pdy=my-panStart.y;
+      webState.panX+=pdx;webState.panY+=pdy;
+      nodes.forEach(function(n){n.x+=pdx;n.y+=pdy});
+      panStart={x:mx,y:my};
+      if(!simRunning)draw();
     }
   };
-  canvas.onmousedown=e=>{
-    if(hoveredNode){dragNode=hoveredNode;const rect=canvas.getBoundingClientRect();dragOff={x:e.clientX-rect.left-dragNode.x,y:e.clientY-rect.top-dragNode.y};canvas.style.cursor='grabbing'}
+  canvas.onmousedown=function(e){
+    var rect=canvas.getBoundingClientRect();
+    var mx=e.clientX-rect.left,my=e.clientY-rect.top;
+    if(hoveredNode){
+      dragNode=hoveredNode;
+      dragOff={x:mx-dragNode.x,y:my-dragNode.y};
+      canvas.style.cursor='grabbing';
+    }else{
+      isPanning=true;
+      panStart={x:mx,y:my};
+      canvas.style.cursor='grabbing';
+    }
   };
-  canvas.onmouseup=()=>{dragNode=null;canvas.style.cursor='grab'};
-  canvas.onmouseleave=()=>{dragNode=null;hoveredNode=null;tooltip.style.display='none';draw()};
+  canvas.onmouseup=function(){
+    dragNode=null;isPanning=false;canvas.style.cursor='grab';
+  };
+  canvas.onmouseleave=function(){
+    dragNode=null;isPanning=false;hoveredNode=null;tooltip.style.display='none';draw();
+  };
+  // Click node → show word detail
+  canvas.onclick=function(e){
+    if(dragNode)return;
+    if(hoveredNode&&hoveredNode.word){
+      var wIdx=S.words.findIndex(function(w){return w.word.toLowerCase()===hoveredNode.word.toLowerCase()});
+      if(wIdx>=0){
+        webState.selectedWord=wIdx;
+        document.getElementById('webWordSelect').value=wIdx;
+        buildGraph();
+        if(webState.mode==='cluster')applyClusterLayout();
+        else if(webState.mode==='tier')applyTierLayout();
+        draw();
+        if(webState.mode==='force')simulate();
+      }else{
+        // Word not in library - show lookup
+        showWebWordLookup(hoveredNode.word);
+      }
+    }
+  };
+  // Zoom with mouse wheel
+  canvas.onwheel=function(e){
+    e.preventDefault();
+    var delta=e.deltaY>0?-0.1:0.1;
+    webState.zoom=Math.max(0.3,Math.min(3,webState.zoom+delta));
+    buildGraph();
+    if(webState.mode==='cluster')applyClusterLayout();
+    else if(webState.mode==='tier')applyTierLayout();
+    draw();
+    if(webState.mode==='force')simulate();
+  };
+  // ── Button events ──
+  c.querySelectorAll('[data-wmode]').forEach(function(btn){
+    btn.onclick=function(){
+      webState.mode=btn.dataset.wmode;
+      webState.physics=webState.mode==='force';
+      renderWordWeb(c);
+    };
+  });
+  var colorSel=document.getElementById('webColorBy');
+  if(colorSel)colorSel.onchange=function(){webState.colorBy=this.value;draw()};
+  var togSyn=document.getElementById('webToggleSyn');
+  if(togSyn)togSyn.onclick=function(){webState.showSynonyms=!webState.showSynonyms;renderWordWeb(c)};
+  var togAnt=document.getElementById('webToggleAnt');
+  if(togAnt)togAnt.onclick=function(){webState.showAntonyms=!webState.showAntonyms;renderWordWeb(c)};
+  var togFam=document.getElementById('webToggleFam');
+  if(togFam)togFam.onclick=function(){webState.showFamily=!webState.showFamily;renderWordWeb(c)};
+  var zoomInBtn=document.getElementById('webZoomIn');
+  if(zoomInBtn)zoomInBtn.onclick=function(){webState.zoom=Math.min(3,webState.zoom+0.2);buildGraph();draw();if(webState.mode==='force')simulate()};
+  var zoomOutBtn=document.getElementById('webZoomOut');
+  if(zoomOutBtn)zoomOutBtn.onclick=function(){webState.zoom=Math.max(0.3,webState.zoom-0.2);buildGraph();draw();if(webState.mode==='force')simulate()};
+  var resetBtn=document.getElementById('webReset');
+  if(resetBtn)resetBtn.onclick=function(){webState.zoom=1;webState.panX=0;webState.panY=0;buildGraph();draw();if(webState.mode==='force')simulate()};
+  var exportBtn=document.getElementById('webExportPng');
+  if(exportBtn)exportBtn.onclick=function(){
+    var link=document.createElement('a');
+    link.download='word-web-'+S.words[selectedIdx].word+'.png';
+    link.href=canvas.toDataURL('image/png');
+    link.click();
+    toast('تصویر ذخیره شد','success');
+  };
+  var fsBtn=document.getElementById('webFullscreen');
+  if(fsBtn)fsBtn.onclick=function(){
+    webState.fullscreen=!webState.fullscreen;
+    renderWordWeb(c);
+  };
   // Select word
-  const select=document.getElementById('webWordSelect');
-  select.onchange=()=>{buildGraph(parseInt(select.value));draw()};
-  const search=document.getElementById('webSearch');
-  search.oninput=()=>{
-    const q=search.value.trim().toLowerCase();
-    if(!q)return;
-    const idx=S.words.findIndex(w=>w.word.toLowerCase().includes(q)||((w.translation||'').toLowerCase().includes(q)));
-    if(idx>=0){select.value=idx;buildGraph(idx);draw()}
+  var select=document.getElementById('webWordSelect');
+  select.onchange=function(){
+    selectedIdx=parseInt(this.value);
+    webState.selectedWord=selectedIdx;
+    buildGraph();
+    if(webState.mode==='cluster')applyClusterLayout();
+    else if(webState.mode==='tier')applyTierLayout();
+    draw();
+    if(webState.mode==='force')simulate();
   };
+  // Search
+  var searchInput=document.getElementById('webSearch');
+  searchInput.oninput=function(){
+    var q=this.value.trim().toLowerCase();
+    if(!q)return;
+    var idx=S.words.findIndex(function(w){return w.word.toLowerCase().includes(q)||(w.translation||'').toLowerCase().includes(q)});
+    if(idx>=0){
+      select.value=idx;selectedIdx=idx;
+      buildGraph();
+      if(webState.mode==='cluster')applyClusterLayout();
+      else if(webState.mode==='tier')applyTierLayout();
+      draw();
+      if(webState.mode==='force')simulate();
+    }
+  };
+  // Keyboard shortcuts
+  document.onkeydown=function(e){
+    if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')return;
+    if(e.key==='+'||e.key==='='){webState.zoom=Math.min(3,webState.zoom+0.1);buildGraph();draw()}
+    else if(e.key==='-'){webState.zoom=Math.max(0.3,webState.zoom-0.1);buildGraph();draw()}
+    else if(e.key==='Escape'&&webState.fullscreen){webState.fullscreen=false;renderWordWeb(c)}
+  };
+}
+function showWebWordLookup(word){
+  var ov=document.createElement('div');ov.className='modal-overlay';
+  ov.innerHTML='<div class="modal" style="max-width:420px">'
+    +'<h3 style="margin-bottom:12px">🔍 '+esc(word)+'</h3>'
+    +'<p style="color:var(--text2);font-size:.85rem">این کلمه در کتابخانه شما نیست.</p>'
+    +'<div id="webLookupBody" style="margin:12px 0"><div class="trans-loading"><div class="trans-spinner"></div>در حال جستجو...</div></div>'
+    +'<div style="display:flex;gap:8px;justify-content:flex-end">'
+    +'<button type="button" class="btn btn-ghost" id="webLookupClose">بستن</button>'
+    +'<button type="button" class="btn btn-primary" id="webLookupAdd" disabled>＋ لایتنر</button>'
+    +'</div></div>';
+  ov.querySelector('#webLookupClose').onclick=function(){ov.remove()};
+  document.body.appendChild(ov);
+  ov.onclick=function(e){if(e.target===ov)ov.remove()};
+  // Fetch word data
+  (async function(){
+    var dict=await fetchDictionary(word);
+    var trans='';
+    var body=ov.querySelector('#webLookupBody');
+    if(!dict){body.innerHTML='<div style="color:var(--text2);text-align:center;padding:12px">نتیجه‌ای یافت نشد</div>';return}
+    var ipa=dict.phoneticBr||dict.phoneticUs||dict.phonetic||'';
+    var pos=dict.meanings[0]?dict.meanings[0].partOfSpeech:'';
+    var defs=dict.meanings.flatMap(function(m){return m.definitions}).slice(0,3);
+    var firstDef=defs[0]?(typeof defs[0]==='string'?defs[0]:defs[0].definition||''):'';
+    if(firstDef)trans=await fetchTranslation(firstDef)||'';
+    if(!trans)trans=await fetchTranslation(word)||'';
+    var h='<div style="text-align:center;margin-bottom:8px">';
+    h+='<div style="font-size:1.2rem;font-weight:700;color:var(--accent)">'+esc(word)+'</div>';
+    if(ipa)h+='<div style="color:var(--text2);font-size:.85rem">/'+esc(ipa)+'/</div>';
+    if(pos)h+='<span class="badge badge-accent">'+esc(pos)+'</span>';
+    h+='</div>';
+    if(trans)h+='<div style="text-align:center;font-size:1.1rem;font-weight:600;color:var(--success);padding:8px;background:var(--bg);border-radius:10px;margin-bottom:8px">'+esc(trans)+'</div>';
+    defs.forEach(function(d){
+      var def=typeof d==='string'?d:(d.definition||'');
+      h+='<div style="font-size:.83rem;padding:6px 10px;margin-bottom:4px;background:var(--bg);border-radius:8px;border-right:3px solid var(--accent)">'+esc(def)+'</div>';
+    });
+    body.innerHTML=h;
+    var addBtn=ov.querySelector('#webLookupAdd');
+    addBtn.disabled=false;
+    addBtn.onclick=function(){
+      var allDefs=defs.map(function(d){return typeof d==='string'?d:(d.definition||'')});
+      S.words.push(createCard({word:word,translation:trans||'',ipa:ipa,partOfSpeech:pos,definitions:allDefs,source:'word-web'}));
+      save();toast(word+' اضافه شد','success');ov.remove();renderWordWeb(document.getElementById('content'));
+    };
+  })();
 }
 
 // ═══════════════════════════════════════════
