@@ -277,6 +277,17 @@ html[data-fontsize="xlarge"]{font-size:20px}
    ═══════════════════════════════════════════ */
 .context-sentence{font-size:.8rem;color:var(--text2);font-style:italic;margin-top:12px;padding:10px 14px;background:var(--bg);border-radius:12px;border-right:3px solid var(--accent);line-height:1.6;text-align:right}
 
+/* ═══ AUTO-PLAY ═══ */
+.auto-play-bar{display:flex;align-items:center;gap:8px;justify-content:center;padding:10px 16px;background:var(--card);border:1px solid var(--accent);border-radius:14px;margin-bottom:14px;flex-wrap:wrap;box-shadow:0 0 20px var(--accent-glow)}
+.auto-play-bar .auto-play-label{font-size:.82rem;font-weight:600;color:var(--accent);display:flex;align-items:center;gap:6px}
+.auto-play-bar .auto-play-dot{width:8px;height:8px;border-radius:50%;background:var(--success);animation:apPulse 1.2s ease-in-out infinite}
+@keyframes apPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+.auto-play-bar .btn{padding:6px 12px;font-size:.78rem}
+.auto-play-speed{display:flex;align-items:center;gap:4px;font-size:.78rem;color:var(--text2)}
+.auto-play-speed select{padding:4px 8px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);font:inherit;font-size:.78rem;cursor:pointer}
+.auto-play-speed select:focus{outline:none;border-color:var(--accent)}
+.auto-play-timer{font-size:.72rem;color:var(--text2);min-width:32px;text-align:center;font-variant-numeric:tabular-nums}
+
 /* ═══════════════════════════════════════════
    QUIZ TYPES
    ═══════════════════════════════════════════ */
@@ -1390,6 +1401,8 @@ if(currentTab!=='pdfreader')hideTransPopup();
 if(currentTab!=='speedreview'&&speedState.timer){clearInterval(speedState.timer);speedState.timer=null}
 // Clear quiz speed timer when leaving quiz
 if(currentTab!=='quiz'&&quizState&&quizState._speedInterval){clearInterval(quizState._speedInterval);quizState._speedInterval=null}
+// Stop auto-play when leaving review
+if(currentTab!=='review'&&autoPlayState.active){stopAutoPlay()}
 renderNav();
 // Render daily challenge widget in sidebar
 const dcw=document.getElementById('dailyChallengeWidget');
@@ -1408,6 +1421,15 @@ const renders={review:renderReview,library:renderLibrary,longterm:renderLongterm
 // ═══════════════════════════════════════════
 let reviewSession={queue:[],idx:0,flipped:false,correct:0,wrong:0,done:false,startTime:0};
 let reviewRatingPending=false;
+// ═══ AUTO-PLAY STATE ═══
+let autoPlayState={active:false,paused:false,timer:null,countdownTimer:null,countdown:0,flipDelay:3000,showDelay:5000,speed:'normal'};
+const AUTO_PLAY_SPEEDS={slow:{flip:4000,show:7000,label:'آهسته'},normal:{flip:3000,show:5000,label:'عادی'},fast:{flip:2000,show:3500,label:'سریع'},turbo:{flip:1200,show:2500,label:'خیلی سریع'}};
+function stopAutoPlay(){autoPlayState.active=false;autoPlayState.paused=false;if(autoPlayState.timer){clearTimeout(autoPlayState.timer);autoPlayState.timer=null}if(autoPlayState.countdownTimer){clearInterval(autoPlayState.countdownTimer);autoPlayState.countdownTimer=null}autoPlayState.countdown=0;var bar=document.getElementById('autoPlayBar');if(bar)bar.remove();var ratingBar=document.getElementById('ratingBar');if(ratingBar)ratingBar.style.display='none'}
+function startAutoPlay(){if(!reviewSession.queue.length)return;if(reviewSession.done){reviewSession.done=false;reviewSession.idx=0;reviewSession.correct=0;reviewSession.wrong=0;reviewSession.startTime=Date.now()}autoPlayState.active=true;autoPlayState.paused=false;var sp=AUTO_PLAY_SPEEDS[autoPlayState.speed]||AUTO_PLAY_SPEEDS.normal;autoPlayState.flipDelay=sp.flip;autoPlayState.showDelay=sp.show;renderReview(document.getElementById('content'))}
+function autoPlayTick(){if(!autoPlayState.active||autoPlayState.paused)return;var c=document.getElementById('content');if(!reviewSession.flipped){reviewSession.flipped=true;var card=document.getElementById('rCard');if(card)card.classList.add('flipped');var rb=document.getElementById('ratingBar');if(rb)rb.style.display='none';autoPlayScheduleNext(autoPlayState.showDelay)}else{reviewSession.idx++;reviewSession.flipped=false;if(reviewSession.idx>=reviewSession.queue.length){stopAutoPlay();reviewSession.done=true;renderReview(c);return}renderReview(c)}}
+function autoPlayScheduleNext(delay){if(!autoPlayState.active)return;if(autoPlayState.timer)clearTimeout(autoPlayState.timer);autoPlayState.countdown=Math.ceil(delay/1000);updateAutoPlayCountdown();if(autoPlayState.countdownTimer)clearInterval(autoPlayState.countdownTimer);autoPlayState.countdownTimer=setInterval(function(){autoPlayState.countdown--;updateAutoPlayCountdown();if(autoPlayState.countdown<=0){clearInterval(autoPlayState.countdownTimer);autoPlayState.countdownTimer=null}},1000);autoPlayState.timer=setTimeout(function(){autoPlayTick()},delay)}
+function updateAutoPlayCountdown(){var el=document.getElementById('apCountdown');if(el)el.textContent=autoPlayState.countdown>0?autoPlayState.countdown+'s':''}
+function renderAutoPlayBar(){return'<div class="auto-play-bar" id="autoPlayBar"><div class="auto-play-label"><div class="auto-play-dot"></div>پخش خودکار</div><button type="button" class="btn btn-ghost btn-sm" id="apPauseBtn" title="مکث/ادامه">'+(autoPlayState.paused?'▶️':'⏸️')+'</button><button type="button" class="btn btn-danger btn-sm" id="apStopBtn" title="توقف">⏹️</button><div class="auto-play-speed"><span>سرعت:</span><select id="apSpeedSelect"><option value="slow"'+(autoPlayState.speed==='slow'?' selected':'')+'>آهسته</option><option value="normal"'+(autoPlayState.speed==='normal'?' selected':'')+'>عادی</option><option value="fast"'+(autoPlayState.speed==='fast'?' selected':'')+'>سریع</option><option value="turbo"'+(autoPlayState.speed==='turbo'?' selected':'')+'>خیلی سریع</option></select></div><div class="auto-play-timer" id="apCountdown"></div></div>'}
 function getDue(){return S.words.filter(w=>!w.nextReviewDate||new Date(w.nextReviewDate)<=new Date())}
 function startReview(){
 const due=getDue();
@@ -1427,6 +1449,8 @@ document.getElementById('reviewRestart').onclick=()=>{reviewSession={queue:[],id
 if(!reviewSession.queue.length){startReview();if(!reviewSession.queue.length){c.innerHTML=`<div class="card" style="text-align:center;padding:60px"><div class="empty"><div class="icon">📖</div><p>کارتی برای مرور نیست</p></div></div>`;return}}
 // Search in review
 const reviewSearchHtml=`<div style="margin-bottom:12px"><input class="input" placeholder="🔍 جستجو در کلمات مرور..." id="reviewSearch" style="max-width:300px;font-size:.85rem;padding:8px 12px"></div>`;
+const autoPlayBarHtml=autoPlayState.active?renderAutoPlayBar():'';
+const autoPlayStartBtn=!autoPlayState.active?`<div style="text-align:center;margin-bottom:14px"><button type="button" class="btn btn-ghost btn-sm" id="autoPlayStartBtn" style="font-size:.8rem;gap:6px">▶️ پخش خودکار</button></div>`:'';
 const w=reviewSession.queue[reviewSession.idx];
 const prog=Math.round((reviewSession.idx/reviewSession.queue.length)*100);
 const tier=getFrequencyTier(w.word);
@@ -1472,16 +1496,18 @@ if(w.tags&&w.tags.length)footerItems.push(...w.tags.map(t=>'<span class="tag">'+
 if(w.source)footerItems.push('<span class="rb-source">'+esc(w.source)+'</span>');
 if(footerItems.length)footerHtml='<div class="rb-footer">'+footerItems.join('')+'</div>';
 backHtml=rbSections.join('')+footerHtml;
-c.innerHTML=`<div style="max-width:500px;margin:0 auto"><div class="flex" style="justify-content:space-between;margin-bottom:16px"><span style="color:var(--text2)">${reviewSession.idx+1} از ${reviewSession.queue.length}</span><div class="flex" style="gap:4px"><span class="badge badge-accent">${w.box>0?'جعبه '+w.box:'جدید'}</span>${tier?`<span class="badge tier-${tier}">${tierLabel(tier)}</span>`:''}</div></div><div class="progress-bar"><div class="progress-fill" style="width:${prog}%"></div></div>${reviewSearchHtml}<div class="review-card" id="rCard" tabindex="0" role="button" aria-label="کارت مرور — برای نمایش پاسخ کلیک یا Enter بزنید" aria-live="polite"><div class="review-inner"><div class="review-face"><div style="font-size:1.8rem;font-weight:700;margin-bottom:12px">${esc(w.word)} <button type="button" class="trans-audio-btn" id="reviewSpeakBtn" title="شنیدن تلفظ" style="vertical-align:middle;font-size:1rem">🔊</button></div>${(S.settings.cardTemplate||{}).showIpa!==false&&w.ipa?`<div style="color:var(--text2);font-size:.9rem">${esc(w.ipa)}</div>`:''}<div style="color:var(--text2);font-size:.8rem;margin-top:16px">برای نمایش پاسخ کلیک کنید</div></div><div class="review-face review-back" style="justify-content:flex-start;padding-top:20px;overflow-y:auto;max-height:100%"><div class="rb-header"><span class="rb-word">${esc(w.word)}</span>${w.ipa?`<span class="rb-ipa">${esc(w.ipa)}</span>`:''}${w.partOfSpeech?`<span class="rb-pos">${esc(w.partOfSpeech)}</span>`:''}${tier?`<span class="badge tier-${tier}" style="font-size:.6rem">${tierLabel(tier)}</span>`:''}</div><div class="rb-translation">${esc(w.translation)}</div>${w.category&&w.category!=='پیش‌فرض'?`<div style="text-align:center;margin-bottom:12px"><span class="tag">${esc(w.category)}</span></div>`:''}${backHtml}<div style="margin-top:12px;text-align:center"><button type="button" class="btn btn-ghost btn-sm" id="reviewEditBtn" style="font-size:.75rem">✏️ ویرایش</button></div></div></div></div></div><div class="rating-bar" id="ratingBar" style="display:none"><button type="button" class="btn btn-danger btn-sm" data-rate="1">❌ نادرست <kbd style="font-size:.6rem;opacity:.6">۱</kbd></button><button type="button" class="btn btn-ghost btn-sm" data-rate="3">😐 سخت <kbd style="font-size:.6rem;opacity:.6">۲</kbd></button><button type="button" class="btn btn-primary btn-sm" data-rate="4">🙂 خوب <kbd style="font-size:.6rem;opacity:.6">۳</kbd></button><button type="button" class="btn btn-success btn-sm" data-rate="5">😄 عالی <kbd style="font-size:.6rem;opacity:.6">۴</kbd></button></div><div style="text-align:center;margin-top:12px"><button type="button" class="btn btn-ghost btn-sm" id="wordDrillBtn" style="font-size:.8rem;gap:6px">📚 تمرین و توضیح کلمه</button></div></div>`;
+c.innerHTML=`<div style="max-width:500px;margin:0 auto">${autoPlayBarHtml}${autoPlayStartBtn}<div class="flex" style="justify-content:space-between;margin-bottom:16px"><span style="color:var(--text2)">${reviewSession.idx+1} از ${reviewSession.queue.length}</span><div class="flex" style="gap:4px"><span class="badge badge-accent">${w.box>0?'جعبه '+w.box:'جدید'}</span>${tier?`<span class="badge tier-${tier}">${tierLabel(tier)}</span>`:''}</div></div><div class="progress-bar"><div class="progress-fill" style="width:${prog}%"></div></div>${reviewSearchHtml}<div class="review-card" id="rCard" tabindex="0" role="button" aria-label="کارت مرور — برای نمایش پاسخ کلیک یا Enter بزنید" aria-live="polite"><div class="review-inner"><div class="review-face"><div style="font-size:1.8rem;font-weight:700;margin-bottom:12px">${esc(w.word)} <button type="button" class="trans-audio-btn" id="reviewSpeakBtn" title="شنیدن تلفظ" style="vertical-align:middle;font-size:1rem">🔊</button></div>${(S.settings.cardTemplate||{}).showIpa!==false&&w.ipa?`<div style="color:var(--text2);font-size:.9rem">${esc(w.ipa)}</div>`:''}<div style="color:var(--text2);font-size:.8rem;margin-top:16px">برای نمایش پاسخ کلیک کنید</div></div><div class="review-face review-back" style="justify-content:flex-start;padding-top:20px;overflow-y:auto;max-height:100%"><div class="rb-header"><span class="rb-word">${esc(w.word)}</span>${w.ipa?`<span class="rb-ipa">${esc(w.ipa)}</span>`:''}${w.partOfSpeech?`<span class="rb-pos">${esc(w.partOfSpeech)}</span>`:''}${tier?`<span class="badge tier-${tier}" style="font-size:.6rem">${tierLabel(tier)}</span>`:''}</div><div class="rb-translation">${esc(w.translation)}</div>${w.category&&w.category!=='پیش‌فرض'?`<div style="text-align:center;margin-bottom:12px"><span class="tag">${esc(w.category)}</span></div>`:''}${backHtml}<div style="margin-top:12px;text-align:center"><button type="button" class="btn btn-ghost btn-sm" id="reviewEditBtn" style="font-size:.75rem">✏️ ویرایش</button></div></div></div></div></div><div class="rating-bar" id="ratingBar" style="display:none"><button type="button" class="btn btn-danger btn-sm" data-rate="1">❌ نادرست <kbd style="font-size:.6rem;opacity:.6">۱</kbd></button><button type="button" class="btn btn-ghost btn-sm" data-rate="3">😐 سخت <kbd style="font-size:.6rem;opacity:.6">۲</kbd></button><button type="button" class="btn btn-primary btn-sm" data-rate="4">🙂 خوب <kbd style="font-size:.6rem;opacity:.6">۳</kbd></button><button type="button" class="btn btn-success btn-sm" data-rate="5">😄 عالی <kbd style="font-size:.6rem;opacity:.6">۴</kbd></button></div><div style="text-align:center;margin-top:12px"><button type="button" class="btn btn-ghost btn-sm" id="wordDrillBtn" style="font-size:.8rem;gap:6px">📚 تمرین و توضیح کلمه</button></div></div>`;
 const card=document.getElementById('rCard');
 const ratingBar=document.getElementById('ratingBar');
-card.onclick=()=>{if(reviewSession.flipped)return;reviewSession.flipped=true;card.classList.add('flipped');ratingBar.style.display='flex'};
+card.onclick=()=>{if(autoPlayState.active)return;if(reviewSession.flipped)return;reviewSession.flipped=true;card.classList.add('flipped');ratingBar.style.display='flex'};
 card.onkeydown=e=>{if(e.key===' '||e.key==='Enter'){e.preventDefault();card.onclick()}};
 ratingBar.onclick=(e)=>{const btn=e.target.closest('[data-rate]');if(!btn||reviewRatingPending)return;rateReview(parseInt(btn.dataset.rate))};
 const reviewSpeakBtn=document.getElementById('reviewSpeakBtn');
 if(reviewSpeakBtn)reviewSpeakBtn.onclick=(e)=>{e.stopPropagation();speakWord(w.word)};
-// Auto-pronounce if enabled
-if(S.settings.autoPronounce){setTimeout(function(){speakWord(w.word,S.settings.speechRate?'en-US':'en-US')},300)};
+// Auto-pronounce if enabled (skip if auto-play is active, it handles its own)
+if(S.settings.autoPronounce&&!autoPlayState.active){setTimeout(function(){speakWord(w.word,S.settings.speechRate?'en-US':'en-US')},300)};
+// ═══ AUTO-PLAY WIRING ═══
+if(autoPlayState.active){var apPauseBtn=document.getElementById('apPauseBtn');var apStopBtn=document.getElementById('apStopBtn');var apSpeedSelect=document.getElementById('apSpeedSelect');if(apPauseBtn)apPauseBtn.onclick=function(){autoPlayState.paused=!autoPlayState.paused;if(autoPlayState.paused){if(autoPlayState.timer){clearTimeout(autoPlayState.timer);autoPlayState.timer=null}if(autoPlayState.countdownTimer){clearInterval(autoPlayState.countdownTimer);autoPlayState.countdownTimer=null}apPauseBtn.textContent='▶️'}else{apPauseBtn.textContent='⏸️';autoPlayScheduleNext(reviewSession.flipped?autoPlayState.showDelay:autoPlayState.flipDelay)}};if(apStopBtn)apStopBtn.onclick=function(){stopAutoPlay();renderReview(document.getElementById('content'))};if(apSpeedSelect)apSpeedSelect.onchange=function(){autoPlayState.speed=this.value;var sp=AUTO_PLAY_SPEEDS[this.value]||AUTO_PLAY_SPEEDS.normal;autoPlayState.flipDelay=sp.flip;autoPlayState.showDelay=sp.show};setTimeout(function(){speakWord(w.word);autoPlayScheduleNext(autoPlayState.flipDelay)},400)}var autoPlayStartBtnEl=document.getElementById('autoPlayStartBtn');if(autoPlayStartBtnEl)autoPlayStartBtnEl.onclick=function(){startAutoPlay()};
 // Word Drill — تمرین و توضیح کلمه
 const wordDrillBtn=document.getElementById('wordDrillBtn');
 if(wordDrillBtn){
@@ -1561,6 +1587,7 @@ reviewRatingPending=false;
 renderReview(document.getElementById('content'))}
 function reviewKeyHandler(e){
 if(document.querySelector('.modal-overlay'))return;
+if(autoPlayState.active)return;
 if(e.key===' '&&reviewSession.flipped===false&&currentTab==='review'){e.preventDefault();const card=document.getElementById('rCard');if(card){reviewSession.flipped=true;card.classList.add('flipped');document.getElementById('ratingBar').style.display='flex'}}
 if(reviewSession.flipped&&currentTab==='review'&&!reviewRatingPending){const map={'1':1,'2':3,'3':4,'4':5};if(map[e.key])rateReview(map[e.key])}}
 
@@ -2043,7 +2070,7 @@ if(_e<_tp)_ph+='<button type="button" class="btn btn-ghost btn-sm lib-pg" onclic
 _ph+='<button type="button" class="btn btn-ghost btn-sm lib-pg" onclick="libPage=Math.min('+(_tp-1)+','+(_lp+1)+');renderLibrary(document.getElementById(\'content\'))"'+(_lp>=_tp-1?' disabled':'')+'>▶</button>';
 _ph+='</div>'}
 c.innerHTML='<div class="filter-bar"><input class="input" placeholder="جستجو..." style="max-width:250px" value="'+esc(libFilter)+'" id="libSearch"><select class="input" style="max-width:180px" id="libCat"><option value="">همه دسته‌ها</option>'+S.categories.map(function(c){return '<option value="'+esc(c)+'"'+(c===libCat?' selected':'')+'>'+esc(c)+'</option>'}).join('')+'</select><select class="input" style="max-width:150px" id="libTagFilter"><option value="">همه برچسب‌ها</option>'+([...new Set(S.words.flatMap(w=>w.tags||[]))].sort().map(function(t){return '<option value="'+esc(t)+'">'+esc(t)+'</option>'}).join(''))+'</select><select class="input" style="max-width:180px" id="libSort"><option value="">مرتب‌سازی</option><option value="newest"'+(libSort==='newest'?' selected':'')+'>جدیدترین</option><option value="due"'+(libSort==='due'?' selected':'')+'>زودترین مرور</option><option value="alpha"'+(libSort==='alpha'?' selected':'')+'>الفبایی</option><option value="freq"'+(libSort==='freq'?' selected':'')+'>فراوانی</option></select><button type="button" class="btn btn-sm btn-ghost" id="manageDecksBtn">🗂️ مدیریت دسته‌ها</button><span style="color:var(--text2);font-size:.85rem">'+total+' کلمه'+(total!==S.words.length?' (از '+S.words.length+')':'')+'</span></div>'+_ph+'<div class="table-wrap card"><table><thead><tr><th>کلمه</th><th>ترجمه</th><th>دسته</th><th>جعبه</th><th>مرور بعدی</th><th>عملیات</th></tr></thead><tbody>'+(pageItems.length?pageItems.map(function(w){return libRowHtml(w,dueToday)}).join(''):'<tr><td colspan="6"><div class="empty"><div class="icon">📚</div><p>نتیجه‌ای یافت نشد</p></div></td></tr>')+'</tbody></table></div>';
-document.getElementById('libSearch').oninput=function(e){clearTimeout(_libSearchTimer);_libSearchTimer=setTimeout(function(){libFilter=e.target.value;libPage=0;invalidateLibCache();renderLibrary(c)},250)};
+document.getElementById('libSearch').oninput=function(e){clearTimeout(_libSearchTimer);_libSearchTimer=setTimeout(function(){libFilter=e.target.value;libPage=0;invalidateLibCache();renderLibrary(c);var si=document.getElementById('libSearch');if(si){si.focus();si.selectionStart=si.selectionEnd=si.value.length}},250)};
 document.getElementById('libCat').onchange=function(e){libCat=e.target.value;libPage=0;invalidateLibCache();renderLibrary(c)};
 document.getElementById('libTagFilter').onchange=function(e){libTag=e.target.value;libPage=0;invalidateLibCache();renderLibrary(c)};
 document.getElementById('libSort').onchange=function(e){libSort=e.target.value;libPage=0;invalidateLibCache();renderLibrary(c)};
@@ -2277,7 +2304,7 @@ const total=items.length;
 const p=paginate(total,ltPage,LT_PAGE_SIZE);ltPage=Math.min(ltPage,Math.max(0,p.totalPages-1));
 const pageItems=items.slice(p.start,p.end);
 c.innerHTML='<div class="filter-bar"><input class="input" placeholder="جستجو..." style="max-width:250px" value="'+esc(ltFilter)+'" id="ltSearch"><select class="input" style="max-width:160px" id="ltTagFilter"><option value="">همه برچسب‌ها</option>'+tagOpts+'</select><select class="input" style="max-width:180px" id="ltSourceFilter"><option value="">همه منابع</option>'+srcOpts+'</select><span style="color:var(--text2);font-size:.85rem">'+total+' کلمه'+(total!==S.longTerm.length?' (از '+S.longTerm.length+')':'')+'</span></div>'+ltPagerHtml(total,ltPage,LT_PAGE_SIZE)+'<div class="table-wrap card"><table><thead><tr><th>کلمه</th><th>ترجمه</th><th>برچسب‌ها</th><th>عملیات</th></tr></thead><tbody>'+(pageItems.length?pageItems.map(ltRowHtml).join(''):'<tr><td colspan="4"><div class="empty"><div class="icon">🧠</div><p>هنوز کلمه‌ای به حافظه بلندمدت منتقل نشده</p><p style="color:var(--text2);font-size:.8rem;margin-top:8px">کلمات تثبیت شده را از کتابخانه به حافظه بلندمدت منتقل کنید</p></div></td></tr>')+'</tbody></table></div>';
-document.getElementById('ltSearch').oninput=function(e){ltFilter=e.target.value;ltPage=0;invalidateLtCache();renderLongterm(c)};
+document.getElementById('ltSearch').oninput=function(e){ltFilter=e.target.value;ltPage=0;invalidateLtCache();renderLongterm(c);var si=document.getElementById('ltSearch');if(si){si.focus();si.selectionStart=si.selectionEnd=si.value.length}};
 document.getElementById('ltTagFilter').onchange=function(e){ltTagFilter=e.target.value;ltPage=0;invalidateLtCache();renderLongterm(c)};
 document.getElementById('ltSourceFilter').onchange=function(e){ltSourceFilter=e.target.value;ltPage=0;invalidateLtCache();renderLongterm(c)};
 c.querySelector('tbody').onclick=function(e){
@@ -3907,7 +3934,7 @@ function bindReadingEvents(c,doc){
     else if(e.key==='End'){e.preventDefault();goToReadingPage(doc.totalPages-1)}
   };
   var searchInput=document.getElementById('rdSearch');
-  if(searchInput){var st;searchInput.oninput=function(){clearTimeout(st);st=setTimeout(function(){readingSearchQuery=searchInput.value;renderReading(c)},300)}}
+  if(searchInput){var st;searchInput.oninput=function(){clearTimeout(st);st=setTimeout(function(){readingSearchQuery=searchInput.value;renderReading(c);var si=document.getElementById('rdSearch');if(si){si.focus();si.selectionStart=si.selectionEnd=si.value.length}},300)}}
   var contentArea=document.getElementById('rdContentArea');
   if(contentArea){
     contentArea.onclick=async function(e){
