@@ -150,15 +150,6 @@ tr:hover td{background:var(--card-hover)}
 .pdf-popup .btn{margin:2px 0}
 .pdf-sep{width:1px;height:24px;background:var(--border);flex-shrink:0}
 @media(max-width:768px){.pdf-sidebar{display:none}.pdf-toolbar{gap:3px;padding:8px;flex-wrap:wrap}.pdf-toolbar .btn{padding:6px 10px;font-size:.75rem;min-width:36px;min-height:36px}.pdf-sep{display:none}.pdf-main{padding:4px}.pdf-page-info{font-size:.8rem}.pdf-zoom-info{font-size:.8rem}}
-.pdf-canvas-page{position:relative;display:inline-block}
-.pdf-canvas-textlayer{position:absolute;left:0;top:0;right:0;bottom:0;overflow:hidden;opacity:1;line-height:1.0;pointer-events:auto;cursor:text}
-.pdf-canvas-textlayer>div{position:absolute;white-space:pre;color:transparent;transform-origin:0% 0%}
-.pdf-canvas-textlayer span{color:transparent;cursor:text;position:relative}
-.pdf-canvas-textlayer span::selection{background:rgba(108,92,231,.4)}
-.pdf-canvas-textlayer span::-moz-selection{background:rgba(108,92,231,.4)}
-.pdf-canvas-textlayer ::selection{background:rgba(108,92,231,.4)}
-.pdf-search-match{background:rgba(253,203,110,.2)!important;border-radius:8px;transition:background .3s}
-.pdf-search-found{background:rgba(253,203,110,.5);padding:2px;border-radius:3px}
 .pdf-trans-popup{position:fixed;z-index:310;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px;box-shadow:0 12px 48px rgba(0,0,0,.5);display:none;max-width:380px;width:auto;max-height:70vh;overflow-y:auto;font-family:var(--font);direction:ltr;text-align:left;backdrop-filter:blur(12px)}
 .pdf-trans-popup.visible{display:block}
 .trans-header{display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap}
@@ -276,17 +267,6 @@ html[data-fontsize="xlarge"]{font-size:20px}
    CONTEXT SENTENCE
    ═══════════════════════════════════════════ */
 .context-sentence{font-size:.8rem;color:var(--text2);font-style:italic;margin-top:12px;padding:10px 14px;background:var(--bg);border-radius:12px;border-right:3px solid var(--accent);line-height:1.6;text-align:right}
-
-/* ═══ AUTO-PLAY ═══ */
-.auto-play-bar{display:flex;align-items:center;gap:8px;justify-content:center;padding:10px 16px;background:var(--card);border:1px solid var(--accent);border-radius:14px;margin-bottom:14px;flex-wrap:wrap;box-shadow:0 0 20px var(--accent-glow)}
-.auto-play-bar .auto-play-label{font-size:.82rem;font-weight:600;color:var(--accent);display:flex;align-items:center;gap:6px}
-.auto-play-bar .auto-play-dot{width:8px;height:8px;border-radius:50%;background:var(--success);animation:apPulse 1.2s ease-in-out infinite}
-@keyframes apPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
-.auto-play-bar .btn{padding:6px 12px;font-size:.78rem}
-.auto-play-speed{display:flex;align-items:center;gap:4px;font-size:.78rem;color:var(--text2)}
-.auto-play-speed select{padding:4px 8px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);font:inherit;font-size:.78rem;cursor:pointer}
-.auto-play-speed select:focus{outline:none;border-color:var(--accent)}
-.auto-play-timer{font-size:.72rem;color:var(--text2);min-width:32px;text-align:center;font-variant-numeric:tabular-nums}
 
 /* ═══════════════════════════════════════════
    QUIZ TYPES
@@ -1401,8 +1381,6 @@ if(currentTab!=='pdfreader')hideTransPopup();
 if(currentTab!=='speedreview'&&speedState.timer){clearInterval(speedState.timer);speedState.timer=null}
 // Clear quiz speed timer when leaving quiz
 if(currentTab!=='quiz'&&quizState&&quizState._speedInterval){clearInterval(quizState._speedInterval);quizState._speedInterval=null}
-// Stop auto-play when leaving review
-if(currentTab!=='review'&&autoPlayState.active){stopAutoPlay()}
 renderNav();
 // Render daily challenge widget in sidebar
 const dcw=document.getElementById('dailyChallengeWidget');
@@ -1421,15 +1399,6 @@ const renders={review:renderReview,library:renderLibrary,longterm:renderLongterm
 // ═══════════════════════════════════════════
 let reviewSession={queue:[],idx:0,flipped:false,correct:0,wrong:0,done:false,startTime:0};
 let reviewRatingPending=false;
-// ═══ AUTO-PLAY STATE ═══
-let autoPlayState={active:false,paused:false,timer:null,countdownTimer:null,countdown:0,flipDelay:3000,showDelay:5000,speed:'normal'};
-const AUTO_PLAY_SPEEDS={slow:{flip:4000,show:7000,label:'آهسته'},normal:{flip:3000,show:5000,label:'عادی'},fast:{flip:2000,show:3500,label:'سریع'},turbo:{flip:1200,show:2500,label:'خیلی سریع'}};
-function stopAutoPlay(){autoPlayState.active=false;autoPlayState.paused=false;if(autoPlayState.timer){clearTimeout(autoPlayState.timer);autoPlayState.timer=null}if(autoPlayState.countdownTimer){clearInterval(autoPlayState.countdownTimer);autoPlayState.countdownTimer=null}autoPlayState.countdown=0;var bar=document.getElementById('autoPlayBar');if(bar)bar.remove();var ratingBar=document.getElementById('ratingBar');if(ratingBar)ratingBar.style.display='none'}
-function startAutoPlay(){if(!reviewSession.queue.length)return;if(reviewSession.done){reviewSession.done=false;reviewSession.idx=0;reviewSession.correct=0;reviewSession.wrong=0;reviewSession.startTime=Date.now()}autoPlayState.active=true;autoPlayState.paused=false;var sp=AUTO_PLAY_SPEEDS[autoPlayState.speed]||AUTO_PLAY_SPEEDS.normal;autoPlayState.flipDelay=sp.flip;autoPlayState.showDelay=sp.show;renderReview(document.getElementById('content'))}
-function autoPlayTick(){if(!autoPlayState.active||autoPlayState.paused)return;var c=document.getElementById('content');if(!reviewSession.flipped){reviewSession.flipped=true;var card=document.getElementById('rCard');if(card)card.classList.add('flipped');var rb=document.getElementById('ratingBar');if(rb)rb.style.display='none';autoPlayScheduleNext(autoPlayState.showDelay)}else{reviewSession.idx++;reviewSession.flipped=false;if(reviewSession.idx>=reviewSession.queue.length){stopAutoPlay();reviewSession.done=true;renderReview(c);return}renderReview(c)}}
-function autoPlayScheduleNext(delay){if(!autoPlayState.active)return;if(autoPlayState.timer)clearTimeout(autoPlayState.timer);autoPlayState.countdown=Math.ceil(delay/1000);updateAutoPlayCountdown();if(autoPlayState.countdownTimer)clearInterval(autoPlayState.countdownTimer);autoPlayState.countdownTimer=setInterval(function(){autoPlayState.countdown--;updateAutoPlayCountdown();if(autoPlayState.countdown<=0){clearInterval(autoPlayState.countdownTimer);autoPlayState.countdownTimer=null}},1000);autoPlayState.timer=setTimeout(function(){autoPlayTick()},delay)}
-function updateAutoPlayCountdown(){var el=document.getElementById('apCountdown');if(el)el.textContent=autoPlayState.countdown>0?autoPlayState.countdown+'s':''}
-function renderAutoPlayBar(){return'<div class="auto-play-bar" id="autoPlayBar"><div class="auto-play-label"><div class="auto-play-dot"></div>پخش خودکار</div><button type="button" class="btn btn-ghost btn-sm" id="apPauseBtn" title="مکث/ادامه">'+(autoPlayState.paused?'▶️':'⏸️')+'</button><button type="button" class="btn btn-danger btn-sm" id="apStopBtn" title="توقف">⏹️</button><div class="auto-play-speed"><span>سرعت:</span><select id="apSpeedSelect"><option value="slow"'+(autoPlayState.speed==='slow'?' selected':'')+'>آهسته</option><option value="normal"'+(autoPlayState.speed==='normal'?' selected':'')+'>عادی</option><option value="fast"'+(autoPlayState.speed==='fast'?' selected':'')+'>سریع</option><option value="turbo"'+(autoPlayState.speed==='turbo'?' selected':'')+'>خیلی سریع</option></select></div><div class="auto-play-timer" id="apCountdown"></div></div>'}
 function getDue(){return S.words.filter(w=>!w.nextReviewDate||new Date(w.nextReviewDate)<=new Date())}
 function startReview(){
 const due=getDue();
@@ -1449,8 +1418,6 @@ document.getElementById('reviewRestart').onclick=()=>{reviewSession={queue:[],id
 if(!reviewSession.queue.length){startReview();if(!reviewSession.queue.length){c.innerHTML=`<div class="card" style="text-align:center;padding:60px"><div class="empty"><div class="icon">📖</div><p>کارتی برای مرور نیست</p></div></div>`;return}}
 // Search in review
 const reviewSearchHtml=`<div style="margin-bottom:12px"><input class="input" placeholder="🔍 جستجو در کلمات مرور..." id="reviewSearch" style="max-width:300px;font-size:.85rem;padding:8px 12px"></div>`;
-const autoPlayBarHtml=autoPlayState.active?renderAutoPlayBar():'';
-const autoPlayStartBtn=!autoPlayState.active?`<div style="text-align:center;margin-bottom:14px"><button type="button" class="btn btn-ghost btn-sm" id="autoPlayStartBtn" style="font-size:.8rem;gap:6px">▶️ پخش خودکار</button></div>`:'';
 const w=reviewSession.queue[reviewSession.idx];
 const prog=Math.round((reviewSession.idx/reviewSession.queue.length)*100);
 const tier=getFrequencyTier(w.word);
@@ -1496,18 +1463,16 @@ if(w.tags&&w.tags.length)footerItems.push(...w.tags.map(t=>'<span class="tag">'+
 if(w.source)footerItems.push('<span class="rb-source">'+esc(w.source)+'</span>');
 if(footerItems.length)footerHtml='<div class="rb-footer">'+footerItems.join('')+'</div>';
 backHtml=rbSections.join('')+footerHtml;
-c.innerHTML=`<div style="max-width:500px;margin:0 auto">${autoPlayBarHtml}${autoPlayStartBtn}<div class="flex" style="justify-content:space-between;margin-bottom:16px"><span style="color:var(--text2)">${reviewSession.idx+1} از ${reviewSession.queue.length}</span><div class="flex" style="gap:4px"><span class="badge badge-accent">${w.box>0?'جعبه '+w.box:'جدید'}</span>${tier?`<span class="badge tier-${tier}">${tierLabel(tier)}</span>`:''}</div></div><div class="progress-bar"><div class="progress-fill" style="width:${prog}%"></div></div>${reviewSearchHtml}<div class="review-card" id="rCard" tabindex="0" role="button" aria-label="کارت مرور — برای نمایش پاسخ کلیک یا Enter بزنید" aria-live="polite"><div class="review-inner"><div class="review-face"><div style="font-size:1.8rem;font-weight:700;margin-bottom:12px">${esc(w.word)} <button type="button" class="trans-audio-btn" id="reviewSpeakBtn" title="شنیدن تلفظ" style="vertical-align:middle;font-size:1rem">🔊</button></div>${(S.settings.cardTemplate||{}).showIpa!==false&&w.ipa?`<div style="color:var(--text2);font-size:.9rem">${esc(w.ipa)}</div>`:''}<div style="color:var(--text2);font-size:.8rem;margin-top:16px">برای نمایش پاسخ کلیک کنید</div></div><div class="review-face review-back" style="justify-content:flex-start;padding-top:20px;overflow-y:auto;max-height:100%"><div class="rb-header"><span class="rb-word">${esc(w.word)}</span>${w.ipa?`<span class="rb-ipa">${esc(w.ipa)}</span>`:''}${w.partOfSpeech?`<span class="rb-pos">${esc(w.partOfSpeech)}</span>`:''}${tier?`<span class="badge tier-${tier}" style="font-size:.6rem">${tierLabel(tier)}</span>`:''}</div><div class="rb-translation">${esc(w.translation)}</div>${w.category&&w.category!=='پیش‌فرض'?`<div style="text-align:center;margin-bottom:12px"><span class="tag">${esc(w.category)}</span></div>`:''}${backHtml}<div style="margin-top:12px;text-align:center"><button type="button" class="btn btn-ghost btn-sm" id="reviewEditBtn" style="font-size:.75rem">✏️ ویرایش</button></div></div></div></div></div><div class="rating-bar" id="ratingBar" style="display:none"><button type="button" class="btn btn-danger btn-sm" data-rate="1">❌ نادرست <kbd style="font-size:.6rem;opacity:.6">۱</kbd></button><button type="button" class="btn btn-ghost btn-sm" data-rate="3">😐 سخت <kbd style="font-size:.6rem;opacity:.6">۲</kbd></button><button type="button" class="btn btn-primary btn-sm" data-rate="4">🙂 خوب <kbd style="font-size:.6rem;opacity:.6">۳</kbd></button><button type="button" class="btn btn-success btn-sm" data-rate="5">😄 عالی <kbd style="font-size:.6rem;opacity:.6">۴</kbd></button></div><div style="text-align:center;margin-top:12px"><button type="button" class="btn btn-ghost btn-sm" id="wordDrillBtn" style="font-size:.8rem;gap:6px">📚 تمرین و توضیح کلمه</button></div></div>`;
+c.innerHTML=`<div style="max-width:500px;margin:0 auto"><div class="flex" style="justify-content:space-between;margin-bottom:16px"><span style="color:var(--text2)">${reviewSession.idx+1} از ${reviewSession.queue.length}</span><div class="flex" style="gap:4px"><span class="badge badge-accent">${w.box>0?'جعبه '+w.box:'جدید'}</span>${tier?`<span class="badge tier-${tier}">${tierLabel(tier)}</span>`:''}</div></div><div class="progress-bar"><div class="progress-fill" style="width:${prog}%"></div></div>${reviewSearchHtml}<div class="review-card" id="rCard" tabindex="0" role="button" aria-label="کارت مرور — برای نمایش پاسخ کلیک یا Enter بزنید" aria-live="polite"><div class="review-inner"><div class="review-face"><div style="font-size:1.8rem;font-weight:700;margin-bottom:12px">${esc(w.word)} <button type="button" class="trans-audio-btn" id="reviewSpeakBtn" title="شنیدن تلفظ" style="vertical-align:middle;font-size:1rem">🔊</button></div>${(S.settings.cardTemplate||{}).showIpa!==false&&w.ipa?`<div style="color:var(--text2);font-size:.9rem">${esc(w.ipa)}</div>`:''}<div style="color:var(--text2);font-size:.8rem;margin-top:16px">برای نمایش پاسخ کلیک کنید</div></div><div class="review-face review-back" style="justify-content:flex-start;padding-top:20px;overflow-y:auto;max-height:100%"><div class="rb-header"><span class="rb-word">${esc(w.word)}</span>${w.ipa?`<span class="rb-ipa">${esc(w.ipa)}</span>`:''}${w.partOfSpeech?`<span class="rb-pos">${esc(w.partOfSpeech)}</span>`:''}${tier?`<span class="badge tier-${tier}" style="font-size:.6rem">${tierLabel(tier)}</span>`:''}</div><div class="rb-translation">${esc(w.translation)}</div>${w.category&&w.category!=='پیش‌فرض'?`<div style="text-align:center;margin-bottom:12px"><span class="tag">${esc(w.category)}</span></div>`:''}${backHtml}<div style="margin-top:12px;text-align:center"><button type="button" class="btn btn-ghost btn-sm" id="reviewEditBtn" style="font-size:.75rem">✏️ ویرایش</button></div></div></div></div></div><div class="rating-bar" id="ratingBar" style="display:none"><button type="button" class="btn btn-danger btn-sm" data-rate="1">❌ نادرست <kbd style="font-size:.6rem;opacity:.6">۱</kbd></button><button type="button" class="btn btn-ghost btn-sm" data-rate="3">😐 سخت <kbd style="font-size:.6rem;opacity:.6">۲</kbd></button><button type="button" class="btn btn-primary btn-sm" data-rate="4">🙂 خوب <kbd style="font-size:.6rem;opacity:.6">۳</kbd></button><button type="button" class="btn btn-success btn-sm" data-rate="5">😄 عالی <kbd style="font-size:.6rem;opacity:.6">۴</kbd></button></div><div style="text-align:center;margin-top:12px"><button type="button" class="btn btn-ghost btn-sm" id="wordDrillBtn" style="font-size:.8rem;gap:6px">📚 تمرین و توضیح کلمه</button></div></div>`;
 const card=document.getElementById('rCard');
 const ratingBar=document.getElementById('ratingBar');
-card.onclick=()=>{if(autoPlayState.active)return;if(reviewSession.flipped)return;reviewSession.flipped=true;card.classList.add('flipped');ratingBar.style.display='flex'};
+card.onclick=()=>{if(reviewSession.flipped)return;reviewSession.flipped=true;card.classList.add('flipped');ratingBar.style.display='flex'};
 card.onkeydown=e=>{if(e.key===' '||e.key==='Enter'){e.preventDefault();card.onclick()}};
 ratingBar.onclick=(e)=>{const btn=e.target.closest('[data-rate]');if(!btn||reviewRatingPending)return;rateReview(parseInt(btn.dataset.rate))};
 const reviewSpeakBtn=document.getElementById('reviewSpeakBtn');
 if(reviewSpeakBtn)reviewSpeakBtn.onclick=(e)=>{e.stopPropagation();speakWord(w.word)};
-// Auto-pronounce if enabled (skip if auto-play is active, it handles its own)
-if(S.settings.autoPronounce&&!autoPlayState.active){setTimeout(function(){speakWord(w.word,S.settings.speechRate?'en-US':'en-US')},300)};
-// ═══ AUTO-PLAY WIRING ═══
-if(autoPlayState.active){var apPauseBtn=document.getElementById('apPauseBtn');var apStopBtn=document.getElementById('apStopBtn');var apSpeedSelect=document.getElementById('apSpeedSelect');if(apPauseBtn)apPauseBtn.onclick=function(){autoPlayState.paused=!autoPlayState.paused;if(autoPlayState.paused){if(autoPlayState.timer){clearTimeout(autoPlayState.timer);autoPlayState.timer=null}if(autoPlayState.countdownTimer){clearInterval(autoPlayState.countdownTimer);autoPlayState.countdownTimer=null}apPauseBtn.textContent='▶️'}else{apPauseBtn.textContent='⏸️';autoPlayScheduleNext(reviewSession.flipped?autoPlayState.showDelay:autoPlayState.flipDelay)}};if(apStopBtn)apStopBtn.onclick=function(){stopAutoPlay();renderReview(document.getElementById('content'))};if(apSpeedSelect)apSpeedSelect.onchange=function(){autoPlayState.speed=this.value;var sp=AUTO_PLAY_SPEEDS[this.value]||AUTO_PLAY_SPEEDS.normal;autoPlayState.flipDelay=sp.flip;autoPlayState.showDelay=sp.show};setTimeout(function(){speakWord(w.word);autoPlayScheduleNext(autoPlayState.flipDelay)},400)}var autoPlayStartBtnEl=document.getElementById('autoPlayStartBtn');if(autoPlayStartBtnEl)autoPlayStartBtnEl.onclick=function(){startAutoPlay()};
+// Auto-pronounce if enabled
+if(S.settings.autoPronounce){setTimeout(function(){speakWord(w.word,S.settings.speechRate?'en-US':'en-US')},300)};
 // Word Drill — تمرین و توضیح کلمه
 const wordDrillBtn=document.getElementById('wordDrillBtn');
 if(wordDrillBtn){
@@ -1587,7 +1552,6 @@ reviewRatingPending=false;
 renderReview(document.getElementById('content'))}
 function reviewKeyHandler(e){
 if(document.querySelector('.modal-overlay'))return;
-if(autoPlayState.active)return;
 if(e.key===' '&&reviewSession.flipped===false&&currentTab==='review'){e.preventDefault();const card=document.getElementById('rCard');if(card){reviewSession.flipped=true;card.classList.add('flipped');document.getElementById('ratingBar').style.display='flex'}}
 if(reviewSession.flipped&&currentTab==='review'&&!reviewRatingPending){const map={'1':1,'2':3,'3':4,'4':5};if(map[e.key])rateReview(map[e.key])}}
 
@@ -2070,7 +2034,7 @@ if(_e<_tp)_ph+='<button type="button" class="btn btn-ghost btn-sm lib-pg" onclic
 _ph+='<button type="button" class="btn btn-ghost btn-sm lib-pg" onclick="libPage=Math.min('+(_tp-1)+','+(_lp+1)+');renderLibrary(document.getElementById(\'content\'))"'+(_lp>=_tp-1?' disabled':'')+'>▶</button>';
 _ph+='</div>'}
 c.innerHTML='<div class="filter-bar"><input class="input" placeholder="جستجو..." style="max-width:250px" value="'+esc(libFilter)+'" id="libSearch"><select class="input" style="max-width:180px" id="libCat"><option value="">همه دسته‌ها</option>'+S.categories.map(function(c){return '<option value="'+esc(c)+'"'+(c===libCat?' selected':'')+'>'+esc(c)+'</option>'}).join('')+'</select><select class="input" style="max-width:150px" id="libTagFilter"><option value="">همه برچسب‌ها</option>'+([...new Set(S.words.flatMap(w=>w.tags||[]))].sort().map(function(t){return '<option value="'+esc(t)+'">'+esc(t)+'</option>'}).join(''))+'</select><select class="input" style="max-width:180px" id="libSort"><option value="">مرتب‌سازی</option><option value="newest"'+(libSort==='newest'?' selected':'')+'>جدیدترین</option><option value="due"'+(libSort==='due'?' selected':'')+'>زودترین مرور</option><option value="alpha"'+(libSort==='alpha'?' selected':'')+'>الفبایی</option><option value="freq"'+(libSort==='freq'?' selected':'')+'>فراوانی</option></select><button type="button" class="btn btn-sm btn-ghost" id="manageDecksBtn">🗂️ مدیریت دسته‌ها</button><span style="color:var(--text2);font-size:.85rem">'+total+' کلمه'+(total!==S.words.length?' (از '+S.words.length+')':'')+'</span></div>'+_ph+'<div class="table-wrap card"><table><thead><tr><th>کلمه</th><th>ترجمه</th><th>دسته</th><th>جعبه</th><th>مرور بعدی</th><th>عملیات</th></tr></thead><tbody>'+(pageItems.length?pageItems.map(function(w){return libRowHtml(w,dueToday)}).join(''):'<tr><td colspan="6"><div class="empty"><div class="icon">📚</div><p>نتیجه‌ای یافت نشد</p></div></td></tr>')+'</tbody></table></div>';
-document.getElementById('libSearch').oninput=function(e){clearTimeout(_libSearchTimer);_libSearchTimer=setTimeout(function(){libFilter=e.target.value;libPage=0;invalidateLibCache();renderLibrary(c);var si=document.getElementById('libSearch');if(si){si.focus();si.selectionStart=si.selectionEnd=si.value.length}},250)};
+document.getElementById('libSearch').oninput=function(e){clearTimeout(_libSearchTimer);_libSearchTimer=setTimeout(function(){libFilter=e.target.value;libPage=0;invalidateLibCache();renderLibrary(c)},250)};
 document.getElementById('libCat').onchange=function(e){libCat=e.target.value;libPage=0;invalidateLibCache();renderLibrary(c)};
 document.getElementById('libTagFilter').onchange=function(e){libTag=e.target.value;libPage=0;invalidateLibCache();renderLibrary(c)};
 document.getElementById('libSort').onchange=function(e){libSort=e.target.value;libPage=0;invalidateLibCache();renderLibrary(c)};
@@ -2291,8 +2255,7 @@ const items=S.longTerm.filter(w=>{
 _ltCache=items;_ltCacheKey=key;return items}
 function invalidateLtCache(){_ltCache=null;_ltCacheKey=''}
 function ltRowHtml(w){
-var tier=getFrequencyTier(w.word);
-return '<tr><td><strong>'+esc(w.word)+'</strong> <button type="button" class="btn btn-ghost btn-sm" data-speak="'+esc(w.word)+'" style="padding:2px 6px;font-size:.75rem" title="شنیدن تلفظ">🔊</button>'+(w.ipa?'<br><small style="color:var(--text2)">'+esc(w.ipa)+'</small>':'')+(tier?'<br><span class="badge tier-'+tier+'" style="font-size:.6rem">'+tierLabel(tier)+'</span>':'')+'</td><td>'+esc(w.translation)+'</td><td>'+(w.tags||[]).map(function(t){return '<span class="tag" style="font-size:.6rem">'+esc(t)+'</span>'}).join(' ')+(w.source?'<br><small style="color:var(--text2);font-size:.65rem">'+esc(w.source)+'</small>':'')+'</td><td><button type="button" class="btn btn-ghost btn-sm" data-ltedit="'+w.id+'" aria-label="ویرایش">✏️</button><button type="button" class="btn btn-ghost btn-sm" data-back="'+w.id+'" aria-label="بازگشت به کتابخانه">↩️</button><button type="button" class="btn btn-ghost btn-sm" data-ltdel="'+w.id+'" aria-label="حذف" style="color:var(--danger)">🗑️</button></td></tr>'}
+return '<tr><td><strong>'+esc(w.word)+'</strong>'+(w.ipa?'<br><small style="color:var(--text2)">'+esc(w.ipa)+'</small>':'')+' <button type="button" class="btn btn-ghost btn-sm" data-speak="'+esc(w.word)+'" style="padding:2px 6px;font-size:.75rem" title="شنیدن تلفظ">🔊</button></td><td>'+esc(w.translation)+'</td><td>'+(w.tags||[]).map(function(t){return '<span class="tag" style="font-size:.6rem">'+esc(t)+'</span>'}).join(' ')+(w.source?'<br><small style="color:var(--text2);font-size:.65rem">'+esc(w.source)+'</small>':'')+'</td><td><button type="button" class="btn btn-ghost btn-sm" data-ltedit="'+w.id+'" aria-label="ویرایش">✏️</button><button type="button" class="btn btn-ghost btn-sm" data-back="'+w.id+'" aria-label="بازگشت به کتابخانه">↩️ بازگشت</button><button type="button" class="btn btn-ghost btn-sm" data-dlt="'+w.id+'" aria-label="حذف">🗑️</button></td></tr>'}
 function ltPagerHtml(total,page,pageSize){return makePagerHtml(total,page,pageSize,'lt-pg','ltpg')}
 function renderLongterm(c){
 const allTags=new Set();const allSources=new Set();
@@ -2304,15 +2267,14 @@ const total=items.length;
 const p=paginate(total,ltPage,LT_PAGE_SIZE);ltPage=Math.min(ltPage,Math.max(0,p.totalPages-1));
 const pageItems=items.slice(p.start,p.end);
 c.innerHTML='<div class="filter-bar"><input class="input" placeholder="جستجو..." style="max-width:250px" value="'+esc(ltFilter)+'" id="ltSearch"><select class="input" style="max-width:160px" id="ltTagFilter"><option value="">همه برچسب‌ها</option>'+tagOpts+'</select><select class="input" style="max-width:180px" id="ltSourceFilter"><option value="">همه منابع</option>'+srcOpts+'</select><span style="color:var(--text2);font-size:.85rem">'+total+' کلمه'+(total!==S.longTerm.length?' (از '+S.longTerm.length+')':'')+'</span></div>'+ltPagerHtml(total,ltPage,LT_PAGE_SIZE)+'<div class="table-wrap card"><table><thead><tr><th>کلمه</th><th>ترجمه</th><th>برچسب‌ها</th><th>عملیات</th></tr></thead><tbody>'+(pageItems.length?pageItems.map(ltRowHtml).join(''):'<tr><td colspan="4"><div class="empty"><div class="icon">🧠</div><p>هنوز کلمه‌ای به حافظه بلندمدت منتقل نشده</p><p style="color:var(--text2);font-size:.8rem;margin-top:8px">کلمات تثبیت شده را از کتابخانه به حافظه بلندمدت منتقل کنید</p></div></td></tr>')+'</tbody></table></div>';
-document.getElementById('ltSearch').oninput=function(e){ltFilter=e.target.value;ltPage=0;invalidateLtCache();renderLongterm(c);var si=document.getElementById('ltSearch');if(si){si.focus();si.selectionStart=si.selectionEnd=si.value.length}};
+document.getElementById('ltSearch').oninput=function(e){ltFilter=e.target.value;ltPage=0;invalidateLtCache();renderLongterm(c)};
 document.getElementById('ltTagFilter').onchange=function(e){ltTagFilter=e.target.value;ltPage=0;invalidateLtCache();renderLongterm(c)};
 document.getElementById('ltSourceFilter').onchange=function(e){ltSourceFilter=e.target.value;ltPage=0;invalidateLtCache();renderLongterm(c)};
 c.querySelector('tbody').onclick=function(e){
 var btn=e.target.closest('button');if(!btn)return;
 if(btn.dataset.speak){speakWord(btn.dataset.speak);return}
-if(btn.dataset.ltedit){editWord(btn.dataset.ltedit,function(){renderLongterm(c)},'longTerm');return}
-if(btn.dataset.back){var w=S.longTerm.find(function(x){return x.id===btn.dataset.back});if(w){S.longTerm=S.longTerm.filter(function(x){return x.id!==w.id});w.box=1;w.nextReviewDate=null;S.words.push(w);save();invalidateLtCache();invalidateLibCache();renderLongterm(c);toast('بازگشت به کتابخانه','success')}return}
-if(btn.dataset.ltdel){var w=S.longTerm.find(function(x){return x.id===btn.dataset.ltdel});var name=w?w.word:'';if(!confirm('\u062d\u0630\u0641 \u00ab'+name+'\u00bb\u061f'))return;S.longTerm=S.longTerm.filter(function(x){return x.id!==btn.dataset.ltdel});save();invalidateLtCache();renderLongterm(c);toast('\u062d\u0630\u0641 \u0634\u062f','success')}}
+if(btn.dataset.back){var w=S.longTerm.find(function(x){return x.id===btn.dataset.back});if(w){S.longTerm=S.longTerm.filter(function(x){return x.id!==w.id});w.box=1;w.nextReviewDate=null;S.words.push(w);save();invalidateLtCache();invalidateLibCache();renderLongterm(c);toast('بازگشت به کتابخانه','success')}}
+if(btn.dataset.dlt){var w=S.longTerm.find(function(x){return x.id===btn.dataset.dlt});var name=w?w.word:'';if(!confirm('\u062d\u0630\u0641 \u00ab'+name+'\u00bb\u061f'))return;S.longTerm=S.longTerm.filter(function(x){return x.id!==btn.dataset.dlt});save();invalidateLtCache();renderLongterm(c);toast('\u062d\u0630\u0641 \u0634\u062f','success')}};
 bindPager(c,null,function(v){ltPage=v==='prev'?Math.max(0,ltPage-1):v==='next'?ltPage+1:parseInt(v);renderLongterm(c)});
 }
 
@@ -2780,9 +2742,6 @@ let pdfTextMode=false; // toggle between embed and text reflow
 let pdfTextPages=[];   // extracted text per page
 let pdfTotalPages=0;
 let pdfBookmarks={};   // fileName -> {page,scrollY}
-let pdfCurrentPage=0;
-let pdfScale=1.5;
-let pdfRenderAbort=null;
 
 // PDF persistence helpers
 const PDF_STORAGE_KEY='leitner_pdf_state';
@@ -2824,16 +2783,7 @@ c.innerHTML=`<div class="card" style="text-align:center;padding:60px"><div class
 document.getElementById('pdfOpen').onclick=()=>document.getElementById('pdfFileInput').click();
 document.getElementById('pdfFileInput').onchange=async e=>{const f=e.target.files[0];if(f)await openPDF(f)};return}
 const truncName=pdfFileName.length>35?pdfFileName.slice(0,32)+'...':pdfFileName;
-c.innerHTML=`<div class="pdf-toolbar" id="pdfToolbar"><button type="button" class="btn btn-ghost btn-sm" id="pdfOpen2" title="فایل جدید">📂</button><input type="file" id="pdfFileInput2" accept=".pdf" style="display:none"><button type="button" class="btn btn-ghost btn-sm" id="pdfCloseBtn" title="بستن PDF" style="color:var(--danger)">✕ بستن</button><div class="pdf-sep"></div><span style="color:var(--text2);font-size:.75rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:250px" title="${esc(pdfFileName)}">${esc(truncName)}</span><div style="flex:1"></div><button type="button" class="btn btn-sm ${pdfTextMode?'btn-primary':'btn-ghost'}" id="pdfTextModeBtn" title="حالت متن">${pdfTextMode?'📄 متن':'📑 PDF'}</button><button type="button" class="btn btn-ghost btn-sm" id="pdfBookmarkBtn" title="نشانک صفحه">🔖</button>
-<input type="text" id="pdfWordSearch" placeholder="🔍 جستجوی کلمه..." style="max-width:180px;padding:6px 10px;font-size:.8rem;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);font-family:var(--font)">
-<div class="pdf-sep"></div>
-<button type="button" class="btn btn-ghost btn-sm" id="pdfFirstPage" title="صفحه اول"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="13 17 18 12 13 7"></polyline><polyline points="6 17 11 12 6 7"></polyline></svg></button>
-<button type="button" class="btn btn-ghost btn-sm" id="pdfPrevPage" title="صفحه قبل"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg></button>
-<button type="button" class="btn btn-ghost btn-sm" id="pdfPageIndicator" title="کلیک برای رفتن به صفحه" style="font-size:.82rem;font-weight:600;color:var(--accent);padding:6px 8px">—</button>
-<button type="button" class="btn btn-ghost btn-sm" id="pdfNextPage" title="صفحه بعد"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg></button>
-<button type="button" class="btn btn-ghost btn-sm" id="pdfLastPage" title="صفحه آخر"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="11 17 6 12 11 7"></polyline><polyline points="18 17 13 12 18 7"></polyline></svg></button>
-<div class="pdf-sep"></div>
-<button type="button" class="btn btn-primary btn-sm" id="pdfTranslateBtn">🔍 ترجمه</button></div>${pdfTextMode?`<div style="width:100%;height:calc(100vh - 140px);min-height:500px;overflow-y:auto;padding:24px;background:var(--bg2);border-radius:var(--radius);line-height:2;font-size:1rem" id="pdfTextContent">${pdfTextPages.length?pdfTextPages.map(p=>'<div class="pdf-text-page" data-page="'+p.pageNum+'" style="margin-bottom:24px;padding-bottom:24px;border-bottom:1px solid var(--border)"><div style="color:var(--text2);font-size:.75rem;margin-bottom:8px">📄 صفحه '+p.pageNum+'</div><div style="white-space:pre-wrap;word-break:break-word;cursor:text;user-select:text">'+esc(p.text)+'</div></div>').join(''):'<div style="text-align:center;padding:40px;color:var(--text2)">در حال استخراج متن...</div>'}</div>`:`<div style="width:100%;height:calc(100vh - 140px);min-height:500px;overflow-y:auto;padding:16px;background:var(--bg2);border-radius:var(--radius)" id="pdfViewerWrap"><div id="pdfCanvasContainer" style="display:flex;flex-direction:column;align-items:center;gap:16px"><div style="text-align:center;padding:40px;color:var(--text2)">📄 در حال بارگذاری PDF...</div></div></div>`}`;
+c.innerHTML=`<div class="pdf-toolbar" id="pdfToolbar"><button type="button" class="btn btn-ghost btn-sm" id="pdfOpen2" title="فایل جدید">📂</button><input type="file" id="pdfFileInput2" accept=".pdf" style="display:none"><button type="button" class="btn btn-ghost btn-sm" id="pdfCloseBtn" title="بستن PDF" style="color:var(--danger)">✕ بستن</button><div class="pdf-sep"></div><span style="color:var(--text2);font-size:.75rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:250px" title="${esc(pdfFileName)}">${esc(truncName)}</span><div style="flex:1"></div><button type="button" class="btn btn-sm ${pdfTextMode?'btn-primary':'btn-ghost'}" id="pdfTextModeBtn" title="حالت متن">${pdfTextMode?'📄 متن':'📑 PDF'}</button><button type="button" class="btn btn-ghost btn-sm" id="pdfBookmarkBtn" title="نشانک صفحه">🔖</button><button type="button" class="btn btn-primary btn-sm" id="pdfTranslateBtn">🔍 ترجمه</button></div>${pdfTextMode?`<div style="width:100%;height:calc(100vh - 140px);min-height:500px;overflow-y:auto;padding:24px;background:var(--bg2);border-radius:var(--radius);line-height:2;font-size:1rem" id="pdfTextContent">${pdfTextPages.length?pdfTextPages.map(p=>'<div class="pdf-text-page" data-page="'+p.pageNum+'" style="margin-bottom:24px;padding-bottom:24px;border-bottom:1px solid var(--border)"><div style="color:var(--text2);font-size:.75rem;margin-bottom:8px">📄 صفحه '+p.pageNum+'</div><div style="white-space:pre-wrap;word-break:break-word;cursor:text;user-select:text">'+esc(p.text)+'</div></div>').join(''):'<div style="text-align:center;padding:40px;color:var(--text2)">در حال استخراج متن...</div>'}</div>`:`<div style="width:100%;height:calc(100vh - 140px);min-height:500px;position:relative" id="pdfViewerWrap"><embed id="pdfEmbed" src="${pdfBlobUrl}" type="application/pdf" style="width:100%;height:100%;border:none;border-radius:var(--radius)"></div>`}`;
 document.getElementById('pdfOpen2').onclick=()=>document.getElementById('pdfFileInput2').click();
 document.getElementById('pdfFileInput2').onchange=async e=>{const f=e.target.files[0];if(f)await openPDF(f)};
 document.getElementById('pdfCloseBtn').onclick=()=>{savePdfBookmark();pdfBlobUrl=null;pdfFileName='';pdfTextMode=false;pdfTextPages=[];clearPdfState();renderPDFReader(document.getElementById('content'));toast('PDF بسته شد','info')};
@@ -2841,183 +2791,44 @@ document.getElementById('pdfCloseBtn').onclick=()=>{savePdfBookmark();pdfBlobUrl
 var textModeBtn=document.getElementById('pdfTextModeBtn');
 if(textModeBtn){textModeBtn.onclick=function(){
   pdfTextMode=!pdfTextMode;
+  if(pdfTextMode&&pdfTextPages.length===0){
+    toast('در حال استخراج متن...','info');
+    // Need to re-extract from the blob
+    fetch(pdfBlobUrl).then(r=>r.blob()).then(b=>extractPdfTextPages(b)).then(result=>{
+      pdfTextPages=result.pages;pdfTotalPages=result.pages.length;
+      renderPDFReader(document.getElementById('content'));
+    }).catch(e=>toast('خطا در استخراج متن','error'));
+    return;
+  }
   renderPDFReader(document.getElementById('content'));
 }}
-// Render PDF canvas pages if in PDF mode
-if(!pdfTextMode&&pdfBlobUrl){
-  renderPDFCanvasPages(pdfBlobUrl);
-}
 // Bookmark button
 var bookmarkBtn=document.getElementById('pdfBookmarkBtn');
 if(bookmarkBtn){bookmarkBtn.onclick=function(){
   savePdfBookmark();
   toast('نشانک ذخیره شد (صفحه '+(pdfCurrentPage||0)+')','success');
 }}
-// PDF page navigation
-function pdfGoToPage(pageNum){
-  var container=document.getElementById('pdfCanvasContainer');
-  if(!container)return;
-  var target=container.querySelector('[data-page="'+pageNum+'"]');
-  if(target){
-    target.scrollIntoView({behavior:'smooth',block:'start'});
-    pdfCurrentPage=pageNum;
-    var indicator=document.getElementById('pdfPageIndicator');
-    if(indicator)indicator.textContent=pageNum+'/'+pdfTotalPages;
-  }
-}
-var pdfFirstBtn=document.getElementById('pdfFirstPage');
-if(pdfFirstBtn)pdfFirstBtn.onclick=function(){pdfGoToPage(1)};
-var pdfPrevBtn=document.getElementById('pdfPrevPage');
-if(pdfPrevBtn)pdfPrevBtn.onclick=function(){pdfGoToPage(Math.max(1,(pdfCurrentPage||1)-1))};
-var pdfNextBtn=document.getElementById('pdfNextPage');
-if(pdfNextBtn)pdfNextBtn.onclick=function(){pdfGoToPage(Math.min(pdfTotalPages,(pdfCurrentPage||1)+1))};
-var pdfLastBtn=document.getElementById('pdfLastPage');
-if(pdfLastBtn)pdfLastBtn.onclick=function(){pdfGoToPage(pdfTotalPages)};
-var pdfPageInd=document.getElementById('pdfPageIndicator');
-if(pdfPageInd)pdfPageInd.onclick=function(){
-  var num=prompt('شماره صفحه (1-'+pdfTotalPages+'):',pdfCurrentPage||1);
-  if(num){var n=parseInt(num);if(n>=1&&n<=pdfTotalPages)pdfGoToPage(n);else toast('شماره صفحه نامعتبر','error')}
-};
-// Track current page on scroll
-var pdfViewerWrap=document.getElementById('pdfViewerWrap');
-if(pdfViewerWrap){
-  pdfViewerWrap.addEventListener('scroll',function(){
-    var container=document.getElementById('pdfCanvasContainer');
-    if(!container)return;
-    var pages=container.querySelectorAll('[data-page]');
-    var scrollTop=pdfViewerWrap.scrollTop;
-    var viewH=pdfViewerWrap.clientHeight;
-    for(var i=0;i<pages.length;i++){
-      var rect=pages[i].getBoundingClientRect();
-      var wrapRect=pdfViewerWrap.getBoundingClientRect();
-      var relTop=rect.top-wrapRect.top;
-      if(relTop<=viewH*0.4&&relTop+rect.height>0){
-        var pn=parseInt(pages[i].getAttribute('data-page'));
-        if(pn&&pn!==pdfCurrentPage){
-          pdfCurrentPage=pn;
-          var indicator=document.getElementById('pdfPageIndicator');
-          if(indicator)indicator.textContent=pn+'/'+pdfTotalPages;
-        }
-      }
-    }
-  });
-}
-// PDF word search
-var pdfSearchInput=document.getElementById('pdfWordSearch');
-if(pdfSearchInput){
-  var pdfSearchTimer;
-  pdfSearchInput.oninput=function(){
-    clearTimeout(pdfSearchTimer);
-    var query=this.value.trim().toLowerCase();
-    if(!query||query.length<2){
-      // Clear highlights
-      document.querySelectorAll('.pdf-search-highlight').forEach(function(el){
-        el.style.background='';el.classList.remove('pdf-search-highlight');
-      });
-      return;
-    }
-    pdfSearchTimer=setTimeout(function(){
-      // Search in text mode
-      if(pdfTextMode){
-        var textContent=document.getElementById('pdfTextContent');
-        if(!textContent)return;
-        // Clear old highlights
-        textContent.querySelectorAll('.pdf-search-match').forEach(function(el){
-          el.style.background='';el.classList.remove('pdf-search-match');
-        });
-        // Find and highlight
-        var pages=textContent.querySelectorAll('.pdf-text-page');
-        var found=false;
-        for(var i=0;i<pages.length;i++){
-          var text=pages[i].textContent.toLowerCase();
-          if(text.includes(query)){
-            pages[i].scrollIntoView({behavior:'smooth',block:'start'});
-            pages[i].style.background='rgba(253,203,110,.15)';
-            pages[i].classList.add('pdf-search-match');
-            if(!found){found=true;toast('یافت شد در صفحه '+pages[i].getAttribute('data-page'),'success')}
-          }else{
-            pages[i].style.background='';
-            pages[i].classList.remove('pdf-search-match');
-          }
-        }
-        if(!found)toast('یافت نشد','info');
-      }
-    },300);
-  };
-  pdfSearchInput.onkeydown=function(e){
-    if(e.key==='Enter'){
-      clearTimeout(pdfSearchTimer);
-      var query=this.value.trim().toLowerCase();
-      if(!query||query.length<2)return;
-      // Search in text mode
-      if(pdfTextMode){
-        var textContent=document.getElementById('pdfTextContent');
-        if(!textContent)return;
-        var pages=textContent.querySelectorAll('.pdf-text-page');
-        for(var i=0;i<pages.length;i++){
-          if(pages[i].textContent.toLowerCase().includes(query)){
-            pages[i].scrollIntoView({behavior:'smooth',block:'start'});
-            toast('صفحه '+pages[i].getAttribute('data-page'),'success');
-            return;
-          }
-        }
-        toast('یافت نشد','info');
-      }
-    }
-    if(e.key==='Escape')this.value='';
-  };
-}
 // Translate button always works
 document.getElementById('pdfTranslateBtn').onclick=function(){
   var btn=document.getElementById('pdfTranslateBtn');
   var rect=btn.getBoundingClientRect();
   showPdfTranslateInput(rect.left,rect.bottom+8);
 };
-// Text mode: double-click to translate word
-var pdfTextContent=document.getElementById('pdfTextContent');
-if(pdfTextContent){
-  pdfTextContent.addEventListener('dblclick',function(e){
-    var selection=window.getSelection();
-    var selectedText=selection?selection.toString().trim():'';
-    if(selectedText&&selectedText.length>=2&&selectedText.length<=50){
-      // Clean the selected text (remove punctuation)
-      var cleanWord=normalizeWordLookup(selectedText);
-      if(cleanWord&&cleanWord.length>=2){
-        showPdfTranslateInput(e.clientX,e.clientY);
-        setTimeout(function(){
-          var input=document.getElementById('pdfTranslateInput');
-          if(input){input.value=cleanWord;input.dispatchEvent(new Event('input'))}
-        },100);
-      }
-    }
-  });
-  // Also handle text selection (mouseup) for single-click select
-  pdfTextContent.addEventListener('mouseup',function(e){
-    setTimeout(function(){
-      var selection=window.getSelection();
-      var selectedText=selection?selection.toString().trim():'';
-      if(selectedText&&selectedText.length>=2&&selectedText.length<=50){
-        var cleanWord=normalizeWordLookup(selectedText);
-        if(cleanWord&&cleanWord.length>=2){
-          // Show small translate button near selection
-          showPdfSelectionHelper(e.clientX,e.clientY,cleanWord);
-        }
-      }
-    },10);
-  });
-}
-
-// Close popup when clicking outside
-document.addEventListener('click',function(e){
-  var popup=document.getElementById('pdfTranslatePopup');
-  if(!popup)return;
-  if(e.target.closest('#pdfTranslatePopup')||e.target.closest('#pdfTranslateBtn'))return;
-  // Don't close if we just opened from selection helper
-  if(e.target.closest('#pdfSelectionHelper'))return;
-  hidePdfTranslateInput();
+// Manual double-click detection (PDF viewer captures native dblclick)
+var pdfClickTimer=null;var pdfLastClick=0;
+var pdfViewerWrap=document.getElementById('pdfViewerWrap');
+pdfViewerWrap.addEventListener('click',function(e){
+  var now=Date.now();
+  if(now-pdfLastClick<350){
+    // Double-click detected
+    showPdfTranslateInput(e.clientX,e.clientY);
+    pdfLastClick=0;clearTimeout(pdfClickTimer);return;
+  }
+  pdfLastClick=now;
 });
-var selHelper=document.getElementById('pdfSelectionHelper');
-if(selHelper)selHelper.remove();
+// Also try dblclick event as backup
+var pdfEmbed=document.getElementById('pdfEmbed');
+if(pdfEmbed){pdfEmbed.addEventListener('dblclick',function(e){showPdfTranslateInput(e.clientX,e.clientY)})}
 document.onkeydown=null;
 }
 
@@ -3025,362 +2836,121 @@ function showPdfTranslateInput(x,y){
   hidePdfTranslateInput();
   var popup=document.createElement('div');
   popup.id='pdfTranslatePopup';
-  popup.style.cssText='position:fixed;z-index:320;background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 12px 48px rgba(0,0,0,.5);backdrop-filter:blur(12px);width:400px;max-height:80vh;overflow:hidden;display:flex;flex-direction:column;font-family:var(--font);direction:ltr;text-align:left';
-  // Position with screen bounds check
-  var left=Math.min(x,window.innerWidth-420);
-  var top=Math.min(y,window.innerHeight-200);
-  if(left<16)left=16;
-  if(top<16)top=16;
-  popup.style.left=left+'px';
-  popup.style.top=top+'px';
-  popup.innerHTML='<div class="wd-drag-handle" style="display:flex;align-items:center;gap:6px;padding:10px 14px;cursor:move;background:var(--bg);border-bottom:1px solid var(--border);border-radius:16px 16px 0 0;flex-shrink:0"><span style="color:var(--text2);font-size:.7rem;letter-spacing:2px;user-select:none">⠿</span><span style="flex:1;text-align:center;font-size:.8rem;color:var(--text2)">در حال جستجو...</span><button type="button" id="pdfTranslateClose" style="background:none;border:none;color:var(--text2);cursor:pointer;font-size:1rem;padding:2px 6px;line-height:1">✕</button></div><div id="pdfTranslateResult" style="padding:14px;overflow-y:auto;flex:1"><div class="trans-loading"><div class="trans-spinner"></div>در حال جستجو...</div></div>';
+  popup.style.cssText='position:fixed;z-index:320;background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 12px 48px rgba(0,0,0,.5);backdrop-filter:blur(12px);width:340px;max-height:70vh;overflow:hidden;display:flex;flex-direction:column;font-family:var(--font)';
+  popup.style.left=Math.min(x,window.innerWidth-360)+'px';
+  popup.style.top=Math.min(y,window.innerHeight-100)+'px';
+  // Header with input
+  popup.innerHTML='<div style="padding:12px 14px;border-bottom:1px solid var(--border);display:flex;gap:8px;align-items:center"><input type="text" id="pdfTranslateInput" class="input" placeholder="کلمه را تایپ یا پیست کنید..." style="flex:1;padding:10px 14px;font-size:.9rem;direction:ltr;text-align:left;margin:0" autocomplete="off" spellcheck="false"><button type="button" class="btn btn-primary btn-sm" id="pdfTranslateGo" style="padding:10px 14px">🔍</button><button type="button" class="btn btn-ghost btn-sm" id="pdfTranslateClose" style="padding:8px 10px;font-size:.9rem">✕</button></div><div id="pdfTranslateResult" style="padding:14px;overflow-y:auto;max-height:calc(70vh - 56px)"><div style="text-align:center;color:var(--text2);font-size:.85rem;padding:20px 0">کلمه‌ای را جستجو کنید یا از متن کپی کنید</div></div>';
   document.body.appendChild(popup);
-  // Make draggable
-  var handle=popup.querySelector('.wd-drag-handle');
-  var isDragging=false,dragOffX=0,dragOffY=0;
-  handle.onmousedown=function(e){
-    if(e.target.id==='pdfTranslateClose')return;
-    isDragging=true;
-    var pRect=popup.getBoundingClientRect();
-    dragOffX=e.clientX-pRect.left;dragOffY=e.clientY-pRect.top;
-    popup.style.transition='none';
-    document.onmousemove=function(ev){
-      if(!isDragging)return;
-      var nx=ev.clientX-dragOffX,ny=ev.clientY-dragOffY;
-      nx=Math.max(0,Math.min(nx,window.innerWidth-popup.offsetWidth-4));
-      ny=Math.max(0,Math.min(ny,window.innerHeight-popup.offsetHeight-4));
-      popup.style.left=nx+'px';popup.style.top=ny+'px';
-    };
-    document.onmouseup=function(){isDragging=false;document.onmousemove=null;document.onmouseup=null;popup.style.transition=''};
-    e.preventDefault();
+  var input=document.getElementById('pdfTranslateInput');
+  input.focus();
+  // Auto-translate with debounce
+  var translateTimer=null;
+  input.oninput=function(){
+    clearTimeout(translateTimer);
+    var word=normalizeWordLookup(input.value);
+    if(word&&word.length>=2){
+      translateTimer=setTimeout(function(){doPdfTranslate(word)},400);
+    }else{
+      document.getElementById('pdfTranslateResult').innerHTML='<div style="text-align:center;color:var(--text2);font-size:.85rem;padding:20px 0">کلمه‌ای را جستجو کنید یا از متن کپی کنید</div>';
+    }
+  };
+  input.onkeydown=function(e){
+    if(e.key==='Enter'){
+      clearTimeout(translateTimer);
+      var word=normalizeWordLookup(input.value);
+      if(word&&word.length>=2)doPdfTranslate(word);
+    }
+    if(e.key==='Escape')hidePdfTranslateInput();
+  };
+  document.getElementById('pdfTranslateGo').onclick=function(){
+    var word=normalizeWordLookup(input.value);
+    if(word&&word.length>=2)doPdfTranslate(word);
   };
   document.getElementById('pdfTranslateClose').onclick=hidePdfTranslateInput;
-  // Auto-translate if word provided (from double-click/selection)
-  var inputTimer=null;
-  // Check if there's a word to translate immediately
+  // Close on outside click
   setTimeout(function(){
-    var sel=window.getSelection();
-    var selText=sel?sel.toString().trim():'';
-    if(selText&&selText.length>=2&&selText.length<=50){
-      var clean=normalizeWordLookup(selText);
-      if(clean&&clean.length>=2){
-        doPdfTranslateSmart(clean);
-        return;
-      }
-    }
-    // No selection - show search input
-    showPdfSearchInput(popup);
-  },50);
+    document.addEventListener('mousedown',function closeHandler(e){
+      if(!popup.contains(e.target)){hidePdfTranslateInput();document.removeEventListener('mousedown',closeHandler)}
+    });
+  },100);
 }
 
-function showPdfSearchInput(popup){
-  var resultDiv=document.getElementById('pdfTranslateResult');
-  if(!resultDiv)return;
-  resultDiv.innerHTML='<div style="padding:8px 0"><input type="text" id="pdfSearchWordInput" class="input" placeholder="کلمه را تایپ کنید..." style="width:100%;padding:10px 14px;font-size:.9rem;direction:ltr;text-align:left" autocomplete="off" spellcheck="false"><div id="pdfSearchResult" style="margin-top:10px"></div></div>';
-  var input=document.getElementById('pdfSearchWordInput');
-  if(input){
-    input.focus();
-    var st;
-    input.oninput=function(){
-      clearTimeout(st);
-      var w=normalizeWordLookup(input.value);
-      if(w&&w.length>=2){st=setTimeout(function(){doPdfTranslateSmart(w)},400)}
-      else{document.getElementById('pdfSearchResult').innerHTML=''}
-    };
-    input.onkeydown=function(e){if(e.key==='Escape')hidePdfTranslateInput();if(e.key==='Enter'){clearTimeout(st);var w=normalizeWordLookup(input.value);if(w&&w.length>=2)doPdfTranslateSmart(w)}};
-  }
-}
-
-async function doPdfTranslateSmart(word){
+async function doPdfTranslate(word){
   var resultDiv=document.getElementById('pdfTranslateResult');
   if(!resultDiv)return;
   resultDiv.innerHTML='<div class="trans-loading"><div class="trans-spinner"></div>در حال جستجو...</div>';
-  // Smart lookup: check existing library first
-  var existingCard=S.words.find(function(x){return x.word.toLowerCase()===word.toLowerCase()})
-    ||S.longTerm.find(function(x){return x.word.toLowerCase()===word.toLowerCase()});
-  var exists=S.words.some(function(x){return x.word.toLowerCase()===word.toLowerCase()});
-  var inLT=S.longTerm.some(function(x){return x.word.toLowerCase()===word.toLowerCase()});
-  var cached=getCachedTrans(word);
-  if(!cached){
-    if(existingCard){
-      cached={translation:existingCard.translation||'',ipa:existingCard.ipa||'',pos:existingCard.partOfSpeech||'',definitions:existingCard.definitions||[],examples:existingCard.examples||[],synonyms:existingCard.synonyms||[],antonyms:existingCard.antonyms||[],audioUs:existingCard.audioUs||'',audioBr:existingCard.audioBr||'',coreMeaning:existingCard.coreMeaning||''};
-      var needsEnrich=!cached.definitions.length||!cached.translation||!cached.ipa;
-      if(needsEnrich){
-        var dict=await fetchDictionary(word);
-        if(dict){
-          if(!cached.ipa)cached.ipa=dict.phoneticBr||dict.phoneticUs||dict.phonetic||'';
-          if(!cached.pos)cached.pos=dict.meanings[0]?dict.meanings[0].partOfSpeech:'';
-          if(!cached.definitions.length)cached.definitions=dict.meanings.flatMap(function(m){return m.definitions}).slice(0,5);
-          if(!cached.examples.length)cached.examples=dict.meanings.flatMap(function(m){return m.examples}).slice(0,4);
-          if(!cached.synonyms.length)cached.synonyms=dict.meanings.flatMap(function(m){return m.synonyms}).slice(0,6);
-          if(!cached.antonyms.length)cached.antonyms=dict.meanings.flatMap(function(m){return m.antonyms||[]}).slice(0,4);
-          if(!cached.audioUs)cached.audioUs=dict.audioUs||'';
-          if(!cached.audioBr)cached.audioBr=dict.audioBr||'';
-        }
-        if(!cached.translation){
-          var defToTranslate='';
-          if(cached.definitions.length){var fd=cached.definitions[0];defToTranslate=typeof fd==='string'?fd:(fd.definition||'')}
-          if(defToTranslate)cached.translation=await fetchTranslation(defToTranslate)||'';
-          if(!cached.translation)cached.translation=await fetchTranslation(word)||'';
-        }
-      }
-    }else{
-      var dict=await fetchDictionary(word);
-      cached={translation:'',ipa:'',pos:'',definitions:[],examples:[],synonyms:[],antonyms:[],audioUs:'',audioBr:'',coreMeaning:''};
-      if(dict){
-        cached.ipa=dict.phoneticBr||dict.phoneticUs||dict.phonetic||'';
-        cached.pos=dict.meanings[0]?dict.meanings[0].partOfSpeech:'';
-        cached.definitions=dict.meanings.flatMap(function(m){return m.definitions}).slice(0,5);
-        cached.examples=dict.meanings.flatMap(function(m){return m.examples}).slice(0,4);
-        cached.synonyms=dict.meanings.flatMap(function(m){return m.synonyms}).slice(0,6);
-        cached.antonyms=dict.meanings.flatMap(function(m){return m.antonyms||[]}).slice(0,4);
-        cached.audioUs=dict.audioUs||'';
-        cached.audioBr=dict.audioBr||'';
-      }
-      if(cached.definitions.length){var fd=cached.definitions[0];cached.coreMeaning=typeof fd==='string'?fd:(fd.definition||'')}
-      if(cached.coreMeaning)cached.translation=await fetchTranslation(cached.coreMeaning)||'';
-      if(!cached.translation)cached.translation=await fetchTranslation(word)||'';
-    }
-    cacheTrans(word,cached);
-  }
-  // Build rich popup content (same as reading section)
-  var h='';
-  var tier=getFrequencyTier(word);
-  // Header
-  h+='<div style="text-align:center;margin-bottom:12px">';
-  h+='<div style="font-size:1.5rem;font-weight:800;color:var(--accent);margin-bottom:4px">'+esc(word)+'</div>';
-  if(cached.ipa)h+='<div style="color:var(--text2);font-size:.9rem;margin-bottom:2px">/'+esc(cached.ipa)+'/</div>';
-  h+='<div style="display:flex;gap:6px;justify-content:center;align-items:center;flex-wrap:wrap">';
-  if(cached.pos)h+='<span class="badge badge-accent">'+esc(cached.pos)+'</span>';
-  if(tier)h+='<span class="badge tier-'+tier+'">'+tierLabel(tier)+'</span>';
-  if(exists)h+='<span class="badge badge-success">✅ لایتنر</span>';
-  if(inLT)h+='<span class="badge badge-warning">🧠 حافظه بلندمدت</span>';
-  h+='</div></div>';
-  // Core meaning
-  if(cached.coreMeaning)h+='<div style="text-align:center;font-size:1rem;font-weight:600;color:var(--text);margin-bottom:8px;padding:10px 14px;background:var(--bg);border-radius:10px;border:1px solid var(--border);direction:ltr;text-align:left">'+esc(cached.coreMeaning)+'</div>';
-  // Persian translation
-  if(cached.translation)h+='<div style="text-align:center;font-size:1.1rem;font-weight:700;color:var(--success);margin-bottom:12px;padding:8px;background:var(--bg);border-radius:10px" title="ترجمه فارسی">'+esc(cached.translation)+'</div>';
-  // Audio buttons
-  h+='<div style="display:flex;gap:6px;justify-content:center;margin-bottom:12px">';
-  h+='<button type="button" class="trans-audio-btn" data-speak="'+esc(word)+'" title="شنیدن">🔊</button>';
-  if(cached.audioUs)h+='<button type="button" class="trans-audio-btn" data-audio="'+esc(cached.audioUs)+'" title="American">🇺🇸</button>';
-  if(cached.audioBr)h+='<button type="button" class="trans-audio-btn" data-audio="'+esc(cached.audioBr)+'" title="British">🇬🇧</button>';
-  h+='</div>';
-  // Tabs
-  h+='<div style="display:flex;border-bottom:1px solid var(--border);margin-bottom:10px">';
-  h+='<button type="button" class="wd-tab active" data-wtab="info" style="flex:1;padding:6px;border:none;background:none;color:var(--accent);font:inherit;font-size:.78rem;font-weight:600;cursor:pointer;border-bottom:2px solid var(--accent)">📖 تعریف</button>';
-  h+='<button type="button" class="wd-tab" data-wtab="examples" style="flex:1;padding:6px;border:none;background:none;color:var(--text2);font:inherit;font-size:.78rem;cursor:pointer;border-bottom:2px solid transparent">💬 مثال</button>';
-  h+='<button type="button" class="wd-tab" data-wtab="related" style="flex:1;padding:6px;border:none;background:none;color:var(--text2);font:inherit;font-size:.78rem;cursor:pointer;border-bottom:2px solid transparent">🔗 مرتبط</button>';
-  h+='</div>';
-  // Definitions tab
-  h+='<div class="wd-tab-content" data-wtab="info">';
-  if(cached.definitions.length){
-    cached.definitions.slice(0,5).forEach(function(d){
-      var def=typeof d==='string'?d:(d.definition||'');
-      h+='<div style="font-size:.85rem;line-height:1.7;margin-bottom:6px;padding:6px 10px;background:var(--bg);border-radius:8px;border-right:3px solid var(--accent);direction:ltr;text-align:left">'+esc(def)+'</div>';
-    });
-  }else{h+='<div style="color:var(--text2);font-size:.85rem;text-align:center;padding:12px">تعریفی یافت نشد</div>'}
-  h+='</div>';
-  // Examples tab
-  h+='<div class="wd-tab-content" data-wtab="examples" style="display:none">';
-  if(cached.examples.length){
-    cached.examples.slice(0,4).forEach(function(ex){
-      h+='<div style="font-size:.85rem;font-style:italic;line-height:1.7;margin-bottom:8px;padding:8px 12px;background:var(--bg);border-radius:8px;border-right:3px solid var(--success);direction:ltr;text-align:left">"'+esc(ex)+'"</div>';
-    });
-  }else{h+='<div style="color:var(--text2);font-size:.85rem;text-align:center;padding:12px">مثالی یافت نشد</div>'}
-  h+='</div>';
-  // Related tab
-  h+='<div class="wd-tab-content" data-wtab="related" style="display:none">';
-  if(cached.synonyms.length){
-    h+='<div style="margin-bottom:10px"><div style="font-size:.75rem;color:var(--success);font-weight:600;margin-bottom:6px">🔄 مترادف‌ها</div><div style="display:flex;flex-wrap:wrap;gap:4px">';
-    cached.synonyms.slice(0,8).forEach(function(s){h+='<span style="padding:4px 10px;border-radius:8px;font-size:.8rem;background:rgba(0,184,148,.1);color:var(--success);border:1px solid rgba(0,184,148,.2)">'+esc(s)+'</span>'});
-    h+='</div></div>';
-  }
-  if(cached.antonyms&&cached.antonyms.length){
-    h+='<div><div style="font-size:.75rem;color:var(--danger);font-weight:600;margin-bottom:6px">⚡ متضادها</div><div style="display:flex;flex-wrap:wrap;gap:4px">';
-    cached.antonyms.slice(0,6).forEach(function(a){h+='<span style="padding:4px 10px;border-radius:8px;font-size:.8rem;background:rgba(225,112,85,.1);color:var(--danger);border:1px solid rgba(225,112,85,.2)">'+esc(a)+'</span>'});
-    h+='</div></div>';
-  }
-  if(!cached.synonyms.length&&!(cached.antonyms&&cached.antonyms.length)){h+='<div style="color:var(--text2);font-size:.85rem;text-align:center;padding:12px">مورد مرتبطی یافت نشد</div>'}
-  h+='</div>';
-  // Add to Leitner button
-  h+='<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:12px;padding-top:10px;border-top:1px solid var(--border)">';
-  if(!exists&&!inLT){
-    h+='<button type="button" class="btn btn-sm btn-primary" id="pdfAddWord">＋ لایتنر</button>';
-    h+='<button type="button" class="btn btn-sm btn-success" id="pdfAddLT" style="font-size:.75rem;padding:6px 12px">＋ حافظه بلندمدت</button>';
-  }else{
-    h+='<span style="font-size:.78rem;color:var(--success);padding:4px 8px">✅ موجود در '+(exists?'لایتنر':'حافظه بلندمدت')+'</span>';
-  }
-  h+='</div>';
-  // Search input at bottom
-  h+='<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">';
-  h+='<input type="text" id="pdfSearchWordInput" class="input" placeholder="🔍 جستجوی کلمه دیگر..." style="width:100%;padding:8px 12px;font-size:.85rem;direction:ltr;text-align:left" autocomplete="off" spellcheck="false">';
-  h+='</div>';
-  resultDiv.innerHTML=h;
-  // Tab switching
-  var popup=document.getElementById('pdfTranslatePopup');
-  if(popup){
-    popup.querySelectorAll('.wd-tab').forEach(function(tab){
-      tab.onclick=function(){
-        popup.querySelectorAll('.wd-tab').forEach(function(t){t.style.color='var(--text2)';t.style.borderBottomColor='transparent';t.style.fontWeight='400';t.classList.remove('active')});
-        tab.style.color='var(--accent)';tab.style.borderBottomColor='var(--accent)';tab.style.fontWeight='600';tab.classList.add('active');
-        popup.querySelectorAll('.wd-tab-content').forEach(function(c){c.style.display='none'});
-        var target=popup.querySelector('.wd-tab-content[data-wtab="'+tab.dataset.wtab+'"]');
-        if(target)target.style.display='block';
-      };
-    });
-  }
-  // Audio
-  resultDiv.querySelectorAll('[data-audio]').forEach(function(btn){btn.onclick=function(){playAudioUrl(btn.dataset.audio)}});
-  resultDiv.querySelectorAll('[data-speak]').forEach(function(btn){btn.onclick=function(){speakWord(btn.dataset.speak)}});
-  // Add to Leitner
-  var addBtn=document.getElementById('pdfAddWord');
-  if(addBtn)addBtn.onclick=function(){
-    var allDefs=cached.definitions.map(function(d){return typeof d==='string'?d:(d.definition||'')});
-    S.words.push(createCard({word:word,translation:cached.translation||'',ipa:cached.ipa||'',definitions:allDefs,examples:cached.examples||[],synonyms:cached.synonyms||[],antonyms:cached.antonyms||[],partOfSpeech:cached.pos||'',audioUs:cached.audioUs||'',audioBr:cached.audioBr||'',source:'pdf-reader'}));
-    trackWordAdded();save();toast(word+' به لایتنر اضافه شد','success');hidePdfTranslateInput();
-  };
-  var ltBtn=document.getElementById('pdfAddLT');
-  if(ltBtn)ltBtn.onclick=function(){
-    var allDefs=cached.definitions.map(function(d){return typeof d==='string'?d:(d.definition||'')});
-    S.longTerm.push(createCard({word:word,translation:cached.translation||'',ipa:cached.ipa||'',definitions:allDefs,examples:cached.examples||[],synonyms:cached.synonyms||[],antonyms:cached.antonyms||[],partOfSpeech:cached.pos||'',audioUs:cached.audioUs||'',audioBr:cached.audioBr||'',source:'pdf-reader'}));
-    save();toast(word+' به حافظه بلندمدت اضافه شد','success');hidePdfTranslateInput();
-  };
-  // Search for another word
-  var searchInput=document.getElementById('pdfSearchWordInput');
-  if(searchInput){
-    var st;
-    searchInput.oninput=function(){clearTimeout(st);var w=normalizeWordLookup(searchInput.value);if(w&&w.length>=2)st=setTimeout(function(){doPdfTranslateSmart(w)},400)};
-    searchInput.onkeydown=function(e){if(e.key==='Escape')hidePdfTranslateInput();if(e.key==='Enter'){clearTimeout(st);var w=normalizeWordLookup(searchInput.value);if(w&&w.length>=2)doPdfTranslateSmart(w)}};
-  }
-}
-
-function showPdfSelectionHelper(x,y,word){
-  var old=document.getElementById('pdfSelectionHelper');
-  if(old)old.remove();
-  var helper=document.createElement('div');
-  helper.id='pdfSelectionHelper';
-  helper.style.cssText='position:fixed;z-index:315;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:6px 12px;box-shadow:0 4px 16px rgba(0,0,0,.3);display:flex;gap:6px;align-items:center;font-family:var(--font);cursor:pointer;transition:all .2s';
-  helper.style.left=Math.min(x,window.innerWidth-200)+'px';
-  helper.style.top=Math.max(8,y-40)+'px';
-  helper.innerHTML='<span style="font-size:.85rem;font-weight:600;color:var(--accent)">🔍 '+esc(word)+'</span>';
-  document.body.appendChild(helper);
-  helper.onclick=function(e){
-    e.stopPropagation();
-    helper.remove();
-    showPdfTranslateInput(x,y);
-    setTimeout(function(){doPdfTranslateSmart(word)},100);
-  };
-  setTimeout(function(){if(helper.parentNode)helper.remove()},5000);
-}
-function hidePdfTranslateInput(){var p=document.getElementById('pdfTranslatePopup');if(p)p.remove();var h=document.getElementById('pdfSelectionHelper');if(h)h.remove()}
-
-async function renderPDFCanvasPages(blobUrl){
-  await ensurePdfJs();
-  var container=document.getElementById('pdfCanvasContainer');
-  if(!container)return;
-  container.style.textAlign='center';
-  container.innerHTML='<div style="text-align:center;padding:20px;color:var(--text2)"><div class="trans-spinner" style="margin:0 auto 8px"></div>در حال رندر صفحات...</div>';
   try{
-    var resp=await fetch(blobUrl);
-    var buf=await resp.arrayBuffer();
-    var pdf=await pdfjsLib.getDocument({data:buf}).promise;
-    pdfTotalPages=pdf.numPages;
-    container.innerHTML='';
-    var scale=pdfScale||1.5;
-    for(var i=1;i<=pdf.numPages;i++){
-      if(pdfRenderAbort&&pdfRenderAbort.signal.aborted)break;
-      var page=await pdf.getPage(i);
-      var viewport=page.getViewport({scale:scale});
-      // Page wrapper
-      var pageWrap=document.createElement('div');
-      pageWrap.className='pdf-canvas-page';
-      pageWrap.setAttribute('data-page',i);
-      pageWrap.style.cssText='position:relative;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.15);margin:0 auto auto;max-width:100%;display:inline-block'
-      // Canvas
-      var canvas=document.createElement('canvas');
-      canvas.width=viewport.width;
-      canvas.height=viewport.height;
-      canvas.style.cssText='display:block;width:100%;height:auto';
-      var ctx=canvas.getContext('2d');
-      await page.render({canvasContext:ctx,viewport:viewport}).promise;
-      pageWrap.appendChild(canvas);
-      // Text overlay (transparent, for selection)
-      var textContent=await page.getTextContent();
-      var textLayer=document.createElement('div');
-      textLayer.className='pdf-canvas-textlayer';
-      // Position text items — tx[5] is baseline, need to subtract fontHeight for top
-      var textItems=textContent.items;
-      var lastY=null;
-      var lineDiv=null;
-      for(var ti=0;ti<textItems.length;ti++){
-        var item=textItems[ti];
-        if(!item.str)continue;
-        var tx=pdfjsLib.Util.transform(viewport.transform,item.transform);
-        var x=tx[4];
-        var fontHeight=Math.sqrt(tx[2]*tx[2]+tx[3]*tx[3]);
-        if(fontHeight<1)fontHeight=Math.abs(tx[0])||12;
-        var baselineY=tx[5];
-        var topY=baselineY-fontHeight;
-        if(lastY===null||Math.abs(baselineY-lastY)>fontHeight*0.3){
-          lineDiv=document.createElement('div');
-          lineDiv.style.left=x+'px';
-          lineDiv.style.top=topY+'px';
-          lineDiv.style.fontSize=fontHeight+'px';
-          lineDiv.style.lineHeight=fontHeight+'px';
-          lineDiv.style.fontFamily=(item.fontName||'sans-serif')+', sans-serif';
-          textLayer.appendChild(lineDiv);
-          lastY=baselineY;
-        }
-        var span=document.createElement('span');
-        span.textContent=item.str;
-        if(lineDiv)lineDiv.appendChild(span);
-      }
-      pageWrap.appendChild(textLayer);
-      // Page number label
-      var label=document.createElement('div');
-      label.style.cssText='position:absolute;bottom:8px;right:12px;font-size:.7rem;color:rgba(0,0,0,.3);pointer-events:none';
-      label.textContent='📄 '+i+'/'+pdf.numPages;
-      pageWrap.appendChild(label);
-      container.appendChild(pageWrap);
-      // Add event listeners per page (works immediately, no need to wait for all pages)
-      (function(pw){
-        pw.addEventListener('dblclick',function(e){
-          var selection=window.getSelection();
-          var selectedText=selection?selection.toString().trim():'';
-          if(selectedText&&selectedText.length>=2&&selectedText.length<=50){
-            var cleanWord=normalizeWordLookup(selectedText);
-            if(cleanWord&&cleanWord.length>=2){
-              showPdfTranslateInput(e.clientX,e.clientY);
-              setTimeout(function(){doPdfTranslateSmart(cleanWord)},100);
-            }
-          }
-        });
-        pw.addEventListener('mouseup',function(e){
-          setTimeout(function(){
-            var selection=window.getSelection();
-            var selectedText=selection?selection.toString().trim():'';
-            if(selectedText&&selectedText.length>=2&&selectedText.length<=50){
-              var cleanWord=normalizeWordLookup(selectedText);
-              if(cleanWord&&cleanWord.length>=2){
-                showPdfSelectionHelper(e.clientX,e.clientY,cleanWord);
-              }
-            }
-      },10);
-    });
-      })(pageWrap);
+    var [dictResult,persianResult]=await Promise.all([fetchDictionary(word),fetchTranslation(word)]);
+    var html='';
+    var displayWord=dictResult?dictResult.headword:word;
+    var ipaText=dictResult?(dictResult.phoneticBr||dictResult.phoneticUs||dictResult.phonetic||''):'';
+    // Word header with audio
+    html+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap">';
+    html+='<span style="font-size:1.2rem;font-weight:700;color:var(--text)">'+esc(displayWord)+'</span>';
+    if(ipaText)html+='<span style="font-size:.85rem;color:var(--text2)">'+esc(ipaText)+'</span>';
+    if(dictResult&&dictResult.audioUs)html+='<button type="button" class="trans-audio-btn" data-audio="'+esc(dictResult.audioUs)+'" title="American English">🇺🇸</button>';
+    if(dictResult&&dictResult.audioBr)html+='<button type="button" class="trans-audio-btn" data-audio="'+esc(dictResult.audioBr)+'" title="British English">🇬🇧</button>';
+    html+='<button type="button" class="trans-audio-btn" data-speak="'+esc(displayWord)+'" title="Listen">🔊</button>';
+    html+='</div>';
+    // Persian translation
+    if(persianResult)html+='<div class="trans-persian">'+esc(persianResult)+'</div>';
+    // Frequency rank
+    if(dictResult&&dictResult.freqRank)html+='<div style="font-size:.75rem;color:var(--accent);margin-bottom:4px">📊 رتبه فراوانی: ~'+dictResult.freqRank.toLocaleString()+' (COCA)</div>';
+    html+='<div class="trans-divider"></div>';
+    // Etymology
+    if(dictResult&&dictResult.etymology){
+      html+='<div style="margin-bottom:10px"><div style="font-size:.75rem;color:var(--text2);margin-bottom:4px">📖 ریشه‌شناسی</div><div style="font-size:.82rem;color:var(--text);line-height:1.6;font-style:italic">'+esc(dictResult.etymology)+'</div></div>';
+      html+='<div class="trans-divider"></div>';
     }
-    // Restore bookmark
-    var bm=loadPdfBookmark();
-    if(bm&&bm.page>0){
-      var targetPage=container.querySelector('[data-page="'+bm.page+'"]');
-      if(targetPage)targetPage.scrollIntoView({behavior:'smooth'});
+    // Morphological family
+    if(dictResult&&dictResult.morphFamily&&dictResult.morphFamily.length){
+      html+='<div style="margin-bottom:10px"><div style="font-size:.75rem;color:var(--text2);margin-bottom:4px">🌳 خانواده واژگانی</div><div style="display:flex;flex-wrap:wrap;gap:4px">';
+      dictResult.morphFamily.slice(0,8).forEach(f=>{html+='<span class="trans-syn-tag">'+esc(f)+'</span>'});
+      html+='</div></div>';
+      html+='<div class="trans-divider"></div>';
     }
-    toast(pdf.numPages+' صفحه رندر شد','success');
+    // Definitions, examples, synonyms
+    if(dictResult&&dictResult.meanings.length){
+      dictResult.meanings.forEach(function(m){
+        if(m.partOfSpeech)html+='<span class="trans-pos">'+esc(m.partOfSpeech)+'</span> ';
+        if(m.definitions.length){html+='<div class="trans-defs">';m.definitions.forEach(function(d){html+='<div class="trans-def-item">'+esc(d)+'</div>'});html+='</div>'}
+        if(m.examples.length){html+='<div class="trans-examples">';m.examples.forEach(function(ex){html+='<div class="trans-example">"'+esc(ex)+'"</div>'});html+='</div>'}
+        if(m.synonyms.length){html+='<div class="trans-synonyms">';m.synonyms.forEach(function(s){html+='<span class="trans-syn-tag">'+esc(s)+'</span>'});html+='</div>'}
+      });
+    }else if(!persianResult)html+='<div style="text-align:center;color:var(--danger);font-size:.85rem;padding:10px">نتیجه‌ای یافت نشد</div>';
+    // Add to Leitner button
+    var cleanWord=displayWord.toLowerCase();
+    var alreadyExists=S.words.some(function(w){return w.word.toLowerCase()===cleanWord})||S.longTerm.some(function(w){return w.word.toLowerCase()===cleanWord});
+    html+='<button type="button" class="trans-add-btn" id="pdfTransAddBtn"'+(alreadyExists?' disabled':'')+'>';
+    if(alreadyExists)html+='✅ در کتابخانه موجود است';
+    else html+='＋ اضافه به لایتنر';
+    html+='</button>';
+    resultDiv.innerHTML=html;
+    // Bind audio buttons
+    resultDiv.querySelectorAll('[data-audio]').forEach(function(btn){btn.onclick=function(){playAudioUrl(btn.dataset.audio)}});
+    resultDiv.querySelectorAll('[data-speak]').forEach(function(btn){btn.onclick=function(){speakWord(btn.dataset.speak)}});
+    // Bind add to leitner
+    var addBtn=document.getElementById('pdfTransAddBtn');
+    if(addBtn&&!alreadyExists){
+      addBtn.onclick=function(){
+        var allDefs=dictResult?dictResult.meanings.flatMap(function(m){return m.definitions}):[];
+        var allExamples=dictResult?dictResult.meanings.flatMap(function(m){return m.examples}):[];
+        var allSynonyms=dictResult?dictResult.meanings.flatMap(function(m){return m.synonyms}):[];
+        var pos=dictResult&&dictResult.meanings[0]?dictResult.meanings[0].partOfSpeech:'';
+        S.words.push(createCard({word:displayWord,translation:persianResult||'',ipa:ipaText,definitions:allDefs,examples:allExamples,synonyms:allSynonyms,partOfSpeech:pos,audioUs:dictResult?dictResult.audioUs||'':'',audioBr:dictResult?dictResult.audioBr||'':''}));
+        save();
+        addBtn.disabled=true;
+        addBtn.textContent='✅ در کتابخانه موجود است';
+        toast(displayWord+' به لایتنر اضافه شد','success');
+      };
+    }
   }catch(e){
-    container.innerHTML='<div style="text-align:center;padding:40px;color:var(--danger)">❌ خطا در رندر PDF: '+esc(e.message)+'</div>';
+    resultDiv.innerHTML='<div style="text-align:center;color:var(--danger);font-size:.85rem;padding:10px">خطا در جستجو</div>';
   }
 }
+
+function hidePdfTranslateInput(){var p=document.getElementById('pdfTranslatePopup');if(p)p.remove()}
 
 async function openPDF(file){
   await ensurePdfJs();
@@ -3934,7 +3504,7 @@ function bindReadingEvents(c,doc){
     else if(e.key==='End'){e.preventDefault();goToReadingPage(doc.totalPages-1)}
   };
   var searchInput=document.getElementById('rdSearch');
-  if(searchInput){var st;searchInput.oninput=function(){clearTimeout(st);st=setTimeout(function(){readingSearchQuery=searchInput.value;renderReading(c);var si=document.getElementById('rdSearch');if(si){si.focus();si.selectionStart=si.selectionEnd=si.value.length}},300)}}
+  if(searchInput){var st;searchInput.oninput=function(){clearTimeout(st);st=setTimeout(function(){readingSearchQuery=searchInput.value;renderReading(c)},300)}}
   var contentArea=document.getElementById('rdContentArea');
   if(contentArea){
     contentArea.onclick=async function(e){
@@ -8487,7 +8057,7 @@ c.innerHTML=`<div style="max-width:700px;margin:0 auto">
       <div style="padding:8px 12px;background:var(--bg);border-radius:8px;font-size:.85rem">📖 کتابخانه واژگان با جستجو، فیلتر و ویرایش</div>
       <div style="padding:8px 12px;background:var(--bg);border-radius:8px;font-size:.85rem">💾 حافظه بلندمدت با ویرایش و بازگشت به کتابخانه</div>
       <div style="padding:8px 12px;background:var(--bg);border-radius:8px;font-size:.85rem">📥 ورود متن هوشمند با انتخاب کلمات و ترجمه</div>
-      <div style="padding:8px 12px;background:var(--bg);border-radius:8px;font-size:.85rem">📄 خواننده PDF با سلکت متن، دابل‌کلیک و پاپ‌آپ قابل درگ</div>
+      <div style="padding:8px 12px;background:var(--bg);border-radius:8px;font-size:.85rem">📄 خواننده PDF با پاپ‌آپ ترجمه خودکار</div>
       <div style="padding:8px 12px;background:var(--bg);border-radius:8px;font-size:.85rem">🌐 ترجمه خودکار با ۱۳ زبان و فرهنگ لغت</div>
       <div style="padding:8px 12px;background:var(--bg);border-radius:8px;font-size:.85rem">🎮 آزمون هوشمند ۸ حالتی با به‌روزرسانی خودکار لایتنر</div>
       <div style="padding:8px 12px;background:var(--bg);border-radius:8px;font-size:.85rem">🎯 تعیین سطح با ارتباط مستقیم با لایتنر</div>
@@ -8538,11 +8108,6 @@ c.innerHTML=`<div style="max-width:700px;margin:0 auto">
         <div style="font-size:.82rem;color:var(--text2)">• جدول میانبرهای کیبورد و سرعت تلفظ قابل تنظیم</div>
         <div style="font-size:.82rem;color:var(--text2)">• 📈 نمودار پیشرفت ۳۰ روز اخیر (کلمات اضافه‌شده و مرورشده)</div>
         <div style="font-size:.82rem;color:var(--text2)">• 🔊 تلفظ خودکار کلمه هنگام نمایش کارت مرور (قابل فعال/غیرفعال در تنظیمات)</div>
-        <div style="font-size:.82rem;color:var(--text2)">• 📄 خواننده PDF: رندر canvas با قابلیت سلکت متن و دابل‌کلیک روی کلمات</div>
-        <div style="font-size:.82rem;color:var(--text2)">• 📄 خواننده PDF: پاپ‌آپ قابل درگ با محتوای غنی (تعریف، مثال، مترادف، متضاد)</div>
-        <div style="font-size:.82rem;color:var(--text2)">• 📄 خواننده PDF: هر صفحه بلافاصله پس از رندر قابل تعامل</div>
-        <div style="font-size:.82rem;color:var(--text2)">• 🧠 حافظه بلندمدت: رفع مشکل دکمه ویرایش و افزودن نمایش فراوانی</div>
-        <div style="font-size:.82rem;color:var(--text2)">• 📖 بخش خواندن: بستن پاپ‌آپ کلمه با کلیک روی فضای خالی صفحه</div>
       </div>
     </details>
     <details style="margin-bottom:10px">
