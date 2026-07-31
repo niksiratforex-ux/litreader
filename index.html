@@ -453,8 +453,74 @@ const LIST_PAGE_SIZE=50;
 const LS_KEY='leitner_v2';
 const LS_BACKUP_KEY='leitner_backup';
 const SCHEMA_VERSION=3;
+
+// ═══ IndexedDB Storage — unlimited, offline ═══
+const IDB_NAME='leitnerDB';
+const IDB_STORE='data';
+let _db=null;
+
+function openDB(){
+  return new Promise(function(resolve,reject){
+    if(_db){resolve(_db);return}
+    const req=indexedDB.open(IDB_NAME,1);
+    req.onupgradeneeded=function(e){
+      const db=e.target.result;
+      if(!db.objectStoreNames.contains(IDB_STORE))db.createObjectStore(IDB_STORE);
+    };
+    req.onsuccess=function(e){_db=e.target.result;resolve(_db)};
+    req.onerror=function(e){reject(e.target.error)};
+  });
+}
+
+function idbPut(key,value){
+  return openDB().then(function(db){
+    return new Promise(function(resolve,reject){
+      const tx=db.transaction(IDB_STORE,'readwrite');
+      tx.objectStore(IDB_STORE).put(value,key);
+      tx.oncomplete=function(){resolve()};
+      tx.onerror=function(e){reject(e.target.error)};
+    });
+  });
+}
+
+function idbGet(key){
+  return openDB().then(function(db){
+    return new Promise(function(resolve,reject){
+      const tx=db.transaction(IDB_STORE,'readonly');
+      const req=tx.objectStore(IDB_STORE).get(key);
+      req.onsuccess=function(){resolve(req.result)};
+      req.onerror=function(e){reject(e.target.error)};
+    });
+  });
+}
 function defaultState(){return{words:[],longTerm:[],stats:{reviewed:0,correct:0,wrong:0,streak:0,xp:0,lastReviewDate:null,history:{}},quizStats:{sessions:[],totalCorrect:0,totalWrong:0,wordPerformance:{},currentSession:null},categories:['پیش‌'],settings:{theme:'dark',sourceLang:'en',targetLang:'fa',notifications:false,notificationTime:'09:00',sidebarLocked:false,aiChat:{provider:'gemini',model:'gemini-2.0-flash',apiKey:'',apiKeys:{gemini:'',openrouter:'',groq:''},systemPrompt:'',temperature:0.7,maxTokens:2048,dailyLimit:250,dailyUsage:0,dailyUsageDate:'',connectionStatus:'disconnected',lastError:'',messages:[],chats:[],activeChat:null,providerUsage:null}},_version:SCHEMA_VERSION}}
-let S=loadState();
+let S=loadState(); // Quick sync load from localStorage
+// Then async load from IndexedDB (bigger, offline)
+loadFromIDB().then(function(idbData){
+  if(idbData&&idbData.words&&idbData.words.length>=S.words.length){
+    // IndexedDB has more data — use it
+    const s={...defaultState(),...idbData};
+    s.words=(idbData.words||[]).map(sanitizeCard).filter(w=>w.word);
+    s.longTerm=(idbData.longTerm||[]).map(sanitizeCard).filter(w=>w.word);
+    s.stats={...defaultState().stats,...(idbData.stats||{})};
+    s.quizStats={...defaultState().quizStats,...(idbData.quizStats||{})};
+    s.settings={...defaultState().settings,...(idbData.settings||{})};
+    S=s;
+    rebuildIndex();
+    if(typeof render==='function')render();
+  } else if(idbData&&idbData.words&&idbData.words.length>0&&S.words.length===0){
+    // localStorage empty but IDB has data
+    const s={...defaultState(),...idbData};
+    s.words=(idbData.words||[]).map(sanitizeCard).filter(w=>w.word);
+    s.longTerm=(idbData.longTerm||[]).map(sanitizeCard).filter(w=>w.word);
+    S=s;
+    rebuildIndex();
+    if(typeof render==='function')render();
+  } else if(S.words.length>0){
+    // localStorage has data — migrate to IDB
+    save();
+  }
+}).catch(function(){});
 
 function sanitizeCard(c){
   return{id:String(c.id||uid()),word:String(c.word||'').trim(),translation:String(c.translation||'').trim(),ipa:String(c.ipa||'').trim(),category:String(c.category||'پیش‌فرض').trim(),favorite:!!c.favorite,context:String(c.context||'').trim(),
@@ -474,15 +540,49 @@ let _saveTimer=null,_saveDirty=false;
 function save(){
   _saveDirty=true;
   if(_saveTimer)clearTimeout(_saveTimer);
-  _saveTimer=setTimeout(_doSave,300);
+  _saveTimer=setTimeout(_doSave,500);
 }
 function _doSave(){
   _saveTimer=null;if(!_saveDirty)return;
   _saveDirty=false;
-  try{localStorage.setItem(LS_KEY,JSON.stringify(S));rebuildIndex();autoBackup()}catch(e){toast('خطا در ذخیره‌سازی','error')}
+  idbPut('state',S).then(function(){
+    rebuildIndex();autoBackup();
+    // Also save slim version to localStorage as fallback
+    try{localStorage.setItem(LS_KEY+'_meta',JSON.stringify({words:S.words.length,longTerm:S.longTerm.length,lastSave:Date.now()}))}catch(e){}
+  }).catch(function(e){
+    toast('خطای ذخیره‌سازی: '+e.message,'error');
+    // Fallback to localStorage
+    try{localStorage.setItem(LS_KEY,JSON.stringify(S));rebuildIndex()}catch(e2){toast('حافظه پر است','error')}
+  });
 }
+
+function saveForce(){
+  return idbPut('state',S).then(function(){return true}).catch(function(){
+    try{localStorage.setItem(LS_KEY,JSON.stringify(S));return true}catch(e){return false}
+  });
+}
+
+function loadFromIDB(){
+  return idbGet('state').then(function(data){
+    if(data)return data;
+    // Fallback: try localStorage
+    try{
+      const d=localStorage.getItem(LS_KEY);
+      if(d)return JSON.parse(d);
+    }catch(e){}
+    return null;
+  });
+}
+
 // Force immediate save (for critical paths like page unload)
-function saveNow(){if(_saveTimer){clearTimeout(_saveTimer);_saveTimer=null}_saveDirty=false;try{localStorage.setItem(LS_KEY,JSON.stringify(S));rebuildIndex()}catch(e){}}
+function saveNow(){
+  if(_saveTimer){clearTimeout(_saveTimer);_saveTimer=null}
+  _saveDirty=false;
+  // Try synchronous localStorage as fallback for unload
+  try{localStorage.setItem(LS_KEY,JSON.stringify(S));rebuildIndex()}catch(e){}
+  // Also try async IDB (may not complete on unload, but worth trying)
+  try{idbPut('state',S)}catch(e){}
+}
 // Warn on page close if there are unsaved changes
 window.addEventListener('beforeunload',()=>{if(_saveDirty||_saveTimer){saveNow()}});
 function esc(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}
@@ -2326,7 +2426,7 @@ function stageImportCards(cards,source){
   return true;
 }
 
-function commitStagedImport(dest){
+async function commitStagedImport(dest){
   const selected=_stagedImportCards.filter(c=>c._selected);
   if(!selected.length){toast('کلمه‌ای انتخاب نشده','error');return}
   const cat=document.getElementById('stgCategory')?.value||'';
@@ -2336,6 +2436,7 @@ function commitStagedImport(dest){
   const BATCH=50;
   let totalAdded=0,totalSkipped=0;
   const statusEl=document.getElementById('stgProgress');
+  // Process synchronously in batches
   for(let i=0;i<selected.length;i+=BATCH){
     const batch=selected.slice(i,i+BATCH);
     let batchAdded=0;
@@ -2349,9 +2450,21 @@ function commitStagedImport(dest){
       batchAdded++;
       totalAdded++;
     });
+    // Update progress
     if(statusEl)statusEl.textContent='در حال افزودن... '+totalAdded+'/'+selected.length;
-    save();
+    // Try to save
+    try{
+      await saveForce();
+    }catch(e){
+      // Revert this batch
+      if(dest==='longTerm')S.longTerm.splice(S.longTerm.length-batchAdded,batchAdded);
+      else S.words.splice(S.words.length-batchAdded,batchAdded);
+      totalAdded-=batchAdded;
+      toast('حافظه پر شد — '+totalAdded+' کلمه ذخیره شد','error');
+      break;
+    }
   }
+  // Remove processed cards from staged list
   const addedWords=new Set([...S.words,...S.longTerm].map(w=>w.word.toLowerCase()));
   _stagedImportCards=_stagedImportCards.filter(c=>!addedWords.has(c.word.toLowerCase()));
   let msg=totalAdded+' کلمه به '+destLabel+' اضافه شد';
