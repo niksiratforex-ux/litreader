@@ -8666,6 +8666,14 @@ c.innerHTML=`<div style="max-width:700px;margin:0 auto">
     <h3 style="margin-bottom:12px;color:var(--accent)">🆕 ویژگی‌های جدید نسخه ۳.۸.۳</h3>
     <div style="display:grid;gap:8px;margin-bottom:16px">
       <div style="padding:10px 14px;background:var(--bg);border-radius:8px;border-right:3px solid var(--success)">
+        <strong style="font-size:.9rem">💾 ذخیره‌سازی IndexedDB</strong>
+        <p style="color:var(--text2);font-size:.8rem;margin-top:4px">جابجایی از localStorage به IndexedDB — بدون محدودیت حجم. ورود ۳۰۰۰+ کلمه بدون خطا. مهاجرت خودکار داده‌های قبلی.</p>
+      </div>
+      <div style="padding:10px 14px;background:var(--bg);border-radius:8px;border-right:3px solid var(--success)">
+        <strong style="font-size:.9rem">📋 ورود با انتخاب و مقصد</strong>
+        <p style="color:var(--text2);font-size:.8rem;margin-top:4px">هنگام ورود JSON/DOCX، ابتدا لیست کلمات نمایش داده می‌شود. انتخاب تکی/گروهی + انتخاب مقصد (کتابخانه یا حافظه بلندمدت).</p>
+      </div>
+      <div style="padding:10px 14px;background:var(--bg);border-radius:8px;border-right:3px solid var(--success)">
         <strong style="font-size:.9rem">▶️ پخش خودکار مرور</strong>
         <p style="color:var(--text2);font-size:.8rem;margin-top:4px">حالت خودکار نمایش کلمه → تلفظ → چرخش کارت → کارت بعدی. ۴ سرعت. مکث/ادامه/توقف.</p>
       </div>
@@ -8674,67 +8682,20 @@ c.innerHTML=`<div style="max-width:700px;margin:0 auto">
         <p style="color:var(--text2);font-size:.8rem;margin-top:4px">لینک مستقیم به VocabForge برای ساخت فلشکارت از PDF/DOCX با غنیسازی خودکار و ترجمه فارسی.</p>
       </div>
       <div style="padding:10px 14px;background:var(--bg);border-radius:8px;border-right:3px solid var(--success)">
-        <strong style="font-size:.9rem">🔍 رفع باگ فوکوس جستجو</strong>
-        <p style="color:var(--text2);font-size:.8rem;margin-top:4px">جستجو در کتابخانه، حافظه بلندمدت و خواندن — فوکوس بعد از تایپ حفظ می‌شود.</p>
+        <strong style="font-size:.9rem">📄 خواننده PDF: رندر Canvas + ناوبری</strong>
+        <p style="color:var(--text2);font-size:.8rem;margin-top:4px">رندر واقعی صفحات با canvas و لایه متنی. دکمه‌های ناوبری، جستجوی کلمه، پاپآپ غنی قابل درگ.</p>
       </div>
       <div style="padding:10px 14px;background:var(--bg);border-radius:8px;border-right:3px solid var(--success)">
         <strong style="font-size:.9rem">🧠 حافظه بلندمدت: ویرایش و فراوانی</strong>
         <p style="color:var(--text2);font-size:.8rem;margin-top:4px">دکمه ویرایش فعال شد. نمایش سطح فراوانی کلمه در کنار هر ردیف.</p>
       </div>
       <div style="padding:10px 14px;background:var(--bg);border-radius:8px;border-right:3px solid var(--success)">
-        <strong style="font-size:.9rem">📄 خواننده PDF: رندر Canvas</strong>
-        <p style="color:var(--text2);font-size:.8rem;margin-top:4px">رندر واقعی صفحات با canvas + لایه متنی برای سلکت. دابلکلیک روی کلمه برای ترجمه.</p>
-      </div>
-      <div style="padding:10px 14px;background:var(--bg);border-radius:8px;border-right:3px solid var(--success)">
-        <strong style="font-size:.9rem">📄 خواننده PDF: ناوبری صفحات</strong>
-        <p style="color:var(--text2);font-size:.8rem;margin-top:4px">دکمه اول/قبل/بعد/آخر + نمایش شماره صفحه + جستجوی کلمه در PDF.</p>
-      </div>
-      <div style="padding:10px 14px;background:var(--bg);border-radius:8px;border-right:3px solid var(--success)">
-        <strong style="font-size:.9rem">📄 خواننده PDF: پاپآپ غنی قابل درگ</strong>
-        <p style="color:var(--text2);font-size:.8rem;margin-top:4px">پاپآپ ترجمه با تب‌ها (تعریف، مثال، مرتبط)، قابل drag، و جستجوی کلمه جدید.</p>
+        <strong style="font-size:.9rem">🔍 رفع باگ فوکوس جستجو</strong>
+        <p style="color:var(--text2);font-size:.8rem;margin-top:4px">جستجو در کتابخانه، حافظه بلندمدت و خواندن — فوکوس بعد از تایپ حفظ می‌شود.</p>
       </div>
       <div style="padding:10px 14px;background:var(--bg);border-radius:8px;border-right:3px solid var(--success)">
         <strong style="font-size:.9rem">📖 بخش خواندن: بستن پاپآپ</strong>
         <p style="color:var(--text2);font-size:.8rem;margin-top:4px">کلیک روی فضای خالی صفحه، پاپآپ کلمه را می‌بندد.</p>
-      </div>
-    </div>
-    <h3 style="margin-bottom:12px;color:var(--accent);margin-top:16px">🆕 ویژگی‌های نسخه ۳.۸.۳</h3>
-    <div style="display:grid;gap:8px;margin-bottom:16px">
-            <div style="padding:10px 14px;background:var(--bg);border-radius:8px;border-right:3px solid var(--accent)">
-        <strong style="font-size:.9rem">📊 پنل اطلاعات قابل مخفی در بخش خواندن</strong>
-        <p style="color:var(--text2);font-size:.8rem;margin-top:4px">دکمه toggle برای نمایش/مخفی کردن پنل آمار متن. اطلاعات جدید: زمان مطالعه، درصد واژگان شناخته‌شده، طولانی‌ترین کلمه.</p>
-      </div>
-      <div style="padding:10px 14px;background:var(--bg);border-radius:8px;border-right:3px solid var(--accent)">
-        <strong style="font-size:.9rem">⚙️ گزینه‌های نمایش خواندن</strong>
-        <p style="color:var(--text2);font-size:.8rem;margin-top:4px">تنظیم فونت، فاصله خطوط، ۵ تم رنگی محتوا. خروجی TXT، کپی متن، آمار تفصیلی.</p>
-      </div>
-      <div style="padding:10px 14px;background:var(--bg);border-radius:8px;border-right:3px solid var(--success)">
-        <strong style="font-size:.9rem">🔍 ترجمه دقیق معنی کلمه</strong>
-        <p style="color:var(--text2);font-size:.8rem;margin-top:4px">ترجمه تعریف انگلیسی به جای ترجمه مستقیم کلمه. واکشی هوشمند دیتای موجود در کتابخانه.</p>
-      </div>
-      <div style="padding:10px 14px;background:var(--bg);border-radius:8px;border-right:3px solid var(--success)">
-        <strong style="font-size:.9rem">🔄 بروزرسانی هوشمند فیلدهای خالی</strong>
-        <p style="color:var(--text2);font-size:.8rem;margin-top:4px">فقط فیلدهای خالی از API پر می‌شوند. دکمه بروزرسانی برای ذخیره تغییرات.</p>
-      </div>
-      <div style="padding:10px 14px;background:var(--bg);border-radius:8px;border-right:3px solid var(--accent)">
-        <strong style="font-size:.9rem">📄 ناوبری پیشرفته صفحات خواندن</strong>
-        <p style="color:var(--text2);font-size:.8rem;margin-top:4px">دکمه اول/آخر صفحه، اسلایدر، رفتن به صفحه دلخواه، میانبرهای کیبورد.</p>
-      </div>
-      <div style="padding:10px 14px;background:var(--bg);border-radius:8px;border-right:3px solid var(--accent)">
-        <strong style="font-size:.9rem">🗺️ نقشه واژگان v2</strong>
-        <p style="color:var(--text2);font-size:.8rem;margin-top:4px">۵ حالت نمایش. ۴ نوع رنگ‌بندی. زوم و پن. فیلتر مترادف/متضاد/خانواده. خروجی PNG.</p>
-      </div>
-      <div style="padding:10px 14px;background:var(--bg);border-radius:8px;border-right:3px solid var(--success)">
-        <strong style="font-size:.9rem">💾 خروجی‌های جدید</strong>
-        <p style="color:var(--text2);font-size:.8rem;margin-top:4px">CSV، Anki، چاپ لیست، آمار تفصیلی، نمودار مصرف حافظه.</p>
-      </div>
-      <div style="padding:10px 14px;background:var(--bg);border-radius:8px;border-right:3px solid var(--accent)">
-        <strong style="font-size:.9rem">⚙️ تنظیمات جدید</strong>
-        <p style="color:var(--text2);font-size:.8rem;margin-top:4px">اهداف روزانه، تنظیمات آزمون، مدیریت دسته‌بندی‌ها، میانبرهای کیبورد، سرعت تلفظ.</p>
-      </div>
-      <div style="padding:10px 14px;background:var(--bg);border-radius:8px;border-right:3px solid var(--warning)">
-        <strong style="font-size:.9rem">🤖 چت هوش مصنوعی — نسخه کامل</strong>
-        <p style="color:var(--text2);font-size:.8rem;margin-top:4px">بازنویسی کامل با ۵ ارائه‌دهنده. پشتیبانی چند کلید API. تب‌های چت متعدد. ضمیمه تصویر.</p>
       </div>
     </div>
   </div>
@@ -8775,7 +8736,7 @@ c.innerHTML=`<div style="max-width:700px;margin:0 auto">
   <div class="card" style="margin-bottom:16px">
     <h3 style="margin-bottom:12px;color:var(--accent)">📋 تغییرات نسخه‌های قبلی</h3>
     <details open style="margin-bottom:10px">
-      <summary style="cursor:pointer;font-size:.9rem;font-weight:600;color:var(--text);padding:8px 0">🆕 نسخه ۳.۸.۳ — بهبود بخش خواندن و نقشه واژگان ▾</summary>
+      <summary style="cursor:pointer;font-size:.9rem;font-weight:600;color:var(--text);padding:8px 0">🆕 نسخه ۳.۸.۲ — بهبود بخش خواندن و نقشه واژگان ▾</summary>
       <div style="display:grid;gap:6px;margin-top:8px;padding:10px;background:var(--bg);border-radius:10px">
         <div style="font-size:.82rem;color:var(--text2)">• پنل اطلاعات قابل مخفی در بخش خواندن با دکمه toggle</div>
         <div style="font-size:.82rem;color:var(--text2)">• اطلاعات جدید: زمان مطالعه، درصد واژگان شناخته‌شده، طولانی‌ترین کلمه، توزیع فراوانی</div>
