@@ -4,7 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>برنامه مرور لایتنر — نسخه ۳.۸.۳</title>
-<link rel="manifest" href='data:application/json,{"name":"برنامه مرور لایتنر","short_name":"لایتنر","start_url":"./leitner.html","display":"standalone","background_color":"#0f1117","theme_color":"#6c5ce7","description":"مرور هوشمند واژگان","icons":[{"src":"data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Crect width=%27100%27 height=%27100%27 rx=%2720%27 fill=%27%236c5ce7%27/%3E%3Ctext x=%2750%27 y=%2768%27 text-anchor=%27middle%27 font-size=%2750%27 fill=%27white%27%3E📖%3C/text%3E%3C/svg%3E","sizes":"192x192","type":"image/svg+xml"}]}'>
+<!-- ═══ PWA ═══ -->
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta name="apple-mobile-web-app-title" content="لایتنر">
+<!-- /PWA -->
 <meta name="theme-color" content="#6c5ce7">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -8901,6 +8905,29 @@ applyTheme();if(S.settings.fontSize)document.documentElement.setAttribute('data-
 // Re-init quiz delegation after each render
 const origRender=render;
 render=function(){origRender();if(currentTab==='quiz')initQuiz()};
+</script>
+<!-- ═══ Service Worker Registration ═══ -->
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./service-worker.js')
+      .then((reg) => {
+        console.log('✅ Service Worker registered:', reg.scope);
+        // چک کردن آپدیت جدید
+        reg.addEventListener('updatefound', () => {
+          const newWorker = reg.installing;
+          newWorker.addEventListener('statechange', () => {
+            if (newWorker.state === 'activated') {
+              if (window.showToast) {
+                showToast('بروزرسانی جدید نصب شد! صفحه رو رفرش کن 🔄', 'info');
+              }
+            }
+          });
+        });
+      })
+      .catch((err) => console.log('❌ SW registration failed:', err));
+  });
+}
 </script>
 </body>
 </html>
